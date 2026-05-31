@@ -28,6 +28,7 @@ import {
   BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
   PieChart as RechartsPie, Pie, Cell, Legend
 } from 'recharts'
+import { signIn, signOut, useSession } from 'next-auth/react'
 
 // ============================================================
 // TYPES
@@ -128,38 +129,17 @@ const CHART_COLORS = [
 // AUTH HOOK
 // ============================================================
 function useAuth() {
-  const [user, setUser] = useState<any>(null)
-  const [loading, setLoading] = useState(true)
-
-  const fetchSession = useCallback(async () => {
-    try {
-      const res = await fetch('/api/auth/session')
-      const data = await res.json()
-      if (data?.user) {
-        setUser(data.user)
-      } else {
-        setUser(null)
-      }
-    } catch {
-      setUser(null)
-    } finally {
-      setLoading(false)
-    }
-  }, [])
-
-  useEffect(() => { fetchSession() }, [fetchSession])
+  const { data: session, status } = useSession()
+  const loading = status === 'loading'
+  const user = session?.user ?? null
 
   const login = async (email: string, password: string) => {
-    const res = await fetch('/api/auth/signin/credentials', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ email, password }),
+    const result = await signIn('credentials', {
+      redirect: false,
+      email,
+      password,
     })
-    if (res.ok) {
-      await fetchSession()
-      return true
-    }
-    return false
+    return result?.ok ?? false
   }
 
   const register = async (email: string, password: string, name: string) => {
@@ -170,18 +150,23 @@ function useAuth() {
     })
     const data = await res.json()
     if (res.ok) {
-      await fetchSession()
+      // Auto-login after registration
+      const result = await signIn('credentials', {
+        redirect: false,
+        email,
+        password,
+      })
+      if (!result?.ok) throw new Error('Inscription réussie mais connexion échouée')
       return true
     }
     throw new Error(data.error || 'Erreur inscription')
   }
 
   const logout = async () => {
-    await fetch('/api/auth/signout', { method: 'POST' })
-    setUser(null)
+    await signOut({ redirect: false })
   }
 
-  return { user, loading, login, register, logout, refetch: fetchSession }
+  return { user, loading, login, register, logout, refetch: async () => {} }
 }
 
 // ============================================================
