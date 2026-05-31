@@ -73,6 +73,25 @@ export async function POST(req: Request) {
       { ticker: "PENGU", name: "Pudgy Penguins", coingeckoId: "pudgy-penguins", cryptoCompareId: "PENGU" },
       { ticker: "WLFI", name: "World Liberty Financial", coingeckoId: "world-liberty-financial", cryptoCompareId: "WLFI" },
       { ticker: "ONDO", name: "Ondo Finance", coingeckoId: "ondo-finance", cryptoCompareId: "ONDO" },
+      // Nouveaux tokens ajoutés
+      { ticker: "ATOM", name: "Cosmos", coingeckoId: "cosmos", cryptoCompareId: "ATOM" },
+      { ticker: "AR", name: "Arweave", coingeckoId: "arweave", cryptoCompareId: "AR" },
+      { ticker: "TIA", name: "Celestia", coingeckoId: "celestia", cryptoCompareId: "TIA" },
+      { ticker: "INJ", name: "Injective", coingeckoId: "injective-protocol", cryptoCompareId: "INJ" },
+      { ticker: "FET", name: "Fetch.ai", coingeckoId: "fetch-ai", cryptoCompareId: "FET" },
+      { ticker: "RENDER", name: "Render", coingeckoId: "render-token", cryptoCompareId: "RENDER" },
+      { ticker: "NMR", name: "Numeraire", coingeckoId: "numeraire", cryptoCompareId: "NMR" },
+      { ticker: "PYTH", name: "Pyth Network", coingeckoId: "pyth-network", cryptoCompareId: "PYTH" },
+      { ticker: "W", name: "Wormhole", coingeckoId: "wormhole", cryptoCompareId: "W" },
+      { ticker: "GRT", name: "The Graph", coingeckoId: "the-graph", cryptoCompareId: "GRT" },
+      { ticker: "QNT", name: "Quant", coingeckoId: "quant-network", cryptoCompareId: "QNT" },
+      { ticker: "AXL", name: "Axelar", coingeckoId: "axelar", cryptoCompareId: "AXL" },
+      { ticker: "ILV", name: "Illuvium", coingeckoId: "illuvium", cryptoCompareId: "ILV" },
+      { ticker: "QTUM", name: "Qtum", coingeckoId: "qtum", cryptoCompareId: "QTUM" },
+      { ticker: "LTC", name: "Litecoin", coingeckoId: "litecoin", cryptoCompareId: "LTC" },
+      { ticker: "PEPE", name: "Pepe", coingeckoId: "pepe", cryptoCompareId: "PEPE" },
+      { ticker: "ANKR", name: "Ankr", coingeckoId: "ankr", cryptoCompareId: "ANKR" },
+      { ticker: "RSR", name: "Reserve Rights", coingeckoId: "reserve-rights-token", cryptoCompareId: "RSR" },
     ]
 
     for (const token of tokens) {

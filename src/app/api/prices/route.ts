@@ -1,39 +1,48 @@
 import { db } from "@/lib/db"
 import { NextResponse } from "next/server"
-import { getServerSession } from "next-auth"
-import { authOptions } from "@/lib/auth"
+
+// CryptoCompare API key
+const CRYPTO_COMPARE_API_KEY = "4f527d4ae4beccf0fb013fc8a7c41fc19595a113d88edb97f83e12fae3ab8e76"
+
+// Price cache - shared across requests
+let priceCache: Record<string, number> = {}
+let lastFetchTime = 0
+const CACHE_DURATION = 60 * 1000 // 1 minute en ms
 
 // GET /api/prices - Get current prices for all tokens
-// Also triggers price update if stale (>5 min)
+// Auto-refreshes every 1 minute using CryptoCompare API
 export async function GET() {
   try {
-    const tokens = await db.token.findMany({
-      where: { active: true },
-    })
-
-    // Check if prices need refresh (>5 minutes old or never updated)
-    const fiveMinutesAgo = new Date(Date.now() - 5 * 60 * 1000)
-    const needsRefresh = tokens.some(
-      (t) => !t.priceUpdatedAt || t.priceUpdatedAt < fiveMinutesAgo
-    )
+    const now = Date.now()
+    const needsRefresh = (now - lastFetchTime) > CACHE_DURATION
 
     if (needsRefresh) {
-      // Use CryptoCompare API (free, no key needed for basic)
-      const tickers = tokens.map((t) => t.cryptoCompareId || t.ticker).join(",")
+      const tokens = await db.token.findMany({
+        where: { active: true },
+      })
+
+      // Build ticker list for CryptoCompare API
+      const tickers = tokens
+        .map((t) => t.cryptoCompareId || t.ticker)
+        .filter(Boolean)
+        .join(",")
+
       try {
-        const response = await fetch(
-          `https://min-api.cryptocompare.com/data/pricemulti?fsyms=${tickers}&tsyms=USD`,
-          { next: { revalidate: 300 } }
-        )
+        const url = `https://min-api.cryptocompare.com/data/pricemulti?fsyms=${tickers}&tsyms=USD&api_key=${CRYPTO_COMPARE_API_KEY}`
+        const response = await fetch(url, {
+          next: { revalidate: 60 },
+        })
 
         if (response.ok) {
           const data = await response.json()
 
-          // Update prices in database
+          // Update prices in database and cache
           for (const token of tokens) {
             const key = token.cryptoCompareId || token.ticker
             const priceData = data[key]
             if (priceData && priceData.USD !== undefined) {
+              priceCache[token.ticker] = priceData.USD
+
               await db.token.update({
                 where: { id: token.id },
                 data: {
@@ -43,24 +52,28 @@ export async function GET() {
               })
             }
           }
+
+          lastFetchTime = now
         }
       } catch (fetchError) {
         console.error("Price fetch error:", fetchError)
-        // Continue with stale prices
+        // Continue with cached prices
       }
     }
 
-    // Return fresh data
-    const updatedTokens = await db.token.findMany({
-      where: { active: true },
-    })
-
-    const priceMap: Record<string, number> = {}
-    for (const token of updatedTokens) {
-      priceMap[token.ticker] = token.currentPrice || 0
+    // If cache is empty, fetch from DB
+    if (Object.keys(priceCache).length === 0) {
+      const tokens = await db.token.findMany({
+        where: { active: true, currentPrice: { not: null } },
+      })
+      for (const token of tokens) {
+        if (token.currentPrice) {
+          priceCache[token.ticker] = token.currentPrice
+        }
+      }
     }
 
-    return NextResponse.json(priceMap)
+    return NextResponse.json(priceCache)
   } catch (error: any) {
     return NextResponse.json({ error: error.message }, { status: 500 })
   }
