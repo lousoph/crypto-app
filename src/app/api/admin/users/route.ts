@@ -1,0 +1,74 @@
+import { db } from "@/lib/db"
+import { NextRequest, NextResponse } from "next/server"
+import { getServerSession } from "next-auth"
+import { authOptions } from "@/lib/auth"
+
+// GET /api/admin/users - List all users (admin only)
+export async function GET() {
+  try {
+    const session = await getServerSession(authOptions)
+    if (!session?.user || (session.user as any).role !== "admin") {
+      return NextResponse.json({ error: "Accès refusé" }, { status: 403 })
+    }
+
+    const users = await db.user.findMany({
+      select: {
+        id: true,
+        email: true,
+        name: true,
+        role: true,
+        suspended: true,
+        createdAt: true,
+        _count: { select: { transactions: true } },
+      },
+      orderBy: { createdAt: "desc" },
+    })
+
+    return NextResponse.json(users)
+  } catch (error: any) {
+    return NextResponse.json({ error: error.message }, { status: 500 })
+  }
+}
+
+// PUT /api/admin/users - Update user role or suspend
+export async function PUT(req: NextRequest) {
+  try {
+    const session = await getServerSession(authOptions)
+    if (!session?.user || (session.user as any).role !== "admin") {
+      return NextResponse.json({ error: "Accès refusé" }, { status: 403 })
+    }
+
+    const { id, role, suspended } = await req.json()
+
+    const user = await db.user.update({
+      where: { id },
+      data: {
+        ...(role && { role }),
+        ...(suspended !== undefined && { suspended }),
+      },
+    })
+
+    return NextResponse.json(user)
+  } catch (error: any) {
+    return NextResponse.json({ error: error.message }, { status: 500 })
+  }
+}
+
+// DELETE /api/admin/users?id=xxx
+export async function DELETE(req: NextRequest) {
+  try {
+    const session = await getServerSession(authOptions)
+    if (!session?.user || (session.user as any).role !== "admin") {
+      return NextResponse.json({ error: "Accès refusé" }, { status: 403 })
+    }
+
+    const { searchParams } = new URL(req.url)
+    const id = searchParams.get("id")
+    if (!id) return NextResponse.json({ error: "ID requis" }, { status: 400 })
+
+    await db.user.delete({ where: { id } })
+    return NextResponse.json({ success: true })
+  } catch (error: any) {
+    return NextResponse.json({ error: error.message }, { status: 500 })
+  }
+}
