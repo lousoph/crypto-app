@@ -45,71 +45,71 @@
 
 :root {
   --radius: 0.625rem;
-  --background: oklch(1 0 0);
-  --foreground: oklch(0.145 0 0);
-  --card: oklch(1 0 0);
-  --card-foreground: oklch(0.145 0 0);
-  --popover: oklch(1 0 0);
-  --popover-foreground: oklch(0.145 0 0);
-  --primary: oklch(0.205 0 0);
-  --primary-foreground: oklch(0.985 0 0);
-  --secondary: oklch(0.97 0 0);
-  --secondary-foreground: oklch(0.205 0 0);
-  --muted: oklch(0.97 0 0);
-  --muted-foreground: oklch(0.556 0 0);
-  --accent: oklch(0.97 0 0);
-  --accent-foreground: oklch(0.205 0 0);
-  --destructive: oklch(0.577 0.245 27.325);
-  --border: oklch(0.922 0 0);
-  --input: oklch(0.922 0 0);
-  --ring: oklch(0.708 0 0);
-  --chart-1: oklch(0.646 0.222 41.116);
-  --chart-2: oklch(0.6 0.118 184.704);
-  --chart-3: oklch(0.398 0.07 227.392);
-  --chart-4: oklch(0.828 0.189 84.429);
-  --chart-5: oklch(0.769 0.188 70.08);
-  --sidebar: oklch(0.985 0 0);
-  --sidebar-foreground: oklch(0.145 0 0);
-  --sidebar-primary: oklch(0.205 0 0);
-  --sidebar-primary-foreground: oklch(0.985 0 0);
-  --sidebar-accent: oklch(0.97 0 0);
-  --sidebar-accent-foreground: oklch(0.205 0 0);
-  --sidebar-border: oklch(0.922 0 0);
-  --sidebar-ring: oklch(0.708 0 0);
+  --background: #0f1117;
+  --foreground: #ffffff;
+  --card: #1a1d2e;
+  --card-foreground: #ffffff;
+  --popover: #1a1d2e;
+  --popover-foreground: #ffffff;
+  --primary: #7c3aed;
+  --primary-foreground: #ffffff;
+  --secondary: #252840;
+  --secondary-foreground: #ffffff;
+  --muted: #252840;
+  --muted-foreground: #9ca3af;
+  --accent: #252840;
+  --accent-foreground: #ffffff;
+  --destructive: #ef4444;
+  --border: rgba(255,255,255,0.06);
+  --input: rgba(255,255,255,0.08);
+  --ring: #7c3aed;
+  --chart-1: #7c3aed;
+  --chart-2: #06b6d4;
+  --chart-3: #10b981;
+  --chart-4: #f59e0b;
+  --chart-5: #ef4444;
+  --sidebar: #0f1117;
+  --sidebar-foreground: #ffffff;
+  --sidebar-primary: #7c3aed;
+  --sidebar-primary-foreground: #ffffff;
+  --sidebar-accent: #252840;
+  --sidebar-accent-foreground: #ffffff;
+  --sidebar-border: rgba(255,255,255,0.06);
+  --sidebar-ring: #7c3aed;
 }
 
 .dark {
-  --background: oklch(0.1 0.005 285);
-  --foreground: oklch(0.985 0 0);
-  --card: oklch(0.16 0.005 285);
-  --card-foreground: oklch(0.985 0 0);
-  --popover: oklch(0.16 0.005 285);
-  --popover-foreground: oklch(0.985 0 0);
-  --primary: oklch(0.922 0 0);
-  --primary-foreground: oklch(0.205 0 0);
-  --secondary: oklch(0.22 0.005 285);
-  --secondary-foreground: oklch(0.985 0 0);
-  --muted: oklch(0.22 0.005 285);
-  --muted-foreground: oklch(0.708 0 0);
-  --accent: oklch(0.22 0.005 285);
-  --accent-foreground: oklch(0.985 0 0);
-  --destructive: oklch(0.704 0.191 22.216);
-  --border: oklch(1 0 0 / 8%);
-  --input: oklch(1 0 0 / 12%);
-  --ring: oklch(0.556 0 0);
-  --chart-1: oklch(0.488 0.243 264.376);
-  --chart-2: oklch(0.696 0.17 162.48);
-  --chart-3: oklch(0.769 0.188 70.08);
-  --chart-4: oklch(0.627 0.265 303.9);
-  --chart-5: oklch(0.645 0.246 16.439);
-  --sidebar: oklch(0.13 0.005 285);
-  --sidebar-foreground: oklch(0.985 0 0);
-  --sidebar-primary: oklch(0.488 0.243 264.376);
-  --sidebar-primary-foreground: oklch(0.985 0 0);
-  --sidebar-accent: oklch(0.22 0.005 285);
-  --sidebar-accent-foreground: oklch(0.985 0 0);
-  --sidebar-border: oklch(1 0 0 / 8%);
-  --sidebar-ring: oklch(0.556 0 0);
+  --background: #0f1117;
+  --foreground: #ffffff;
+  --card: #1a1d2e;
+  --card-foreground: #ffffff;
+  --popover: #1a1d2e;
+  --popover-foreground: #ffffff;
+  --primary: #7c3aed;
+  --primary-foreground: #ffffff;
+  --secondary: #252840;
+  --secondary-foreground: #ffffff;
+  --muted: #252840;
+  --muted-foreground: #9ca3af;
+  --accent: #252840;
+  --accent-foreground: #ffffff;
+  --destructive: #ef4444;
+  --border: rgba(255,255,255,0.06);
+  --input: rgba(255,255,255,0.08);
+  --ring: #7c3aed;
+  --chart-1: #7c3aed;
+  --chart-2: #06b6d4;
+  --chart-3: #10b981;
+  --chart-4: #f59e0b;
+  --chart-5: #ef4444;
+  --sidebar: #0f1117;
+  --sidebar-foreground: #ffffff;
+  --sidebar-primary: #7c3aed;
+  --sidebar-primary-foreground: #ffffff;
+  --sidebar-accent: #252840;
+  --sidebar-accent-foreground: #ffffff;
+  --sidebar-border: rgba(255,255,255,0.06);
+  --sidebar-ring: #7c3aed;
 }
 
 @layer base {
@@ -125,15 +125,7 @@
    ANIMATED GRADIENT BACKGROUND FOR LOGIN
    ============================================================ */
 .login-gradient-bg {
-  background: linear-gradient(-45deg, #0f0a1a, #1a0f2e, #0a1628, #0f1a2e, #1a0a28);
-  background-size: 400% 400%;
-  animation: gradientShift 15s ease infinite;
-}
-
-@keyframes gradientShift {
-  0% { background-position: 0% 50%; }
-  50% { background-position: 100% 50%; }
-  100% { background-position: 0% 50%; }
+  background: #0f1117;
 }
 
 /* ============================================================
@@ -152,28 +144,29 @@
    GLASSMORPHISM UTILITIES
    ============================================================ */
 .glass {
-  background: rgba(255, 255, 255, 0.05);
+  background: rgba(26, 29, 46, 0.8);
   backdrop-filter: blur(20px);
   -webkit-backdrop-filter: blur(20px);
-  border: 1px solid rgba(255, 255, 255, 0.08);
-}
-
-.glass-strong {
-  background: rgba(255, 255, 255, 0.08);
-  backdrop-filter: blur(30px);
-  -webkit-backdrop-filter: blur(30px);
-  border: 1px solid rgba(255, 255, 255, 0.12);
-}
-
-.glass-card {
-  background: rgba(255, 255, 255, 0.04);
-  backdrop-filter: blur(16px);
-  -webkit-backdrop-filter: blur(16px);
   border: 1px solid rgba(255, 255, 255, 0.06);
 }
 
+.glass-strong {
+  background: rgba(26, 29, 46, 0.95);
+  backdrop-filter: blur(30px);
+  -webkit-backdrop-filter: blur(30px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.glass-card {
+  background: rgba(26, 29, 46, 0.6);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.12), inset 0 1px 0 rgba(255,255,255,0.03);
+}
+
 .glass-sidebar {
-  background: rgba(15, 10, 26, 0.85);
+  background: rgba(15, 17, 23, 0.97);
   backdrop-filter: blur(24px);
   -webkit-backdrop-filter: blur(24px);
   border-right: 1px solid rgba(255, 255, 255, 0.06);
@@ -193,7 +186,7 @@
   inset: 0;
   border-radius: inherit;
   padding: 1px;
-  background: linear-gradient(135deg, #8b5cf6, #06b6d4, #8b5cf6);
+  background: linear-gradient(135deg, #7c3aed, #06b6d4, #7c3aed);
   background-size: 200% 200%;
   animation: borderGlow 3s ease infinite;
   -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
@@ -268,19 +261,19 @@
 }
 
 .custom-scrollbar::-webkit-scrollbar-thumb {
-  background: rgba(139, 92, 246, 0.2);
+  background: rgba(124, 58, 237, 0.2);
   border-radius: 3px;
 }
 
 .custom-scrollbar::-webkit-scrollbar-thumb:hover {
-  background: rgba(139, 92, 246, 0.4);
+  background: rgba(124, 58, 237, 0.4);
 }
 
 /* ============================================================
    MOBILE BOTTOM NAV
    ============================================================ */
 .bottom-nav {
-  background: rgba(15, 10, 26, 0.92);
+  background: rgba(15, 17, 23, 0.95);
   backdrop-filter: blur(24px);
   -webkit-backdrop-filter: blur(24px);
   border-top: 1px solid rgba(255, 255, 255, 0.06);
@@ -292,7 +285,7 @@
 }
 
 .bottom-nav-item.active {
-  color: #8b5cf6;
+  color: #7c3aed;
 }
 
 .bottom-nav-item.active::before {
@@ -303,7 +296,7 @@
   transform: translateX(-50%);
   width: 24px;
   height: 2px;
-  background: linear-gradient(90deg, #8b5cf6, #06b6d4);
+  background: linear-gradient(90deg, #7c3aed, #06b6d4);
   border-radius: 1px;
 }
 
@@ -315,15 +308,38 @@
 }
 
 @keyframes pulseGlow {
-  0%, 100% { box-shadow: 0 0 0 0 rgba(139, 92, 246, 0.3); }
-  50% { box-shadow: 0 0 12px 2px rgba(139, 92, 246, 0.15); }
+  0%, 100% { box-shadow: 0 0 0 0 rgba(124, 58, 237, 0.3); }
+  50% { box-shadow: 0 0 12px 2px rgba(124, 58, 237, 0.15); }
+}
+
+/* ============================================================
+   LIVE BADGE PULSE
+   ============================================================ */
+.live-dot {
+  animation: livePulse 1.5s ease-in-out infinite;
+}
+
+@keyframes livePulse {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50% { opacity: 0.5; transform: scale(1.3); }
+}
+
+/* ============================================================
+   TICKER SCROLL
+   ============================================================ */
+.ticker-scroll {
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+.ticker-scroll::-webkit-scrollbar {
+  display: none;
 }
 
 /* ============================================================
    FAB BUTTON
    ============================================================ */
 .fab-button {
-  box-shadow: 0 4px 20px rgba(139, 92, 246, 0.4);
+  box-shadow: 0 4px 20px rgba(124, 58, 237, 0.4);
   transition: all 0.2s ease;
 }
 
@@ -340,6 +356,7 @@
 
 .card-hover:hover {
   transform: translateY(-2px);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2), inset 0 1px 0 rgba(255,255,255,0.04);
 }
 
 /* ============================================================
@@ -354,7 +371,7 @@
   content: '';
   position: absolute;
   inset: 0;
-  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.04), transparent);
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.03), transparent);
   animation: shimmer 2s infinite;
 }
 
@@ -366,11 +383,26 @@
 /* ============================================================
    KPI CARD GRADIENT TOP BAR
    ============================================================ */
-.kpi-bar-blue { border-top: 2px solid; border-image: linear-gradient(90deg, #3b82f6, #60a5fa) 1; }
-.kpi-bar-violet { border-top: 2px solid; border-image: linear-gradient(90deg, #8b5cf6, #a78bfa) 1; }
-.kpi-bar-emerald { border-top: 2px solid; border-image: linear-gradient(90deg, #10b981, #34d399) 1; }
-.kpi-bar-amber { border-top: 2px solid; border-image: linear-gradient(90deg, #f59e0b, #fbbf24) 1; }
-.kpi-bar-red { border-top: 2px solid; border-image: linear-gradient(90deg, #ef4444, #f87171) 1; }
+.kpi-bar-violet {
+  border-top: 2px solid transparent;
+  border-image: linear-gradient(90deg, #7c3aed, #a78bfa) 1;
+}
+.kpi-bar-cyan {
+  border-top: 2px solid transparent;
+  border-image: linear-gradient(90deg, #06b6d4, #22d3ee) 1;
+}
+.kpi-bar-emerald {
+  border-top: 2px solid transparent;
+  border-image: linear-gradient(90deg, #10b981, #34d399) 1;
+}
+.kpi-bar-amber {
+  border-top: 2px solid transparent;
+  border-image: linear-gradient(90deg, #f59e0b, #fbbf24) 1;
+}
+.kpi-bar-red {
+  border-top: 2px solid transparent;
+  border-image: linear-gradient(90deg, #ef4444, #f87171) 1;
+}
 
 /* ============================================================
    RESPONSIVE DIALOG FULLSCREEN ON MOBILE
@@ -387,7 +419,7 @@
     border-radius: 0 !important;
     transform: none !important;
   }
-  
+
   .dialog-mobile-fullscreen > div {
     height: 100%;
     display: flex;
@@ -411,7 +443,7 @@
    GRADIENT TEXT
    ============================================================ */
 .gradient-text {
-  background: linear-gradient(135deg, #8b5cf6, #06b6d4);
+  background: linear-gradient(135deg, #7c3aed, #06b6d4);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
@@ -422,7 +454,7 @@
    ============================================================ */
 .avatar-ring {
   padding: 2px;
-  background: linear-gradient(135deg, #8b5cf6, #06b6d4);
+  background: linear-gradient(135deg, #7c3aed, #06b6d4);
   border-radius: 9999px;
 }
 
@@ -445,7 +477,7 @@
   transform: translateY(-50%);
   width: 3px;
   height: 60%;
-  background: linear-gradient(180deg, #8b5cf6, #06b6d4);
+  background: linear-gradient(180deg, #7c3aed, #06b6d4);
   border-radius: 0 3px 3px 0;
 }
 
@@ -455,4 +487,18 @@
 .token-gradient-btc { background: linear-gradient(135deg, #f59e0b, #d97706); }
 .token-gradient-eth { background: linear-gradient(135deg, #627eea, #3c3c3d); }
 .token-gradient-sol { background: linear-gradient(135deg, #9945ff, #14f195); }
-.token-gradient-default { background: linear-gradient(135deg, #8b5cf6, #06b6d4); }
+.token-gradient-default { background: linear-gradient(135deg, #7c3aed, #06b6d4); }
+
+/* ============================================================
+   HORIZONTAL BAR CHART ANIMATION
+   ============================================================ */
+.hbar-fill {
+  transition: width 0.8s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+/* ============================================================
+   SAFE AREA BOTTOM
+   ============================================================ */
+.safe-area-bottom {
+  padding-bottom: env(safe-area-inset-bottom, 0px);
+}

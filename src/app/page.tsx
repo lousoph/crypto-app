@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect, useCallback } from 'react'
+import { useState, useEffect, useCallback, useRef } from 'react'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
@@ -8,8 +8,8 @@ import {
   LayoutDashboard, ArrowLeftRight, User, Shield, Coins, Building2,
   LogOut, LogIn, TrendingUp, TrendingDown, DollarSign, Wallet,
   Plus, Trash2, Edit3, ChevronDown, ChevronUp, RefreshCw,
-  BarChart3, PieChart, Crown, AlertTriangle, Check, X, Menu,
-  Search
+  BarChart3, Crown, AlertTriangle, Check, X, Menu,
+  Search, Activity, Zap, Eye
 } from 'lucide-react'
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
@@ -27,7 +27,7 @@ import { Switch } from '@/components/ui/switch'
 import { toast } from 'sonner'
 import {
   BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
-  PieChart as RechartsPie, Pie, Cell, Legend
+  Legend
 } from 'recharts'
 import { signIn, signOut, useSession } from 'next-auth/react'
 
@@ -117,11 +117,16 @@ const fmtSmall = (n: number) =>
     : n < 1 ? n.toLocaleString('fr-FR', { minimumFractionDigits: 4, maximumFractionDigits: 6 })
     : n.toLocaleString('fr-FR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })
 
+const fmtPrice = (n: number) =>
+  n >= 1 ? n.toLocaleString('fr-FR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })
+    : n >= 0.01 ? n.toLocaleString('fr-FR', { minimumFractionDigits: 4, maximumFractionDigits: 4 })
+    : n.toLocaleString('fr-FR', { minimumFractionDigits: 6, maximumFractionDigits: 8 })
+
 const plColor = (v: number) => v >= 0 ? 'text-emerald-400' : 'text-red-400'
 const plBg = (v: number) => v >= 0 ? 'bg-emerald-400/10' : 'bg-red-400/10'
 
 const CHART_COLORS = [
-  '#8b5cf6', '#06b6d4', '#f59e0b', '#10b981', '#ef4444',
+  '#7c3aed', '#06b6d4', '#f59e0b', '#10b981', '#ef4444',
   '#3b82f6', '#ec4899', '#14b8a6', '#f97316', '#6366f1',
   '#84cc16', '#e11d48', '#0ea5e9', '#a855f7', '#f43f5e',
 ]
@@ -217,25 +222,25 @@ function LoginScreen({ onLogin, onRegister }: {
   }
 
   return (
-    <div className="login-gradient-bg min-h-screen flex items-center justify-center p-4">
+    <div className="min-h-screen flex items-center justify-center p-4" style={{ background: 'linear-gradient(135deg, #0f1117 0%, #1a1d2e 50%, #0f1117 100%)' }}>
       <div className="w-full max-w-md space-y-8 fade-in-up">
         {/* Logo */}
         <div className="text-center space-y-3">
-          <div className="float-animation inline-flex items-center justify-center w-20 h-20 rounded-2xl bg-violet-600/20 border border-violet-500/30 shadow-lg shadow-violet-500/10">
+          <div className="float-animation inline-flex items-center justify-center w-20 h-20 rounded-2xl border shadow-lg" style={{ background: 'rgba(124, 58, 237, 0.15)', borderColor: 'rgba(124, 58, 237, 0.3)', boxShadow: '0 0 40px rgba(124, 58, 237, 0.1)' }}>
             <Wallet className="w-10 h-10 text-violet-400" />
           </div>
           <h1 className="text-4xl font-bold gradient-text">
-            CryptoTracker
+            CryptoFolio
           </h1>
-          <p className="text-white/50 text-sm">Suivez votre portefeuille crypto en temps réel</p>
+          <p className="text-sm" style={{ color: 'rgba(255,255,255,0.4)' }}>Suivez votre portefeuille crypto en temps réel</p>
         </div>
 
-        <div className="glass-strong rounded-2xl p-6 sm:p-8 shadow-2xl shadow-black/20">
+        <div className="rounded-2xl p-6 sm:p-8 shadow-2xl" style={{ background: 'rgba(26, 29, 46, 0.8)', backdropFilter: 'blur(30px)', border: '1px solid rgba(255,255,255,0.08)', boxShadow: '0 0 60px rgba(0,0,0,0.3)' }}>
           <div className="mb-6">
             <h2 className="text-xl font-semibold text-white">
               {isRegister ? 'Créer un compte' : 'Connexion'}
             </h2>
-            <p className="text-white/40 text-sm mt-1">
+            <p className="text-sm mt-1" style={{ color: 'rgba(255,255,255,0.35)' }}>
               {isRegister
                 ? 'Créez votre compte pour commencer à suivre vos investissements'
                 : 'Connectez-vous pour accéder à votre portefeuille'}
@@ -245,18 +250,19 @@ function LoginScreen({ onLogin, onRegister }: {
           <form onSubmit={handleSubmit} className="space-y-4">
             {isRegister && (
               <div className="space-y-2 fade-in-up stagger-1">
-                <Label htmlFor="name" className="text-white/70 text-xs font-medium">Nom</Label>
+                <Label htmlFor="name" className="text-xs font-medium" style={{ color: 'rgba(255,255,255,0.5)' }}>Nom</Label>
                 <Input
                   id="name"
                   value={name}
                   onChange={(e) => setName(e.target.value)}
                   placeholder="Votre nom"
-                  className="bg-white/5 border-white/10 text-white placeholder:text-white/30 rounded-xl h-11 focus:border-violet-500/50 focus:ring-violet-500/20"
+                  className="border text-white placeholder:text-white/20 rounded-xl h-11"
+                  style={{ background: 'rgba(255,255,255,0.04)', borderColor: 'rgba(255,255,255,0.08)' }}
                 />
               </div>
             )}
             <div className="space-y-2 fade-in-up stagger-2">
-              <Label htmlFor="email" className="text-white/70 text-xs font-medium">Email</Label>
+              <Label htmlFor="email" className="text-xs font-medium" style={{ color: 'rgba(255,255,255,0.5)' }}>Email</Label>
               <Input
                 id="email"
                 type="email"
@@ -264,11 +270,12 @@ function LoginScreen({ onLogin, onRegister }: {
                 onChange={(e) => setEmail(e.target.value)}
                 placeholder="votre@email.com"
                 required
-                className="bg-white/5 border-white/10 text-white placeholder:text-white/30 rounded-xl h-11 focus:border-violet-500/50 focus:ring-violet-500/20"
+                className="border text-white placeholder:text-white/20 rounded-xl h-11"
+                style={{ background: 'rgba(255,255,255,0.04)', borderColor: 'rgba(255,255,255,0.08)' }}
               />
             </div>
             <div className="space-y-2 fade-in-up stagger-3">
-              <Label htmlFor="password" className="text-white/70 text-xs font-medium">Mot de passe</Label>
+              <Label htmlFor="password" className="text-xs font-medium" style={{ color: 'rgba(255,255,255,0.5)' }}>Mot de passe</Label>
               <Input
                 id="password"
                 type="password"
@@ -276,18 +283,20 @@ function LoginScreen({ onLogin, onRegister }: {
                 onChange={(e) => setPassword(e.target.value)}
                 placeholder="••••••••"
                 required
-                className="bg-white/5 border-white/10 text-white placeholder:text-white/30 rounded-xl h-11 focus:border-violet-500/50 focus:ring-violet-500/20"
+                className="border text-white placeholder:text-white/20 rounded-xl h-11"
+                style={{ background: 'rgba(255,255,255,0.04)', borderColor: 'rgba(255,255,255,0.08)' }}
               />
             </div>
             {error && (
-              <div className="flex items-center gap-2 text-red-400 text-sm bg-red-400/10 p-3 rounded-xl border border-red-400/20 fade-in">
+              <div className="flex items-center gap-2 text-red-400 text-sm p-3 rounded-xl border fade-in" style={{ background: 'rgba(239,68,68,0.08)', borderColor: 'rgba(239,68,68,0.2)' }}>
                 <AlertTriangle className="w-4 h-4 shrink-0" />
                 {error}
               </div>
             )}
             <Button
               type="submit"
-              className="w-full bg-gradient-to-r from-violet-600 to-cyan-600 hover:from-violet-500 hover:to-cyan-500 text-white rounded-xl h-11 font-medium shadow-lg shadow-violet-500/20 transition-all active:scale-[0.98]"
+              className="w-full text-white rounded-xl h-11 font-medium shadow-lg transition-all active:scale-[0.98]"
+              style={{ background: 'linear-gradient(135deg, #7c3aed, #06b6d4)', boxShadow: '0 4px 20px rgba(124,58,237,0.25)' }}
               disabled={loading}
             >
               {loading ? <RefreshCw className="w-4 h-4 animate-spin mr-2" /> : null}
@@ -295,7 +304,7 @@ function LoginScreen({ onLogin, onRegister }: {
             </Button>
           </form>
 
-          <div className="mt-5 text-center text-sm text-white/40">
+          <div className="mt-5 text-center text-sm" style={{ color: 'rgba(255,255,255,0.35)' }}>
             {isRegister ? (
               <>Déjà un compte ?{' '}
                 <button onClick={() => { setIsRegister(false); setError('') }} className="text-violet-400 hover:text-violet-300 transition-colors font-medium">
@@ -313,14 +322,15 @@ function LoginScreen({ onLogin, onRegister }: {
 
           {!isRegister && (
             <div className="mt-5 space-y-2">
-              <p className="text-white/40 text-xs font-medium text-center mb-3">Comptes de démonstration</p>
+              <p className="text-xs font-medium text-center mb-3" style={{ color: 'rgba(255,255,255,0.3)' }}>Comptes de démonstration</p>
               <div className="space-y-2">
                 <button
                   type="button"
                   onClick={() => fillDemo('admin@cryptotracker.com', 'admin123')}
-                  className="w-full flex items-center gap-3 p-3 rounded-xl bg-violet-500/10 border border-violet-500/20 hover:bg-violet-500/20 transition-colors text-left group"
+                  className="w-full flex items-center gap-3 p-3 rounded-xl border transition-colors text-left group"
+                  style={{ background: 'rgba(124,58,237,0.08)', borderColor: 'rgba(124,58,237,0.2)' }}
                 >
-                  <div className="w-8 h-8 rounded-lg bg-violet-500/20 flex items-center justify-center shrink-0">
+                  <div className="w-8 h-8 rounded-lg flex items-center justify-center shrink-0" style={{ background: 'rgba(124,58,237,0.15)' }}>
                     <Shield className="w-4 h-4 text-violet-400" />
                   </div>
                   <div className="flex-1 min-w-0">
@@ -332,9 +342,10 @@ function LoginScreen({ onLogin, onRegister }: {
                 <button
                   type="button"
                   onClick={() => fillDemo('premium@cryptotracker.com', 'premium123')}
-                  className="w-full flex items-center gap-3 p-3 rounded-xl bg-amber-500/10 border border-amber-500/20 hover:bg-amber-500/20 transition-colors text-left group"
+                  className="w-full flex items-center gap-3 p-3 rounded-xl border transition-colors text-left group"
+                  style={{ background: 'rgba(245,158,11,0.08)', borderColor: 'rgba(245,158,11,0.2)' }}
                 >
-                  <div className="w-8 h-8 rounded-lg bg-amber-500/20 flex items-center justify-center shrink-0">
+                  <div className="w-8 h-8 rounded-lg flex items-center justify-center shrink-0" style={{ background: 'rgba(245,158,11,0.15)' }}>
                     <Crown className="w-4 h-4 text-amber-400" />
                   </div>
                   <div className="flex-1 min-w-0">
@@ -346,10 +357,11 @@ function LoginScreen({ onLogin, onRegister }: {
                 <button
                   type="button"
                   onClick={() => fillDemo('demo@cryptotracker.com', 'demo123')}
-                  className="w-full flex items-center gap-3 p-3 rounded-xl bg-white/5 border border-white/10 hover:bg-white/10 transition-colors text-left group"
+                  className="w-full flex items-center gap-3 p-3 rounded-xl border transition-colors text-left group"
+                  style={{ background: 'rgba(255,255,255,0.03)', borderColor: 'rgba(255,255,255,0.08)' }}
                 >
-                  <div className="w-8 h-8 rounded-lg bg-white/10 flex items-center justify-center shrink-0">
-                    <User className="w-4 h-4 text-white/50" />
+                  <div className="w-8 h-8 rounded-lg flex items-center justify-center shrink-0" style={{ background: 'rgba(255,255,255,0.06)' }}>
+                    <User className="w-4 h-4 text-white/40" />
                   </div>
                   <div className="flex-1 min-w-0">
                     <p className="text-sm font-medium text-white/80 group-hover:text-white transition-colors">Gratuit</p>
@@ -437,11 +449,12 @@ function Sidebar({ currentView, setView, user, onLogout }: {
     return (
       <button
         onClick={() => { setView(item.id); setMobileOpen(false) }}
-        className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all duration-200 ${
+        className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all duration-200 relative ${
           active
-            ? 'nav-active-indicator bg-gradient-to-r from-violet-600/20 to-cyan-600/10 text-violet-300 border border-violet-500/20'
-            : 'text-white/40 hover:bg-white/5 hover:text-white/70 border border-transparent'
+            ? 'text-violet-300'
+            : 'text-white/40 hover:text-white/70'
         }`}
+        style={active ? { background: 'rgba(124,58,237,0.12)', borderLeft: '3px solid #7c3aed' } : { borderLeft: '3px solid transparent' }}
       >
         <item.icon className={`w-5 h-5 shrink-0 transition-colors ${active ? 'text-violet-400' : ''}`} />
         {!collapsed && <span>{item.label}</span>}
@@ -462,12 +475,12 @@ function Sidebar({ currentView, setView, user, onLogout }: {
   const sidebarContent = (
     <>
       {/* Logo */}
-      <div className={`flex items-center gap-3 px-4 py-5 border-b border-white/5 ${collapsed ? 'justify-center' : ''}`}>
-        <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-violet-600/30 to-cyan-600/30 border border-violet-500/20 flex items-center justify-center shrink-0 shadow-lg shadow-violet-500/10">
+      <div className={`flex items-center gap-3 px-5 py-5 border-b ${collapsed ? 'justify-center' : ''}`} style={{ borderColor: 'rgba(255,255,255,0.05)' }}>
+        <div className="w-10 h-10 rounded-xl flex items-center justify-center shrink-0 shadow-lg" style={{ background: 'linear-gradient(135deg, rgba(124,58,237,0.3), rgba(6,182,212,0.3))', border: '1px solid rgba(124,58,237,0.2)', boxShadow: '0 0 20px rgba(124,58,237,0.1)' }}>
           <Wallet className="w-5 h-5 text-violet-400" />
         </div>
         {!collapsed && (
-          <span className="text-lg font-bold gradient-text">CryptoTracker</span>
+          <span className="text-lg font-bold gradient-text">CryptoFolio</span>
         )}
       </div>
 
@@ -478,9 +491,9 @@ function Sidebar({ currentView, setView, user, onLogout }: {
 
         {isAdmin && (
           <>
-            <Separator className="my-4 bg-white/5" />
+            <Separator className="my-4" style={{ background: 'rgba(255,255,255,0.05)' }} />
             <div className="space-y-1">
-              {!collapsed && <p className="px-3 text-[10px] font-semibold text-white/25 uppercase tracking-widest mb-2">Administration</p>}
+              {!collapsed && <p className="px-3 text-[10px] font-semibold uppercase tracking-widest mb-2" style={{ color: 'rgba(255,255,255,0.2)' }}>Administration</p>}
               {adminItems.map(item => <NavItem key={item.id} item={item} />)}
             </div>
           </>
@@ -488,10 +501,10 @@ function Sidebar({ currentView, setView, user, onLogout }: {
       </ScrollArea>
 
       {/* User info */}
-      <div className={`border-t border-white/5 p-4 ${collapsed ? 'flex flex-col items-center' : ''}`}>
+      <div className={`border-t p-4 ${collapsed ? 'flex flex-col items-center' : ''}`} style={{ borderColor: 'rgba(255,255,255,0.05)' }}>
         <div className={`flex items-center gap-3 ${collapsed ? '' : 'w-full'}`}>
           <div className="avatar-ring shrink-0">
-            <div className="w-9 h-9 bg-gradient-to-br from-violet-500 to-cyan-500 flex items-center justify-center text-white text-sm font-bold">
+            <div className="w-9 h-9 flex items-center justify-center text-white text-sm font-bold" style={{ background: 'linear-gradient(135deg, #7c3aed, #06b6d4)' }}>
               {user?.name?.[0] || user?.email?.[0]?.toUpperCase() || '?'}
             </div>
           </div>
@@ -514,7 +527,7 @@ function Sidebar({ currentView, setView, user, onLogout }: {
             variant="ghost"
             size="sm"
             onClick={handleLogout}
-            className={`mt-3 w-full transition-all duration-200 ${
+            className={`mt-3 w-full transition-all duration-200 rounded-xl ${
               showLogoutConfirm
                 ? 'bg-red-500/20 text-red-400 border border-red-500/30 hover:bg-red-500/30'
                 : 'text-white/30 hover:text-white/60 hover:bg-white/5'
@@ -542,7 +555,7 @@ function Sidebar({ currentView, setView, user, onLogout }: {
 
       {/* Mobile overlay */}
       {mobileOpen && (
-        <div className="fixed inset-0 bg-black/70 z-40 md:hidden fade-in" onClick={() => setMobileOpen(false)} />
+        <div className="fixed inset-0 z-40 md:hidden fade-in" style={{ background: 'rgba(0,0,0,0.7)', backdropFilter: 'blur(4px)' }} onClick={() => setMobileOpen(false)} />
       )}
 
       {/* Mobile sidebar */}
@@ -576,15 +589,83 @@ function Sidebar({ currentView, setView, user, onLogout }: {
 function CustomTooltip({ active, payload, label }: any) {
   if (!active || !payload?.length) return null
   return (
-    <div className="glass-strong rounded-xl px-4 py-3 shadow-xl">
-      {label && <p className="text-white/60 text-xs mb-1.5 font-medium">{label}</p>}
+    <div className="rounded-xl px-4 py-3 shadow-xl" style={{ background: 'rgba(26,29,46,0.95)', backdropFilter: 'blur(20px)', border: '1px solid rgba(255,255,255,0.1)' }}>
+      {label && <p className="text-xs mb-1.5 font-medium" style={{ color: 'rgba(255,255,255,0.5)' }}>{label}</p>}
       {payload.map((entry: any, i: number) => (
         <div key={i} className="flex items-center gap-2 text-sm">
           <div className="w-2 h-2 rounded-full" style={{ backgroundColor: entry.color }} />
-          <span className="text-white/50">{entry.name}:</span>
+          <span style={{ color: 'rgba(255,255,255,0.4)' }}>{entry.name}:</span>
           <span className="text-white font-semibold">{fmt(entry.value)} $</span>
         </div>
       ))}
+    </div>
+  )
+}
+
+// ============================================================
+// LIVE PRICE TICKER
+// ============================================================
+function LivePriceTicker() {
+  const [prices, setPrices] = useState<Record<string, number>>({})
+  const [prevPrices, setPrevPrices] = useState<Record<string, number>>({})
+  const tickerRef = useRef<HTMLDivElement>(null)
+
+  useEffect(() => {
+    const fetchPrices = async () => {
+      try {
+        const res = await fetch('/api/prices')
+        if (res.ok) {
+          const data = await res.json()
+          setPrevPrices(prices)
+          setPrices(data)
+        }
+      } catch (err) {
+        console.error(err)
+      }
+    }
+    fetchPrices()
+    const interval = setInterval(fetchPrices, 60000)
+    return () => clearInterval(interval)
+  }, [])
+
+  const entries = Object.entries(prices)
+  if (entries.length === 0) return null
+
+  return (
+    <div className="glass-card rounded-2xl overflow-hidden fade-in-up">
+      <div className="flex items-center gap-3 px-4 py-2.5 border-b" style={{ borderColor: 'rgba(255,255,255,0.04)' }}>
+        <div className="flex items-center gap-1.5">
+          <span className="relative flex h-2 w-2">
+            <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+            <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-400"></span>
+          </span>
+          <span className="text-xs font-semibold text-emerald-400">LIVE</span>
+        </div>
+        <span className="text-xs" style={{ color: 'rgba(255,255,255,0.25)' }}>Cours en temps réel</span>
+      </div>
+      <div ref={tickerRef} className="flex items-center gap-1 px-4 py-3 overflow-x-auto ticker-scroll">
+        {entries.map(([ticker, price]) => {
+          const prev = prevPrices[ticker]
+          const change = prev && prev !== price ? ((price - prev) / prev) * 100 : 0
+          const isUp = change >= 0
+          return (
+            <div key={ticker} className="flex items-center gap-2 px-3 py-1.5 rounded-lg shrink-0 mr-1" style={{ background: 'rgba(255,255,255,0.03)' }}>
+              <div className={`w-6 h-6 rounded-md ${tokenGradientClass(ticker)} flex items-center justify-center text-[9px] font-bold text-white`}>
+                {ticker.slice(0, 2)}
+              </div>
+              <div className="flex flex-col">
+                <span className="text-[10px] font-semibold text-white/60">{ticker}</span>
+                <span className="text-xs font-semibold text-white/90">{fmtPrice(price)} $</span>
+              </div>
+              {change !== 0 && (
+                <span className={`text-[10px] font-semibold ${isUp ? 'text-emerald-400' : 'text-red-400'}`}>
+                  {isUp ? '+' : ''}{change.toFixed(2)}%
+                </span>
+              )}
+            </div>
+          )
+        })}
+      </div>
     </div>
   )
 }
@@ -644,7 +725,7 @@ function DashboardView({ user }: { user: any }) {
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
           {[1, 2, 3, 4].map(i => (
             <Card key={i} className="glass-card rounded-2xl shimmer">
-              <CardContent className="p-6"><div className="h-20 bg-white/5 rounded-xl" /></CardContent>
+              <CardContent className="p-6"><div className="h-20 rounded-xl" style={{ background: 'rgba(255,255,255,0.03)' }} /></CardContent>
             </Card>
           ))}
         </div>
@@ -658,8 +739,8 @@ function DashboardView({ user }: { user: any }) {
         <div className="w-20 h-20 rounded-2xl glass flex items-center justify-center">
           <BarChart3 className="w-10 h-10 text-violet-400/50" />
         </div>
-        <h2 className="text-xl font-semibold">Aucune transaction</h2>
-        <p className="text-white/40 text-center max-w-md">
+        <h2 className="text-xl font-semibold text-white/80">Aucune transaction</h2>
+        <p className="text-center max-w-md" style={{ color: 'rgba(255,255,255,0.35)' }}>
           Commencez par ajouter des transactions dans l&apos;onglet &quot;Transactions&quot; pour voir votre tableau de bord.
         </p>
       </div>
@@ -667,11 +748,7 @@ function DashboardView({ user }: { user: any }) {
   }
 
   const sortedTokens = [...data.tokens].sort((a, b) => b.valeurActuelle - a.valeurActuelle)
-
-  const pieData = sortedTokens.map(t => ({
-    name: t.ticker,
-    value: t.valeurActuelle,
-  }))
+  const totalValue = data.valeurActuelle || 1
 
   const barData = sortedTokens.map(t => ({
     name: t.ticker,
@@ -681,20 +758,11 @@ function DashboardView({ user }: { user: any }) {
 
   const kpiCards = [
     {
-      label: 'Investissement Total',
-      value: `${fmt(data.investissementTotal)} $`,
-      icon: DollarSign,
-      barClass: 'kpi-bar-blue',
-      iconBg: 'bg-blue-500/15',
-      iconColor: 'text-blue-400',
-      colorClass: '',
-    },
-    {
-      label: 'Valeur Actuelle',
+      label: 'Valeur du Portefeuille',
       value: `${fmt(data.valeurActuelle)} $`,
       icon: Wallet,
       barClass: 'kpi-bar-violet',
-      iconBg: 'bg-violet-500/15',
+      iconBg: 'rgba(124,58,237,0.12)',
       iconColor: 'text-violet-400',
       colorClass: '',
     },
@@ -703,17 +771,26 @@ function DashboardView({ user }: { user: any }) {
       value: `${data.pl >= 0 ? '+' : ''}${fmt(data.pl)} $`,
       icon: data.pl >= 0 ? TrendingUp : TrendingDown,
       barClass: data.pl >= 0 ? 'kpi-bar-emerald' : 'kpi-bar-red',
-      iconBg: plBg(data.pl),
+      iconBg: data.pl >= 0 ? 'rgba(16,185,129,0.12)' : 'rgba(239,68,68,0.12)',
       iconColor: data.pl >= 0 ? 'text-emerald-400' : 'text-red-400',
       colorClass: plColor(data.pl),
+    },
+    {
+      label: 'Investissement Total',
+      value: `${fmt(data.investissementTotal)} $`,
+      icon: DollarSign,
+      barClass: 'kpi-bar-cyan',
+      iconBg: 'rgba(6,182,212,0.12)',
+      iconColor: 'text-cyan-400',
+      colorClass: '',
     },
     {
       label: 'ROI',
       value: `${data.roi >= 0 ? '+' : ''}${fmtPct(data.roi)}`,
       icon: data.roi >= 0 ? TrendingUp : TrendingDown,
       barClass: data.roi >= 0 ? 'kpi-bar-amber' : 'kpi-bar-red',
-      iconBg: plBg(data.roi),
-      iconColor: data.roi >= 0 ? 'text-emerald-400' : 'text-red-400',
+      iconBg: data.roi >= 0 ? 'rgba(245,158,11,0.12)' : 'rgba(239,68,68,0.12)',
+      iconColor: data.roi >= 0 ? 'text-amber-400' : 'text-red-400',
       colorClass: plColor(data.roi),
     },
   ]
@@ -724,12 +801,12 @@ function DashboardView({ user }: { user: any }) {
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 fade-in-up">
         <div>
           <h1 className="text-2xl font-bold text-white/90">Tableau de Bord</h1>
-          <div className="flex items-center gap-2 text-sm text-white/35 mt-1">
+          <div className="flex items-center gap-2 text-sm mt-1" style={{ color: 'rgba(255,255,255,0.3)' }}>
             <span>Vue d&apos;ensemble de votre portefeuille</span>
             {lastUpdated && (
               <span className="hidden sm:flex items-center gap-1.5">
                 • <span className="inline-block w-1.5 h-1.5 rounded-full bg-emerald-400 pulse-glow" />
-                <span className="text-white/25">Mis à jour {lastUpdated.toLocaleTimeString('fr-FR')} • {nextRefreshIn}s</span>
+                <span style={{ color: 'rgba(255,255,255,0.2)' }}>Mis à jour {lastUpdated.toLocaleTimeString('fr-FR')} • {nextRefreshIn}s</span>
               </span>
             )}
           </div>
@@ -738,23 +815,27 @@ function DashboardView({ user }: { user: any }) {
           variant="outline"
           onClick={handleRefresh}
           disabled={refreshing}
-          className="gap-2 shrink-0 glass rounded-xl border-white/10 text-white/60 hover:text-white/80 hover:bg-white/5 h-10"
+          className="gap-2 shrink-0 glass rounded-xl text-white/60 hover:text-white/80 hover:bg-white/5 h-10"
+          style={{ borderColor: 'rgba(255,255,255,0.08)' }}
         >
           <RefreshCw className={`w-4 h-4 ${refreshing ? 'animate-spin' : ''}`} />
           {refreshing ? 'Actualisation...' : 'Actualiser'}
         </Button>
       </div>
 
+      {/* Live Price Ticker */}
+      <LivePriceTicker />
+
       {/* KPI Cards */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-5">
         {kpiCards.map((card, i) => (
           <div key={card.label} className={`fade-in-up stagger-${i + 1}`}>
-            <Card className={`glass-card rounded-2xl card-hover gradient-border ${card.barClass}`}>
+            <Card className={`glass-card rounded-2xl card-hover ${card.barClass}`}>
               <CardContent className="p-5 sm:p-6">
                 <div className="flex items-center justify-between mb-3">
-                  <span className="text-xs font-medium text-white/40 uppercase tracking-wider">{card.label}</span>
-                  <div className={`w-9 h-9 rounded-xl ${card.iconBg} flex items-center justify-center`}>
-                    <card.icon className={`w-4.5 h-4.5 ${card.iconColor}`} />
+                  <span className="text-xs font-medium uppercase tracking-wider" style={{ color: 'rgba(255,255,255,0.35)' }}>{card.label}</span>
+                  <div className="w-9 h-9 rounded-xl flex items-center justify-center" style={{ background: card.iconBg }}>
+                    <card.icon className={`w-4 h-4 ${card.iconColor}`} />
                   </div>
                 </div>
                 <p className={`text-xl sm:text-2xl font-bold ${card.colorClass || 'text-white/90'}`}>
@@ -768,39 +849,49 @@ function DashboardView({ user }: { user: any }) {
 
       {/* Charts */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">
+        {/* Portfolio Distribution - Horizontal Bar Chart */}
         <Card className="glass-card rounded-2xl card-hover fade-in-up stagger-5">
           <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium text-white/50">Répartition du Portefeuille</CardTitle>
+            <CardTitle className="text-sm font-medium" style={{ color: 'rgba(255,255,255,0.45)' }}>Répartition du Portefeuille</CardTitle>
           </CardHeader>
           <CardContent>
-            <ResponsiveContainer width="100%" height={280} className="sm:h-[300px]">
-              <RechartsPie>
-                <Pie
-                  data={pieData}
-                  cx="50%"
-                  cy="50%"
-                  innerRadius={55}
-                  outerRadius={90}
-                  paddingAngle={3}
-                  dataKey="value"
-                  strokeWidth={0}
-                >
-                  {pieData.map((_, i) => (
-                    <Cell key={i} fill={CHART_COLORS[i % CHART_COLORS.length]} />
-                  ))}
-                </Pie>
-                <Tooltip content={<CustomTooltip />} />
-                <Legend
-                  wrapperStyle={{ fontSize: '12px', color: 'rgba(255,255,255,0.4)' }}
-                />
-              </RechartsPie>
-            </ResponsiveContainer>
+            <div className="space-y-3">
+              {sortedTokens.map((t, i) => {
+                const pct = (t.valeurActuelle / totalValue) * 100
+                return (
+                  <div key={t.ticker} className="space-y-1.5">
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-2">
+                        <div className={`w-6 h-6 rounded-md ${tokenGradientClass(t.ticker)} flex items-center justify-center text-[9px] font-bold text-white`}>
+                          {t.ticker.slice(0, 2)}
+                        </div>
+                        <span className="text-sm font-medium text-white/70">{t.ticker}</span>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <span className="text-xs font-mono text-white/40">{fmt(t.valeurActuelle)} $</span>
+                        <span className="text-xs font-semibold text-white/60">{pct.toFixed(1)}%</span>
+                      </div>
+                    </div>
+                    <div className="w-full h-2 rounded-full overflow-hidden" style={{ background: 'rgba(255,255,255,0.04)' }}>
+                      <div
+                        className="hbar-fill h-full rounded-full"
+                        style={{
+                          width: `${pct}%`,
+                          background: `linear-gradient(90deg, ${CHART_COLORS[i % CHART_COLORS.length]}, ${CHART_COLORS[i % CHART_COLORS.length]}88)`,
+                        }}
+                      />
+                    </div>
+                  </div>
+                )
+              })}
+            </div>
           </CardContent>
         </Card>
 
+        {/* Investment vs Value Bar Chart */}
         <Card className="glass-card rounded-2xl card-hover fade-in-up stagger-6">
           <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium text-white/50">Investissement vs Valeur Actuelle</CardTitle>
+            <CardTitle className="text-sm font-medium" style={{ color: 'rgba(255,255,255,0.45)' }}>Investissement vs Valeur Actuelle</CardTitle>
           </CardHeader>
           <CardContent>
             <ResponsiveContainer width="100%" height={280} className="sm:h-[300px]">
@@ -809,8 +900,9 @@ function DashboardView({ user }: { user: any }) {
                 <XAxis dataKey="name" stroke="rgba(255,255,255,0.25)" fontSize={11} tickLine={false} />
                 <YAxis stroke="rgba(255,255,255,0.25)" fontSize={11} tickLine={false} axisLine={false} />
                 <Tooltip content={<CustomTooltip />} />
-                <Bar dataKey="investissement" name="Investissement" fill="#3b82f6" radius={[6, 6, 0, 0]} />
-                <Bar dataKey="valeur" name="Valeur Actuelle" fill="#8b5cf6" radius={[6, 6, 0, 0]} />
+                <Legend wrapperStyle={{ fontSize: '12px', color: 'rgba(255,255,255,0.4)' }} />
+                <Bar dataKey="investissement" name="Investissement" fill="#06b6d4" radius={[6, 6, 0, 0]} />
+                <Bar dataKey="valeur" name="Valeur Actuelle" fill="#7c3aed" radius={[6, 6, 0, 0]} />
               </BarChart>
             </ResponsiveContainer>
           </CardContent>
@@ -821,27 +913,27 @@ function DashboardView({ user }: { user: any }) {
       <Card className="glass-card rounded-2xl fade-in-up">
         <CardHeader className="pb-3">
           <CardTitle className="text-base font-medium text-white/70">Détail par Token</CardTitle>
-          <CardDescription className="text-white/30">Analyse détaillée de chaque crypto-actif de votre portefeuille</CardDescription>
+          <CardDescription style={{ color: 'rgba(255,255,255,0.25)' }}>Analyse détaillée de chaque crypto-actif de votre portefeuille</CardDescription>
         </CardHeader>
         <CardContent>
           {/* Desktop Table */}
           <div className="hidden md:block overflow-x-auto custom-scrollbar">
             <Table>
               <TableHeader>
-                <TableRow className="border-white/5 hover:bg-transparent">
-                  <TableHead className="font-semibold text-white/40">Token</TableHead>
-                  <TableHead className="text-right font-semibold text-white/40">Montant Investi</TableHead>
-                  <TableHead className="text-right font-semibold text-white/40">Quantité</TableHead>
-                  <TableHead className="text-right font-semibold text-white/40">PRU</TableHead>
-                  <TableHead className="text-right font-semibold text-white/40">Cours Actuel</TableHead>
-                  <TableHead className="text-right font-semibold text-white/40">Valeur Actuelle</TableHead>
-                  <TableHead className="text-right font-semibold text-white/40">P/L</TableHead>
-                  <TableHead className="text-right font-semibold text-white/40">Rentabilité</TableHead>
+                <TableRow className="hover:bg-transparent" style={{ borderBottomColor: 'rgba(255,255,255,0.05)' }}>
+                  <TableHead className="font-semibold" style={{ color: 'rgba(255,255,255,0.35)' }}>Token</TableHead>
+                  <TableHead className="text-right font-semibold" style={{ color: 'rgba(255,255,255,0.35)' }}>Montant Investi</TableHead>
+                  <TableHead className="text-right font-semibold" style={{ color: 'rgba(255,255,255,0.35)' }}>Quantité</TableHead>
+                  <TableHead className="text-right font-semibold" style={{ color: 'rgba(255,255,255,0.35)' }}>PRU</TableHead>
+                  <TableHead className="text-right font-semibold" style={{ color: 'rgba(255,255,255,0.35)' }}>Cours Actuel</TableHead>
+                  <TableHead className="text-right font-semibold" style={{ color: 'rgba(255,255,255,0.35)' }}>Valeur Actuelle</TableHead>
+                  <TableHead className="text-right font-semibold" style={{ color: 'rgba(255,255,255,0.35)' }}>P/L</TableHead>
+                  <TableHead className="text-right font-semibold" style={{ color: 'rgba(255,255,255,0.35)' }}>Rentabilité</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
                 {sortedTokens.map((t) => (
-                  <TableRow key={t.ticker} className="border-white/5 hover:bg-white/[0.02] transition-colors">
+                  <TableRow key={t.ticker} className="transition-colors" style={{ borderBottomColor: 'rgba(255,255,255,0.04)' }}>
                     <TableCell>
                       <div className="flex items-center gap-3">
                         <div className={`w-9 h-9 rounded-xl ${tokenGradientClass(t.ticker)} flex items-center justify-center text-xs font-bold text-white shadow-lg`}>
@@ -849,7 +941,7 @@ function DashboardView({ user }: { user: any }) {
                         </div>
                         <div>
                           <p className="font-semibold text-white/80">{t.ticker}</p>
-                          <p className="text-xs text-white/30">{t.name}</p>
+                          <p className="text-xs" style={{ color: 'rgba(255,255,255,0.25)' }}>{t.name}</p>
                         </div>
                       </div>
                     </TableCell>
@@ -883,7 +975,7 @@ function DashboardView({ user }: { user: any }) {
                     </div>
                     <div>
                       <p className="font-semibold text-white/80">{t.ticker}</p>
-                      <p className="text-xs text-white/30">{t.name}</p>
+                      <p className="text-xs" style={{ color: 'rgba(255,255,255,0.25)' }}>{t.name}</p>
                     </div>
                   </div>
                   <Badge className={`${t.rentabilite >= 0 ? 'bg-emerald-400/10 text-emerald-400 border-emerald-400/20' : 'bg-red-400/10 text-red-400 border-red-400/20'} border font-mono text-xs`}>
@@ -892,19 +984,19 @@ function DashboardView({ user }: { user: any }) {
                 </div>
                 <div className="grid grid-cols-2 gap-x-4 gap-y-2 text-sm">
                   <div>
-                    <p className="text-white/30 text-xs">Investi</p>
+                    <p className="text-xs" style={{ color: 'rgba(255,255,255,0.25)' }}>Investi</p>
                     <p className="text-white/60 font-mono">{fmt(t.montantInvesti)} $</p>
                   </div>
                   <div>
-                    <p className="text-white/30 text-xs">Valeur</p>
+                    <p className="text-xs" style={{ color: 'rgba(255,255,255,0.25)' }}>Valeur</p>
                     <p className="text-white/60 font-mono">{fmt(t.valeurActuelle)} $</p>
                   </div>
                   <div>
-                    <p className="text-white/30 text-xs">Quantité</p>
+                    <p className="text-xs" style={{ color: 'rgba(255,255,255,0.25)' }}>Quantité</p>
                     <p className="text-white/40 font-mono">{fmtSmall(t.quantite)}</p>
                   </div>
                   <div>
-                    <p className="text-white/30 text-xs">P/L</p>
+                    <p className="text-xs" style={{ color: 'rgba(255,255,255,0.25)' }}>P/L</p>
                     <p className={`font-mono font-semibold ${plColor(t.pl)}`}>
                       {t.pl >= 0 ? '+' : ''}{fmt(t.pl)} $
                     </p>
@@ -1091,30 +1183,30 @@ function TransactionsView({ user }: { user: any }) {
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 fade-in-up">
         <div>
           <h1 className="text-2xl font-bold text-white/90">Transactions</h1>
-          <p className="text-white/35 mt-1">Gérez vos achats de crypto-actifs</p>
+          <p className="mt-1" style={{ color: 'rgba(255,255,255,0.3)' }}>Gérez vos achats de crypto-actifs</p>
         </div>
         <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
           <DialogTrigger asChild>
-            <Button onClick={openNew} className="bg-gradient-to-r from-violet-600 to-cyan-600 hover:from-violet-500 hover:to-cyan-500 gap-2 rounded-xl h-10 shadow-lg shadow-violet-500/20 transition-all active:scale-[0.98] hidden sm:flex">
+            <Button onClick={openNew} className="gap-2 rounded-xl h-10 shadow-lg transition-all active:scale-[0.98] hidden sm:flex text-white" style={{ background: 'linear-gradient(135deg, #7c3aed, #06b6d4)', boxShadow: '0 4px 20px rgba(124,58,237,0.25)' }}>
               <Plus className="w-4 h-4" /> Nouvelle Transaction
             </Button>
           </DialogTrigger>
-          <DialogContent className="glass-strong rounded-2xl border-white/10 max-w-lg dialog-mobile-fullscreen text-white">
+          <DialogContent className="rounded-2xl max-w-lg dialog-mobile-fullscreen text-white" style={{ background: 'rgba(26,29,46,0.95)', backdropFilter: 'blur(30px)', border: '1px solid rgba(255,255,255,0.1)' }}>
             <DialogHeader>
               <DialogTitle className="text-white/90">{editingTx ? 'Modifier la transaction' : 'Nouvelle transaction'}</DialogTitle>
             </DialogHeader>
             <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div className="space-y-2">
-                  <Label className="text-white/50 text-xs">Date</Label>
-                  <Input type="date" {...register('date')} className="bg-white/5 border-white/10 text-white rounded-xl h-11 focus:border-violet-500/50 focus:ring-violet-500/20" />
+                  <Label className="text-xs" style={{ color: 'rgba(255,255,255,0.45)' }}>Date</Label>
+                  <Input type="date" {...register('date')} className="border text-white rounded-xl h-11" style={{ background: 'rgba(255,255,255,0.04)', borderColor: 'rgba(255,255,255,0.08)' }} />
                   {errors.date && <p className="text-xs text-red-400">{errors.date.message}</p>}
                 </div>
                 <div className="space-y-2">
-                  <Label className="text-white/50 text-xs">Token</Label>
+                  <Label className="text-xs" style={{ color: 'rgba(255,255,255,0.45)' }}>Token</Label>
                   <Select onValueChange={v => setValue('tokenTicker', v)} defaultValue={editingTx?.tokenTicker}>
-                    <SelectTrigger className="bg-white/5 border-white/10 text-white rounded-xl h-11"><SelectValue placeholder="Sélectionner" /></SelectTrigger>
-                    <SelectContent className="glass-strong border-white/10">
+                    <SelectTrigger className="border text-white rounded-xl h-11" style={{ background: 'rgba(255,255,255,0.04)', borderColor: 'rgba(255,255,255,0.08)' }}><SelectValue placeholder="Sélectionner" /></SelectTrigger>
+                    <SelectContent style={{ background: 'rgba(26,29,46,0.95)', border: '1px solid rgba(255,255,255,0.1)' }}>
                       {tokens.map(t => (
                         <SelectItem key={t.ticker} value={t.ticker}>{t.ticker} - {t.name}</SelectItem>
                       ))}
@@ -1125,21 +1217,21 @@ function TransactionsView({ user }: { user: any }) {
               </div>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div className="space-y-2">
-                  <Label className="text-white/50 text-xs">Montant investi ($)</Label>
-                  <Input type="number" step="0.01" {...register('montantInvesti')} placeholder="15.70" className="bg-white/5 border-white/10 text-white placeholder:text-white/20 rounded-xl h-11 focus:border-violet-500/50 focus:ring-violet-500/20" />
+                  <Label className="text-xs" style={{ color: 'rgba(255,255,255,0.45)' }}>Montant investi ($)</Label>
+                  <Input type="number" step="0.01" {...register('montantInvesti')} placeholder="15.70" className="border text-white placeholder:text-white/20 rounded-xl h-11" style={{ background: 'rgba(255,255,255,0.04)', borderColor: 'rgba(255,255,255,0.08)' }} />
                   {errors.montantInvesti && <p className="text-xs text-red-400">{errors.montantInvesti.message}</p>}
                 </div>
                 <div className="space-y-2">
-                  <Label className="text-white/50 text-xs">Cours d&apos;achat ($)</Label>
-                  <Input type="number" step="0.0001" {...register('coursAchat')} placeholder="82603.9" className="bg-white/5 border-white/10 text-white placeholder:text-white/20 rounded-xl h-11 focus:border-violet-500/50 focus:ring-violet-500/20" />
+                  <Label className="text-xs" style={{ color: 'rgba(255,255,255,0.45)' }}>Cours d&apos;achat ($)</Label>
+                  <Input type="number" step="0.0001" {...register('coursAchat')} placeholder="82603.9" className="border text-white placeholder:text-white/20 rounded-xl h-11" style={{ background: 'rgba(255,255,255,0.04)', borderColor: 'rgba(255,255,255,0.08)' }} />
                   {errors.coursAchat && <p className="text-xs text-red-400">{errors.coursAchat.message}</p>}
                 </div>
               </div>
               <div className="space-y-2">
-                <Label className="text-white/50 text-xs">Exchange (optionnel)</Label>
+                <Label className="text-xs" style={{ color: 'rgba(255,255,255,0.45)' }}>Exchange (optionnel)</Label>
                 <Select onValueChange={v => setValue('exchangeId', v)} defaultValue={editingTx?.exchangeId || ''}>
-                  <SelectTrigger className="bg-white/5 border-white/10 text-white rounded-xl h-11"><SelectValue placeholder="Sélectionner" /></SelectTrigger>
-                  <SelectContent className="glass-strong border-white/10">
+                  <SelectTrigger className="border text-white rounded-xl h-11" style={{ background: 'rgba(255,255,255,0.04)', borderColor: 'rgba(255,255,255,0.08)' }}><SelectValue placeholder="Sélectionner" /></SelectTrigger>
+                  <SelectContent style={{ background: 'rgba(26,29,46,0.95)', border: '1px solid rgba(255,255,255,0.1)' }}>
                     {exchanges.map(e => (
                       <SelectItem key={e.id} value={e.id}>{e.name}</SelectItem>
                     ))}
@@ -1147,14 +1239,14 @@ function TransactionsView({ user }: { user: any }) {
                 </Select>
               </div>
               <div className="space-y-2">
-                <Label className="text-white/50 text-xs">Notes (optionnel)</Label>
-                <Input {...register('notes')} placeholder="Note facultative" className="bg-white/5 border-white/10 text-white placeholder:text-white/20 rounded-xl h-11 focus:border-violet-500/50 focus:ring-violet-500/20" />
+                <Label className="text-xs" style={{ color: 'rgba(255,255,255,0.45)' }}>Notes (optionnel)</Label>
+                <Input {...register('notes')} placeholder="Note facultative" className="border text-white placeholder:text-white/20 rounded-xl h-11" style={{ background: 'rgba(255,255,255,0.04)', borderColor: 'rgba(255,255,255,0.08)' }} />
               </div>
               <DialogFooter className="gap-2">
                 <DialogClose asChild>
-                  <Button variant="outline" className="rounded-xl border-white/10 text-white/50 hover:text-white/70 hover:bg-white/5">Annuler</Button>
+                  <Button variant="outline" className="rounded-xl text-white/50 hover:text-white/70 hover:bg-white/5" style={{ borderColor: 'rgba(255,255,255,0.08)' }}>Annuler</Button>
                 </DialogClose>
-                <Button type="submit" className="bg-gradient-to-r from-violet-600 to-cyan-600 hover:from-violet-500 hover:to-cyan-500 rounded-xl shadow-lg shadow-violet-500/20 transition-all active:scale-[0.98]">
+                <Button type="submit" className="rounded-xl shadow-lg text-white transition-all active:scale-[0.98]" style={{ background: 'linear-gradient(135deg, #7c3aed, #06b6d4)', boxShadow: '0 4px 20px rgba(124,58,237,0.25)' }}>
                   {editingTx ? 'Modifier' : 'Ajouter'}
                 </Button>
               </DialogFooter>
@@ -1165,16 +1257,16 @@ function TransactionsView({ user }: { user: any }) {
 
       {/* Freemium notice */}
       {user?.role === 'user_free' && (
-        <Card className="glass-card rounded-2xl border-amber-500/20 bg-amber-500/5 fade-in-up stagger-1">
+        <Card className="glass-card rounded-2xl fade-in-up stagger-1" style={{ borderColor: 'rgba(245,158,11,0.2)', background: 'rgba(245,158,11,0.04)' }}>
           <CardContent className="p-4 flex items-center gap-3">
-            <div className="w-9 h-9 rounded-xl bg-amber-500/15 flex items-center justify-center shrink-0">
-              <AlertTriangle className="w-4.5 h-4.5 text-amber-400" />
+            <div className="w-9 h-9 rounded-xl flex items-center justify-center shrink-0" style={{ background: 'rgba(245,158,11,0.12)' }}>
+              <AlertTriangle className="w-4 h-4 text-amber-400" />
             </div>
             <div className="flex-1 text-sm">
               <p className="font-medium text-amber-400">Plan Gratuit — Limité à 3 tokens et 10 transactions</p>
-              <p className="text-white/30">Passez en Premium pour débloquer l&apos;accès illimité.</p>
+              <p style={{ color: 'rgba(255,255,255,0.25)' }}>Passez en Premium pour débloquer l&apos;accès illimité.</p>
             </div>
-            <Badge className="bg-amber-500/15 text-amber-400 border-amber-500/20 border shrink-0">
+            <Badge className="border shrink-0" style={{ background: 'rgba(245,158,11,0.12)', color: '#f59e0b', borderColor: 'rgba(245,158,11,0.2)' }}>
               {transactions.length}/10
             </Badge>
           </CardContent>
@@ -1184,12 +1276,13 @@ function TransactionsView({ user }: { user: any }) {
       {/* Search/Filter Bar */}
       {transactions.length > 0 && (
         <div className="relative fade-in-up stagger-2">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-white/25" />
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4" style={{ color: 'rgba(255,255,255,0.2)' }} />
           <Input
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             placeholder="Rechercher par token, exchange, notes..."
-            className="bg-white/5 border-white/8 text-white placeholder:text-white/20 rounded-xl h-11 pl-10 focus:border-violet-500/40 focus:ring-violet-500/15"
+            className="border text-white placeholder:text-white/20 rounded-xl h-11 pl-10"
+            style={{ background: 'rgba(255,255,255,0.04)', borderColor: 'rgba(255,255,255,0.06)' }}
           />
         </div>
       )}
@@ -1199,11 +1292,11 @@ function TransactionsView({ user }: { user: any }) {
         <Card className="glass-card rounded-2xl fade-in-up">
           <CardContent className="py-16 text-center">
             <div className="w-16 h-16 rounded-2xl glass mx-auto mb-4 flex items-center justify-center">
-              <ArrowLeftRight className="w-8 h-8 text-violet-400/40" />
+              <Wallet className="w-8 h-8 text-violet-400/40" />
             </div>
             <h3 className="text-lg font-semibold text-white/70 mb-2">Aucune transaction</h3>
-            <p className="text-white/30 mb-6">Ajoutez votre première transaction pour commencer le suivi.</p>
-            <Button onClick={openNew} className="bg-gradient-to-r from-violet-600 to-cyan-600 hover:from-violet-500 hover:to-cyan-500 gap-2 rounded-xl shadow-lg shadow-violet-500/20">
+            <p className="mb-6" style={{ color: 'rgba(255,255,255,0.25)' }}>Ajoutez votre première transaction pour commencer le suivi.</p>
+            <Button onClick={openNew} className="gap-2 rounded-xl shadow-lg text-white" style={{ background: 'linear-gradient(135deg, #7c3aed, #06b6d4)', boxShadow: '0 4px 20px rgba(124,58,237,0.25)' }}>
               <Plus className="w-4 h-4" /> Ajouter une transaction
             </Button>
           </CardContent>
@@ -1216,25 +1309,25 @@ function TransactionsView({ user }: { user: any }) {
               <div className="overflow-x-auto custom-scrollbar">
                 <Table>
                   <TableHeader>
-                    <TableRow className="border-white/5 hover:bg-transparent">
-                      <TableHead className="cursor-pointer select-none text-white/40" onClick={() => toggleSort('date')}>
+                    <TableRow className="hover:bg-transparent" style={{ borderBottomColor: 'rgba(255,255,255,0.05)' }}>
+                      <TableHead className="cursor-pointer select-none" style={{ color: 'rgba(255,255,255,0.35)' }} onClick={() => toggleSort('date')}>
                         <span className="flex items-center gap-1">Date <SortIcon field="date" /></span>
                       </TableHead>
-                      <TableHead className="cursor-pointer select-none text-white/40" onClick={() => toggleSort('tokenTicker')}>
+                      <TableHead className="cursor-pointer select-none" style={{ color: 'rgba(255,255,255,0.35)' }} onClick={() => toggleSort('tokenTicker')}>
                         <span className="flex items-center gap-1">Token <SortIcon field="tokenTicker" /></span>
                       </TableHead>
-                      <TableHead className="text-right cursor-pointer select-none text-white/40" onClick={() => toggleSort('montantInvesti')}>
+                      <TableHead className="text-right cursor-pointer select-none" style={{ color: 'rgba(255,255,255,0.35)' }} onClick={() => toggleSort('montantInvesti')}>
                         <span className="flex items-center justify-end gap-1">Montant <SortIcon field="montantInvesti" /></span>
                       </TableHead>
-                      <TableHead className="text-right text-white/40">Cours</TableHead>
-                      <TableHead className="text-right text-white/40">Quantité</TableHead>
-                      <TableHead className="text-white/40">Exchange</TableHead>
-                      <TableHead className="text-right text-white/40">Actions</TableHead>
+                      <TableHead className="text-right" style={{ color: 'rgba(255,255,255,0.35)' }}>Cours</TableHead>
+                      <TableHead className="text-right" style={{ color: 'rgba(255,255,255,0.35)' }}>Quantité</TableHead>
+                      <TableHead style={{ color: 'rgba(255,255,255,0.35)' }}>Exchange</TableHead>
+                      <TableHead className="text-right" style={{ color: 'rgba(255,255,255,0.35)' }}>Actions</TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
                     {sorted.map((tx) => (
-                      <TableRow key={tx.id} className="border-white/5 hover:bg-white/[0.02] transition-colors">
+                      <TableRow key={tx.id} className="transition-colors" style={{ borderBottomColor: 'rgba(255,255,255,0.04)' }}>
                         <TableCell className="font-mono text-sm text-white/50">
                           {new Date(tx.date).toLocaleDateString('fr-FR')}
                         </TableCell>
@@ -1253,8 +1346,8 @@ function TransactionsView({ user }: { user: any }) {
                         <TableCell className="text-right font-mono text-white/40">{fmtSmall(tx.quantite)}</TableCell>
                         <TableCell>
                           {tx.exchange ? (
-                            <Badge variant="secondary" className="text-xs bg-white/5 text-white/40 border border-white/5">{tx.exchange.name}</Badge>
-                          ) : <span className="text-white/15">—</span>}
+                            <Badge variant="secondary" className="text-xs border" style={{ background: 'rgba(255,255,255,0.04)', color: 'rgba(255,255,255,0.35)', borderColor: 'rgba(255,255,255,0.05)' }}>{tx.exchange.name}</Badge>
+                          ) : <span style={{ color: 'rgba(255,255,255,0.12)' }}>—</span>}
                         </TableCell>
                         <TableCell className="text-right">
                           <div className="flex items-center justify-end gap-1">
@@ -1296,7 +1389,7 @@ function TransactionsView({ user }: { user: any }) {
                     </div>
                     <div>
                       <p className="font-semibold text-white/80">{tx.tokenTicker}</p>
-                      <p className="text-xs text-white/30">{new Date(tx.date).toLocaleDateString('fr-FR')}</p>
+                      <p className="text-xs" style={{ color: 'rgba(255,255,255,0.25)' }}>{new Date(tx.date).toLocaleDateString('fr-FR')}</p>
                     </div>
                   </div>
                   <div className="flex items-center gap-1">
@@ -1321,25 +1414,25 @@ function TransactionsView({ user }: { user: any }) {
                 </div>
                 <div className="grid grid-cols-3 gap-2 text-sm">
                   <div>
-                    <p className="text-white/25 text-xs">Montant</p>
+                    <p className="text-xs" style={{ color: 'rgba(255,255,255,0.2)' }}>Montant</p>
                     <p className="text-white/60 font-mono">{fmt(tx.montantInvesti)} $</p>
                   </div>
                   <div>
-                    <p className="text-white/25 text-xs">Cours</p>
+                    <p className="text-xs" style={{ color: 'rgba(255,255,255,0.2)' }}>Cours</p>
                     <p className="text-white/50 font-mono">{fmt(tx.coursAchat)} $</p>
                   </div>
                   <div>
-                    <p className="text-white/25 text-xs">Quantité</p>
+                    <p className="text-xs" style={{ color: 'rgba(255,255,255,0.2)' }}>Quantité</p>
                     <p className="text-white/40 font-mono">{fmtSmall(tx.quantite)}</p>
                   </div>
                 </div>
                 {(tx.exchange || tx.notes) && (
-                  <div className="flex items-center gap-2 pt-1 border-t border-white/5">
+                  <div className="flex items-center gap-2 pt-1" style={{ borderTop: '1px solid rgba(255,255,255,0.04)' }}>
                     {tx.exchange && (
-                      <Badge variant="secondary" className="text-xs bg-white/5 text-white/30 border-0">{tx.exchange.name}</Badge>
+                      <Badge variant="secondary" className="text-xs border-0" style={{ background: 'rgba(255,255,255,0.04)', color: 'rgba(255,255,255,0.25)' }}>{tx.exchange.name}</Badge>
                     )}
                     {tx.notes && (
-                      <span className="text-xs text-white/20 truncate flex-1">{tx.notes}</span>
+                      <span className="text-xs truncate flex-1" style={{ color: 'rgba(255,255,255,0.15)' }}>{tx.notes}</span>
                     )}
                   </div>
                 )}
@@ -1352,7 +1445,8 @@ function TransactionsView({ user }: { user: any }) {
       {/* FAB Button on Mobile */}
       <button
         onClick={openNew}
-        className="fab-button fixed bottom-20 right-4 sm:hidden w-14 h-14 rounded-2xl bg-gradient-to-r from-violet-600 to-cyan-600 flex items-center justify-center text-white z-40 active:scale-95"
+        className="fab-button fixed bottom-20 right-4 sm:hidden w-14 h-14 rounded-2xl flex items-center justify-center text-white z-40 active:scale-95"
+        style={{ background: 'linear-gradient(135deg, #7c3aed, #06b6d4)' }}
       >
         <Plus className="w-6 h-6" />
       </button>
@@ -1371,29 +1465,29 @@ function ProfileView({ user }: { user: any }) {
     <div className="space-y-6 max-w-2xl page-transition">
       <div className="fade-in-up">
         <h1 className="text-2xl font-bold text-white/90">Profil & Abonnement</h1>
-        <p className="text-white/35 mt-1">Gérez votre compte et votre abonnement</p>
+        <p className="mt-1" style={{ color: 'rgba(255,255,255,0.3)' }}>Gérez votre compte et votre abonnement</p>
       </div>
 
       {/* User Info */}
       <Card className="glass-card rounded-2xl fade-in-up stagger-1">
         <CardHeader className="pb-3">
-          <CardTitle className="text-sm font-medium text-white/50">Informations du compte</CardTitle>
+          <CardTitle className="text-sm font-medium" style={{ color: 'rgba(255,255,255,0.4)' }}>Informations du compte</CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
           <div className="flex items-center gap-4">
             <div className="avatar-ring">
-              <div className="w-16 h-16 bg-gradient-to-br from-violet-500 to-cyan-500 flex items-center justify-center text-white text-2xl font-bold">
+              <div className="w-16 h-16 flex items-center justify-center text-white text-2xl font-bold" style={{ background: 'linear-gradient(135deg, #7c3aed, #06b6d4)' }}>
                 {user?.name?.[0] || user?.email?.[0]?.toUpperCase() || '?'}
               </div>
             </div>
             <div>
               <p className="text-lg font-semibold text-white/80">{user?.name || 'Utilisateur'}</p>
-              <p className="text-white/35 text-sm">{user?.email}</p>
-              <Badge className={`mt-1.5 text-xs ${
+              <p className="text-sm" style={{ color: 'rgba(255,255,255,0.3)' }}>{user?.email}</p>
+              <Badge className={`mt-1.5 text-xs border ${
                 isAdmin ? 'bg-violet-500/15 text-violet-400 border-violet-500/20' :
                 isPremium ? 'bg-amber-500/15 text-amber-400 border-amber-500/20' :
                 'bg-white/5 text-white/30 border-white/10'
-              } border`}>
+              }`}>
                 {isAdmin ? 'Administrateur' : isPremium ? 'Premium' : 'Gratuit'}
               </Badge>
             </div>
@@ -1404,66 +1498,66 @@ function ProfileView({ user }: { user: any }) {
       {/* Plan Comparison */}
       <Card className="glass-card rounded-2xl fade-in-up stagger-2">
         <CardHeader className="pb-3">
-          <CardTitle className="text-sm font-medium text-white/50">Comparatif des plans</CardTitle>
+          <CardTitle className="text-sm font-medium" style={{ color: 'rgba(255,255,255,0.4)' }}>Comparatif des plans</CardTitle>
         </CardHeader>
         <CardContent>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             {/* Free Plan */}
             <div className={`p-5 rounded-2xl border transition-all ${
               !isPremium && !isAdmin
-                ? 'border-violet-500/30 bg-violet-500/5 glass-card'
-                : 'border-white/5 bg-white/[0.02]'
-            }`}>
+                ? 'border-violet-500/30 glass-card'
+                : ''
+            }`} style={!isPremium && !isAdmin ? { background: 'rgba(124,58,237,0.05)' } : { background: 'rgba(255,255,255,0.02)', borderColor: 'rgba(255,255,255,0.05)' }}>
               <div className="flex items-center gap-2 mb-3">
-                <div className="w-8 h-8 rounded-lg bg-white/5 flex items-center justify-center">
+                <div className="w-8 h-8 rounded-lg flex items-center justify-center" style={{ background: 'rgba(255,255,255,0.05)' }}>
                   <User className="w-4 h-4 text-white/40" />
                 </div>
                 <h3 className="font-semibold text-white/70">Gratuit</h3>
               </div>
-              <p className="text-2xl font-bold text-white/80 mb-4">0 €<span className="text-sm font-normal text-white/30">/mois</span></p>
+              <p className="text-2xl font-bold text-white/80 mb-4">0 €<span className="text-sm font-normal" style={{ color: 'rgba(255,255,255,0.25)' }}>/mois</span></p>
               <ul className="space-y-2.5 text-sm">
-                <li className="flex items-center gap-2.5"><Check className="w-4 h-4 text-emerald-400 shrink-0" /> <span className="text-white/50">Accès au tableau de bord</span></li>
-                <li className="flex items-center gap-2.5"><Check className="w-4 h-4 text-emerald-400 shrink-0" /> <span className="text-white/50">3 tokens maximum</span></li>
-                <li className="flex items-center gap-2.5"><Check className="w-4 h-4 text-emerald-400 shrink-0" /> <span className="text-white/50">10 transactions maximum</span></li>
-                <li className="flex items-center gap-2.5"><X className="w-4 h-4 text-red-400/60 shrink-0" /> <span className="text-white/25">Pas de graphiques avancés</span></li>
-                <li className="flex items-center gap-2.5"><X className="w-4 h-4 text-red-400/60 shrink-0" /> <span className="text-white/25">Pas de métriques avancées</span></li>
+                <li className="flex items-center gap-2.5"><Check className="w-4 h-4 text-emerald-400 shrink-0" /> <span style={{ color: 'rgba(255,255,255,0.45)' }}>Accès au tableau de bord</span></li>
+                <li className="flex items-center gap-2.5"><Check className="w-4 h-4 text-emerald-400 shrink-0" /> <span style={{ color: 'rgba(255,255,255,0.45)' }}>3 tokens maximum</span></li>
+                <li className="flex items-center gap-2.5"><Check className="w-4 h-4 text-emerald-400 shrink-0" /> <span style={{ color: 'rgba(255,255,255,0.45)' }}>10 transactions maximum</span></li>
+                <li className="flex items-center gap-2.5"><X className="w-4 h-4 text-red-400/60 shrink-0" /> <span style={{ color: 'rgba(255,255,255,0.2)' }}>Pas de graphiques avancés</span></li>
+                <li className="flex items-center gap-2.5"><X className="w-4 h-4 text-red-400/60 shrink-0" /> <span style={{ color: 'rgba(255,255,255,0.2)' }}>Pas de métriques avancées</span></li>
               </ul>
               {!isPremium && !isAdmin && (
-                <Badge className="mt-4 bg-gradient-to-r from-violet-600 to-cyan-600 text-white border-0">Plan actuel</Badge>
+                <Badge className="mt-4 text-white border-0" style={{ background: 'linear-gradient(135deg, #7c3aed, #06b6d4)' }}>Plan actuel</Badge>
               )}
             </div>
 
             {/* Premium Plan */}
             <div className={`p-5 rounded-2xl border transition-all ${
               isPremium
-                ? 'border-amber-500/30 bg-amber-500/5 glass-card'
-                : 'border-white/5 bg-white/[0.02]'
-            }`}>
+                ? 'border-amber-500/30 glass-card'
+                : ''
+            }`} style={isPremium ? { background: 'rgba(245,158,11,0.05)' } : { background: 'rgba(255,255,255,0.02)', borderColor: 'rgba(255,255,255,0.05)' }}>
               <div className="flex items-center gap-2 mb-3">
-                <div className="w-8 h-8 rounded-lg bg-amber-500/10 flex items-center justify-center">
+                <div className="w-8 h-8 rounded-lg flex items-center justify-center" style={{ background: 'rgba(245,158,11,0.1)' }}>
                   <Crown className="w-4 h-4 text-amber-400" />
                 </div>
                 <h3 className="font-semibold text-white/70">Premium</h3>
               </div>
-              <p className="text-2xl font-bold text-white/80 mb-4">9,99 €<span className="text-sm font-normal text-white/30">/mois</span></p>
+              <p className="text-2xl font-bold text-white/80 mb-4">9,99 €<span className="text-sm font-normal" style={{ color: 'rgba(255,255,255,0.25)' }}>/mois</span></p>
               <ul className="space-y-2.5 text-sm">
-                <li className="flex items-center gap-2.5"><Check className="w-4 h-4 text-emerald-400 shrink-0" /> <span className="text-white/50">Accès au tableau de bord</span></li>
-                <li className="flex items-center gap-2.5"><Check className="w-4 h-4 text-emerald-400 shrink-0" /> <span className="text-white/50">Tokens illimités</span></li>
-                <li className="flex items-center gap-2.5"><Check className="w-4 h-4 text-emerald-400 shrink-0" /> <span className="text-white/50">Transactions illimitées</span></li>
-                <li className="flex items-center gap-2.5"><Check className="w-4 h-4 text-emerald-400 shrink-0" /> <span className="text-white/50">Graphiques d&apos;évolution</span></li>
-                <li className="flex items-center gap-2.5"><Check className="w-4 h-4 text-emerald-400 shrink-0" /> <span className="text-white/50">Métriques avancées</span></li>
+                <li className="flex items-center gap-2.5"><Check className="w-4 h-4 text-emerald-400 shrink-0" /> <span style={{ color: 'rgba(255,255,255,0.45)' }}>Accès au tableau de bord</span></li>
+                <li className="flex items-center gap-2.5"><Check className="w-4 h-4 text-emerald-400 shrink-0" /> <span style={{ color: 'rgba(255,255,255,0.45)' }}>Tokens illimités</span></li>
+                <li className="flex items-center gap-2.5"><Check className="w-4 h-4 text-emerald-400 shrink-0" /> <span style={{ color: 'rgba(255,255,255,0.45)' }}>Transactions illimitées</span></li>
+                <li className="flex items-center gap-2.5"><Check className="w-4 h-4 text-emerald-400 shrink-0" /> <span style={{ color: 'rgba(255,255,255,0.45)' }}>Graphiques d&apos;évolution</span></li>
+                <li className="flex items-center gap-2.5"><Check className="w-4 h-4 text-emerald-400 shrink-0" /> <span style={{ color: 'rgba(255,255,255,0.45)' }}>Métriques avancées</span></li>
               </ul>
               {isPremium ? (
                 <Badge className="mt-4 bg-amber-500 text-black border-0">Plan actuel</Badge>
               ) : !isAdmin ? (
-                <Button className="mt-4 bg-amber-500/20 hover:bg-amber-500/30 text-amber-400 border-amber-500/20 rounded-xl" disabled>
+                <Button className="mt-4 rounded-xl" style={{ background: 'rgba(245,158,11,0.15)', color: '#f59e0b', border: '1px solid rgba(245,158,11,0.2)' }} disabled>
                   <Crown className="w-4 h-4 mr-2" /> Passer en Premium
                 </Button>
               ) : null}
             </div>
           </div>
           {!isPremium && !isAdmin && (
-            <p className="text-xs text-white/20 mt-5 text-center">
+            <p className="text-xs text-center mt-5" style={{ color: 'rgba(255,255,255,0.15)' }}>
               L&apos;intégration Stripe sera bientôt disponible. Contactez l&apos;administrateur pour activer votre compte Premium.
             </p>
           )}
@@ -1544,7 +1638,7 @@ function AdminUsersView() {
     <div className="space-y-6 page-transition">
       <div className="fade-in-up">
         <h1 className="text-2xl font-bold text-white/90">Gestion Utilisateurs</h1>
-        <p className="text-white/35 mt-1">{users.length} comptes enregistrés</p>
+        <p className="mt-1" style={{ color: 'rgba(255,255,255,0.3)' }}>{users.length} comptes enregistrés</p>
       </div>
 
       {/* Desktop Table */}
@@ -1553,34 +1647,34 @@ function AdminUsersView() {
           <div className="overflow-x-auto custom-scrollbar">
             <Table>
               <TableHeader>
-                <TableRow className="border-white/5 hover:bg-transparent">
-                  <TableHead className="text-white/40">Utilisateur</TableHead>
-                  <TableHead className="text-white/40">Rôle</TableHead>
-                  <TableHead className="text-center text-white/40">Transactions</TableHead>
-                  <TableHead className="text-white/40">Statut</TableHead>
-                  <TableHead className="text-right text-white/40">Actions</TableHead>
+                <TableRow className="hover:bg-transparent" style={{ borderBottomColor: 'rgba(255,255,255,0.05)' }}>
+                  <TableHead style={{ color: 'rgba(255,255,255,0.35)' }}>Utilisateur</TableHead>
+                  <TableHead style={{ color: 'rgba(255,255,255,0.35)' }}>Rôle</TableHead>
+                  <TableHead className="text-center" style={{ color: 'rgba(255,255,255,0.35)' }}>Transactions</TableHead>
+                  <TableHead style={{ color: 'rgba(255,255,255,0.35)' }}>Statut</TableHead>
+                  <TableHead className="text-right" style={{ color: 'rgba(255,255,255,0.35)' }}>Actions</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
                 {users.map((u) => (
-                  <TableRow key={u.id} className="border-white/5 hover:bg-white/[0.02] transition-colors">
+                  <TableRow key={u.id} className="transition-colors" style={{ borderBottomColor: 'rgba(255,255,255,0.04)' }}>
                     <TableCell>
                       <div className="flex items-center gap-3">
-                        <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-violet-500/30 to-cyan-500/30 flex items-center justify-center text-white text-xs font-bold">
+                        <div className="w-9 h-9 rounded-xl flex items-center justify-center text-white text-xs font-bold" style={{ background: 'linear-gradient(135deg, rgba(124,58,237,0.25), rgba(6,182,212,0.25))' }}>
                           {u.name?.[0] || u.email?.[0]?.toUpperCase() || '?'}
                         </div>
                         <div>
                           <p className="font-medium text-white/70">{u.name || 'Sans nom'}</p>
-                          <p className="text-xs text-white/30">{u.email}</p>
+                          <p className="text-xs" style={{ color: 'rgba(255,255,255,0.25)' }}>{u.email}</p>
                         </div>
                       </div>
                     </TableCell>
                     <TableCell>
                       <Select value={u.role} onValueChange={(v) => updateRole(u.id, v)}>
-                        <SelectTrigger className="w-32 bg-white/5 border-white/10 text-white/60 rounded-xl h-9">
+                        <SelectTrigger className="w-32 border text-white/60 rounded-xl h-9" style={{ background: 'rgba(255,255,255,0.04)', borderColor: 'rgba(255,255,255,0.08)' }}>
                           <SelectValue />
                         </SelectTrigger>
-                        <SelectContent className="glass-strong border-white/10">
+                        <SelectContent style={{ background: 'rgba(26,29,46,0.95)', border: '1px solid rgba(255,255,255,0.1)' }}>
                           <SelectItem value="user_free">Gratuit</SelectItem>
                           <SelectItem value="user_premium">Premium</SelectItem>
                           <SelectItem value="admin">Admin</SelectItem>
@@ -1603,16 +1697,18 @@ function AdminUsersView() {
                           onClick={() => toggleSuspend(u.id, u.suspended)}
                           className={`rounded-xl h-8 text-xs ${
                             u.suspended
-                              ? 'text-emerald-400 border-emerald-500/20 bg-emerald-500/5 hover:bg-emerald-500/10'
-                              : 'text-amber-400 border-amber-500/20 bg-amber-500/5 hover:bg-amber-500/10'
+                              ? 'text-emerald-400 border-emerald-500/20 hover:bg-emerald-500/10'
+                              : 'text-amber-400 border-amber-500/20 hover:bg-amber-500/10'
                           }`}
+                          style={u.suspended ? { background: 'rgba(16,185,129,0.05)' } : { background: 'rgba(245,158,11,0.05)' }}
                         >
                           {u.suspended ? 'Réactiver' : 'Suspendre'}
                         </Button>
                         <Button
                           variant="outline"
                           size="sm"
-                          className="rounded-xl h-8 text-xs text-red-400 border-red-500/20 bg-red-500/5 hover:bg-red-500/10"
+                          className="rounded-xl h-8 text-xs text-red-400 border-red-500/20 hover:bg-red-500/10"
+                          style={{ background: 'rgba(239,68,68,0.05)' }}
                           onClick={() => deleteUser(u.id)}
                         >
                           Supprimer
@@ -1633,12 +1729,12 @@ function AdminUsersView() {
           <div key={u.id} className="glass-card rounded-2xl p-4 space-y-3 card-hover">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-violet-500/30 to-cyan-500/30 flex items-center justify-center text-white text-sm font-bold">
+                <div className="w-10 h-10 rounded-xl flex items-center justify-center text-white text-sm font-bold" style={{ background: 'linear-gradient(135deg, rgba(124,58,237,0.25), rgba(6,182,212,0.25))' }}>
                   {u.name?.[0] || u.email?.[0]?.toUpperCase() || '?'}
                 </div>
                 <div>
                   <p className="font-semibold text-white/70">{u.name || 'Sans nom'}</p>
-                  <p className="text-xs text-white/30">{u.email}</p>
+                  <p className="text-xs" style={{ color: 'rgba(255,255,255,0.25)' }}>{u.email}</p>
                 </div>
               </div>
               {u.suspended ? (
@@ -1649,12 +1745,12 @@ function AdminUsersView() {
             </div>
             <div className="grid grid-cols-2 gap-2 text-sm">
               <div>
-                <p className="text-white/25 text-xs">Rôle</p>
+                <p className="text-xs" style={{ color: 'rgba(255,255,255,0.2)' }}>Rôle</p>
                 <Select value={u.role} onValueChange={(v) => updateRole(u.id, v)}>
-                  <SelectTrigger className="w-full bg-white/5 border-white/10 text-white/60 rounded-xl h-9 text-xs mt-1">
+                  <SelectTrigger className="w-full border text-white/60 rounded-xl h-9 text-xs mt-1" style={{ background: 'rgba(255,255,255,0.04)', borderColor: 'rgba(255,255,255,0.08)' }}>
                     <SelectValue />
                   </SelectTrigger>
-                  <SelectContent className="glass-strong border-white/10">
+                  <SelectContent style={{ background: 'rgba(26,29,46,0.95)', border: '1px solid rgba(255,255,255,0.1)' }}>
                     <SelectItem value="user_free">Gratuit</SelectItem>
                     <SelectItem value="user_premium">Premium</SelectItem>
                     <SelectItem value="admin">Admin</SelectItem>
@@ -1662,27 +1758,29 @@ function AdminUsersView() {
                 </Select>
               </div>
               <div>
-                <p className="text-white/25 text-xs">Transactions</p>
+                <p className="text-xs" style={{ color: 'rgba(255,255,255,0.2)' }}>Transactions</p>
                 <p className="text-white/40 mt-1 font-mono">{u._count.transactions}</p>
               </div>
             </div>
-            <div className="flex items-center gap-2 pt-2 border-t border-white/5">
+            <div className="flex items-center gap-2 pt-2" style={{ borderTop: '1px solid rgba(255,255,255,0.04)' }}>
               <Button
                 variant="outline"
                 size="sm"
                 onClick={() => toggleSuspend(u.id, u.suspended)}
                 className={`rounded-xl h-8 text-xs flex-1 ${
                   u.suspended
-                    ? 'text-emerald-400 border-emerald-500/20 bg-emerald-500/5 hover:bg-emerald-500/10'
-                    : 'text-amber-400 border-amber-500/20 bg-amber-500/5 hover:bg-amber-500/10'
+                    ? 'text-emerald-400 border-emerald-500/20 hover:bg-emerald-500/10'
+                    : 'text-amber-400 border-amber-500/20 hover:bg-amber-500/10'
                 }`}
+                style={u.suspended ? { background: 'rgba(16,185,129,0.05)' } : { background: 'rgba(245,158,11,0.05)' }}
               >
                 {u.suspended ? 'Réactiver' : 'Suspendre'}
               </Button>
               <Button
                 variant="outline"
                 size="sm"
-                className="rounded-xl h-8 text-xs text-red-400 border-red-500/20 bg-red-500/5 hover:bg-red-500/10 flex-1"
+                className="rounded-xl h-8 text-xs text-red-400 border-red-500/20 hover:bg-red-500/10 flex-1"
+                style={{ background: 'rgba(239,68,68,0.05)' }}
                 onClick={() => deleteUser(u.id)}
               >
                 Supprimer
@@ -1759,58 +1857,62 @@ function AdminTokensView() {
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 fade-in-up">
         <div>
           <h1 className="text-2xl font-bold text-white/90">Gestion des Tokens</h1>
-          <p className="text-white/35 mt-1">{tokens.length} tokens configurés</p>
+          <p className="mt-1" style={{ color: 'rgba(255,255,255,0.3)' }}>{tokens.length} tokens configurés</p>
         </div>
         <Dialog open={addOpen} onOpenChange={setAddOpen}>
           <DialogTrigger asChild>
-            <Button className="bg-gradient-to-r from-violet-600 to-cyan-600 hover:from-violet-500 hover:to-cyan-500 gap-2 rounded-xl h-10 shadow-lg shadow-violet-500/20 transition-all active:scale-[0.98]">
+            <Button className="gap-2 rounded-xl h-10 shadow-lg text-white transition-all active:scale-[0.98]" style={{ background: 'linear-gradient(135deg, #7c3aed, #06b6d4)', boxShadow: '0 4px 20px rgba(124,58,237,0.25)' }}>
               <Plus className="w-4 h-4" /> Ajouter un Token
             </Button>
           </DialogTrigger>
-          <DialogContent className="glass-strong rounded-2xl border-white/10 dialog-mobile-fullscreen text-white">
+          <DialogContent className="rounded-2xl dialog-mobile-fullscreen text-white" style={{ background: 'rgba(26,29,46,0.95)', backdropFilter: 'blur(30px)', border: '1px solid rgba(255,255,255,0.1)' }}>
             <DialogHeader>
               <DialogTitle className="text-white/90">Nouveau Token</DialogTitle>
             </DialogHeader>
             <div className="space-y-4">
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div className="space-y-2">
-                  <Label className="text-white/50 text-xs">Ticker</Label>
+                  <Label className="text-xs" style={{ color: 'rgba(255,255,255,0.45)' }}>Ticker</Label>
                   <Input
                     value={newToken.ticker}
                     onChange={e => setNewToken({ ...newToken, ticker: e.target.value.toUpperCase() })}
                     placeholder="BTC"
-                    className="bg-white/5 border-white/10 text-white placeholder:text-white/20 rounded-xl h-11 focus:border-violet-500/50 focus:ring-violet-500/20"
+                    className="border text-white placeholder:text-white/20 rounded-xl h-11"
+                    style={{ background: 'rgba(255,255,255,0.04)', borderColor: 'rgba(255,255,255,0.08)' }}
                   />
                 </div>
                 <div className="space-y-2">
-                  <Label className="text-white/50 text-xs">Nom</Label>
+                  <Label className="text-xs" style={{ color: 'rgba(255,255,255,0.45)' }}>Nom</Label>
                   <Input
                     value={newToken.name}
                     onChange={e => setNewToken({ ...newToken, name: e.target.value })}
                     placeholder="Bitcoin"
-                    className="bg-white/5 border-white/10 text-white placeholder:text-white/20 rounded-xl h-11 focus:border-violet-500/50 focus:ring-violet-500/20"
+                    className="border text-white placeholder:text-white/20 rounded-xl h-11"
+                    style={{ background: 'rgba(255,255,255,0.04)', borderColor: 'rgba(255,255,255,0.08)' }}
                   />
                 </div>
               </div>
               <div className="space-y-2">
-                <Label className="text-white/50 text-xs">CoinGecko ID</Label>
+                <Label className="text-xs" style={{ color: 'rgba(255,255,255,0.45)' }}>CoinGecko ID</Label>
                 <Input
                   value={newToken.coingeckoId}
                   onChange={e => setNewToken({ ...newToken, coingeckoId: e.target.value })}
                   placeholder="bitcoin"
-                  className="bg-white/5 border-white/10 text-white placeholder:text-white/20 rounded-xl h-11 focus:border-violet-500/50 focus:ring-violet-500/20"
+                  className="border text-white placeholder:text-white/20 rounded-xl h-11"
+                  style={{ background: 'rgba(255,255,255,0.04)', borderColor: 'rgba(255,255,255,0.08)' }}
                 />
               </div>
               <div className="space-y-2">
-                <Label className="text-white/50 text-xs">CryptoCompare ID</Label>
+                <Label className="text-xs" style={{ color: 'rgba(255,255,255,0.45)' }}>CryptoCompare ID</Label>
                 <Input
                   value={newToken.cryptoCompareId}
                   onChange={e => setNewToken({ ...newToken, cryptoCompareId: e.target.value })}
                   placeholder="BTC"
-                  className="bg-white/5 border-white/10 text-white placeholder:text-white/20 rounded-xl h-11 focus:border-violet-500/50 focus:ring-violet-500/20"
+                  className="border text-white placeholder:text-white/20 rounded-xl h-11"
+                  style={{ background: 'rgba(255,255,255,0.04)', borderColor: 'rgba(255,255,255,0.08)' }}
                 />
               </div>
-              <Button onClick={addToken} className="w-full bg-gradient-to-r from-violet-600 to-cyan-600 hover:from-violet-500 hover:to-cyan-500 rounded-xl shadow-lg shadow-violet-500/20 transition-all active:scale-[0.98]">Ajouter</Button>
+              <Button onClick={addToken} className="w-full rounded-xl shadow-lg text-white transition-all active:scale-[0.98]" style={{ background: 'linear-gradient(135deg, #7c3aed, #06b6d4)', boxShadow: '0 4px 20px rgba(124,58,237,0.25)' }}>Ajouter</Button>
             </div>
           </DialogContent>
         </Dialog>
@@ -1822,19 +1924,19 @@ function AdminTokensView() {
           <div className="overflow-x-auto custom-scrollbar">
             <Table>
               <TableHeader>
-                <TableRow className="border-white/5 hover:bg-transparent">
-                  <TableHead className="text-white/40">Ticker</TableHead>
-                  <TableHead className="text-white/40">Nom</TableHead>
-                  <TableHead className="text-white/40">CoinGecko ID</TableHead>
-                  <TableHead className="text-right text-white/40">Prix Actuel</TableHead>
-                  <TableHead className="text-center text-white/40">Transactions</TableHead>
-                  <TableHead className="text-center text-white/40">Statut</TableHead>
-                  <TableHead className="text-right text-white/40">Actions</TableHead>
+                <TableRow className="hover:bg-transparent" style={{ borderBottomColor: 'rgba(255,255,255,0.05)' }}>
+                  <TableHead style={{ color: 'rgba(255,255,255,0.35)' }}>Ticker</TableHead>
+                  <TableHead style={{ color: 'rgba(255,255,255,0.35)' }}>Nom</TableHead>
+                  <TableHead style={{ color: 'rgba(255,255,255,0.35)' }}>CoinGecko ID</TableHead>
+                  <TableHead className="text-right" style={{ color: 'rgba(255,255,255,0.35)' }}>Prix Actuel</TableHead>
+                  <TableHead className="text-center" style={{ color: 'rgba(255,255,255,0.35)' }}>Transactions</TableHead>
+                  <TableHead className="text-center" style={{ color: 'rgba(255,255,255,0.35)' }}>Statut</TableHead>
+                  <TableHead className="text-right" style={{ color: 'rgba(255,255,255,0.35)' }}>Actions</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
                 {tokens.map((t) => (
-                  <TableRow key={t.id} className="border-white/5 hover:bg-white/[0.02] transition-colors">
+                  <TableRow key={t.id} className="transition-colors" style={{ borderBottomColor: 'rgba(255,255,255,0.04)' }}>
                     <TableCell>
                       <div className="flex items-center gap-2">
                         <div className={`w-7 h-7 rounded-lg ${tokenGradientClass(t.ticker)} flex items-center justify-center text-[10px] font-bold text-white`}>
@@ -1844,7 +1946,7 @@ function AdminTokensView() {
                       </div>
                     </TableCell>
                     <TableCell className="text-white/60">{t.name}</TableCell>
-                    <TableCell className="text-white/30 font-mono text-xs">{t.coingeckoId || '—'}</TableCell>
+                    <TableCell className="font-mono text-xs" style={{ color: 'rgba(255,255,255,0.25)' }}>{t.coingeckoId || '—'}</TableCell>
                     <TableCell className="text-right font-mono text-white/60">
                       {t.currentPrice ? fmt(t.currentPrice) + ' $' : '—'}
                     </TableCell>
@@ -1865,9 +1967,10 @@ function AdminTokensView() {
                         onClick={() => toggleActive(t.id, t.active)}
                         className={`rounded-xl h-8 text-xs ${
                           t.active
-                            ? 'text-red-400 border-red-500/20 bg-red-500/5 hover:bg-red-500/10'
-                            : 'text-emerald-400 border-emerald-500/20 bg-emerald-500/5 hover:bg-emerald-500/10'
+                            ? 'text-red-400 border-red-500/20 hover:bg-red-500/10'
+                            : 'text-emerald-400 border-emerald-500/20 hover:bg-emerald-500/10'
                         }`}
+                        style={t.active ? { background: 'rgba(239,68,68,0.05)' } : { background: 'rgba(16,185,129,0.05)' }}
                       >
                         {t.active ? 'Désactiver' : 'Activer'}
                       </Button>
@@ -1891,7 +1994,7 @@ function AdminTokensView() {
                 </div>
                 <div>
                   <p className="font-semibold text-white/80">{t.ticker}</p>
-                  <p className="text-xs text-white/30">{t.name}</p>
+                  <p className="text-xs" style={{ color: 'rgba(255,255,255,0.25)' }}>{t.name}</p>
                 </div>
               </div>
               <div className="flex items-center gap-2">
@@ -1904,22 +2007,22 @@ function AdminTokensView() {
             </div>
             <div className="grid grid-cols-2 gap-2 text-sm">
               <div>
-                <p className="text-white/25 text-xs">Prix</p>
+                <p className="text-xs" style={{ color: 'rgba(255,255,255,0.2)' }}>Prix</p>
                 <p className="text-white/60 font-mono">{t.currentPrice ? fmt(t.currentPrice) + ' $' : '—'}</p>
               </div>
               <div>
-                <p className="text-white/25 text-xs">Transactions</p>
+                <p className="text-xs" style={{ color: 'rgba(255,255,255,0.2)' }}>Transactions</p>
                 <p className="text-white/40 font-mono">{t._count.transactions}</p>
               </div>
             </div>
-            <div className="flex items-center gap-2 pt-2 border-t border-white/5">
+            <div className="flex items-center gap-2 pt-2" style={{ borderTop: '1px solid rgba(255,255,255,0.04)' }}>
               {t.active ? (
                 <Badge className="bg-emerald-400/10 text-emerald-400 border-emerald-400/20 border text-xs">Actif</Badge>
               ) : (
                 <Badge className="bg-red-400/10 text-red-400 border-red-400/20 border text-xs">Inactif</Badge>
               )}
               {t.coingeckoId && (
-                <span className="text-xs text-white/15 font-mono">{t.coingeckoId}</span>
+                <span className="text-xs font-mono" style={{ color: 'rgba(255,255,255,0.12)' }}>{t.coingeckoId}</span>
               )}
             </div>
           </div>
@@ -1993,29 +2096,30 @@ function AdminExchangesView() {
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 fade-in-up">
         <div>
           <h1 className="text-2xl font-bold text-white/90">Gestion des Exchanges</h1>
-          <p className="text-white/35 mt-1">{exchanges.length} plateformes configurées</p>
+          <p className="mt-1" style={{ color: 'rgba(255,255,255,0.3)' }}>{exchanges.length} plateformes configurées</p>
         </div>
         <Dialog open={addOpen} onOpenChange={setAddOpen}>
           <DialogTrigger asChild>
-            <Button className="bg-gradient-to-r from-violet-600 to-cyan-600 hover:from-violet-500 hover:to-cyan-500 gap-2 rounded-xl h-10 shadow-lg shadow-violet-500/20 transition-all active:scale-[0.98]">
+            <Button className="gap-2 rounded-xl h-10 shadow-lg text-white transition-all active:scale-[0.98]" style={{ background: 'linear-gradient(135deg, #7c3aed, #06b6d4)', boxShadow: '0 4px 20px rgba(124,58,237,0.25)' }}>
               <Plus className="w-4 h-4" /> Ajouter un Exchange
             </Button>
           </DialogTrigger>
-          <DialogContent className="glass-strong rounded-2xl border-white/10 dialog-mobile-fullscreen text-white">
+          <DialogContent className="rounded-2xl dialog-mobile-fullscreen text-white" style={{ background: 'rgba(26,29,46,0.95)', backdropFilter: 'blur(30px)', border: '1px solid rgba(255,255,255,0.1)' }}>
             <DialogHeader>
               <DialogTitle className="text-white/90">Nouvel Exchange</DialogTitle>
             </DialogHeader>
             <div className="space-y-4">
               <div className="space-y-2">
-                <Label className="text-white/50 text-xs">Nom</Label>
+                <Label className="text-xs" style={{ color: 'rgba(255,255,255,0.45)' }}>Nom</Label>
                 <Input
                   value={newName}
                   onChange={e => setNewName(e.target.value.toUpperCase())}
                   placeholder="BINANCE"
-                  className="bg-white/5 border-white/10 text-white placeholder:text-white/20 rounded-xl h-11 focus:border-violet-500/50 focus:ring-violet-500/20"
+                  className="border text-white placeholder:text-white/20 rounded-xl h-11"
+                  style={{ background: 'rgba(255,255,255,0.04)', borderColor: 'rgba(255,255,255,0.08)' }}
                 />
               </div>
-              <Button onClick={addExchange} className="w-full bg-gradient-to-r from-violet-600 to-cyan-600 hover:from-violet-500 hover:to-cyan-500 rounded-xl shadow-lg shadow-violet-500/20 transition-all active:scale-[0.98]">Ajouter</Button>
+              <Button onClick={addExchange} className="w-full rounded-xl shadow-lg text-white transition-all active:scale-[0.98]" style={{ background: 'linear-gradient(135deg, #7c3aed, #06b6d4)', boxShadow: '0 4px 20px rgba(124,58,237,0.25)' }}>Ajouter</Button>
             </div>
           </DialogContent>
         </Dialog>
@@ -2027,19 +2131,19 @@ function AdminExchangesView() {
           <div className="overflow-x-auto custom-scrollbar">
             <Table>
               <TableHeader>
-                <TableRow className="border-white/5 hover:bg-transparent">
-                  <TableHead className="text-white/40">Nom</TableHead>
-                  <TableHead className="text-center text-white/40">Transactions</TableHead>
-                  <TableHead className="text-center text-white/40">Statut</TableHead>
-                  <TableHead className="text-right text-white/40">Actions</TableHead>
+                <TableRow className="hover:bg-transparent" style={{ borderBottomColor: 'rgba(255,255,255,0.05)' }}>
+                  <TableHead style={{ color: 'rgba(255,255,255,0.35)' }}>Nom</TableHead>
+                  <TableHead className="text-center" style={{ color: 'rgba(255,255,255,0.35)' }}>Transactions</TableHead>
+                  <TableHead className="text-center" style={{ color: 'rgba(255,255,255,0.35)' }}>Statut</TableHead>
+                  <TableHead className="text-right" style={{ color: 'rgba(255,255,255,0.35)' }}>Actions</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
                 {exchanges.map((e) => (
-                  <TableRow key={e.id} className="border-white/5 hover:bg-white/[0.02] transition-colors">
+                  <TableRow key={e.id} className="transition-colors" style={{ borderBottomColor: 'rgba(255,255,255,0.04)' }}>
                     <TableCell>
                       <div className="flex items-center gap-3">
-                        <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-cyan-500/20 to-violet-500/20 flex items-center justify-center">
+                        <div className="w-8 h-8 rounded-lg flex items-center justify-center" style={{ background: 'linear-gradient(135deg, rgba(6,182,212,0.15), rgba(124,58,237,0.15))' }}>
                           <Building2 className="w-4 h-4 text-cyan-400/60" />
                         </div>
                         <span className="font-semibold text-white/70">{e.name}</span>
@@ -2062,9 +2166,10 @@ function AdminExchangesView() {
                         onClick={() => toggleActive(e.id, e.active)}
                         className={`rounded-xl h-8 text-xs ${
                           e.active
-                            ? 'text-red-400 border-red-500/20 bg-red-500/5 hover:bg-red-500/10'
-                            : 'text-emerald-400 border-emerald-500/20 bg-emerald-500/5 hover:bg-emerald-500/10'
+                            ? 'text-red-400 border-red-500/20 hover:bg-red-500/10'
+                            : 'text-emerald-400 border-emerald-500/20 hover:bg-emerald-500/10'
                         }`}
+                        style={e.active ? { background: 'rgba(239,68,68,0.05)' } : { background: 'rgba(16,185,129,0.05)' }}
                       >
                         {e.active ? 'Désactiver' : 'Activer'}
                       </Button>
@@ -2083,12 +2188,12 @@ function AdminExchangesView() {
           <div key={e.id} className="glass-card rounded-2xl p-4 card-hover">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-cyan-500/20 to-violet-500/20 flex items-center justify-center">
+                <div className="w-10 h-10 rounded-xl flex items-center justify-center" style={{ background: 'linear-gradient(135deg, rgba(6,182,212,0.15), rgba(124,58,237,0.15))' }}>
                   <Building2 className="w-5 h-5 text-cyan-400/60" />
                 </div>
                 <div>
                   <p className="font-semibold text-white/80">{e.name}</p>
-                  <p className="text-xs text-white/30">{e._count.transactions} transactions</p>
+                  <p className="text-xs" style={{ color: 'rgba(255,255,255,0.25)' }}>{e._count.transactions} transactions</p>
                 </div>
               </div>
               <Switch
@@ -2097,7 +2202,7 @@ function AdminExchangesView() {
                 className={`${e.active ? 'bg-emerald-500' : 'bg-white/10'}`}
               />
             </div>
-            <div className="flex items-center gap-2 mt-3 pt-3 border-t border-white/5">
+            <div className="flex items-center gap-2 mt-3 pt-3" style={{ borderTop: '1px solid rgba(255,255,255,0.04)' }}>
               {e.active ? (
                 <Badge className="bg-emerald-400/10 text-emerald-400 border-emerald-400/20 border text-xs">Actif</Badge>
               ) : (
@@ -2110,9 +2215,10 @@ function AdminExchangesView() {
                 onClick={() => toggleActive(e.id, e.active)}
                 className={`rounded-xl h-8 text-xs ${
                   e.active
-                    ? 'text-red-400 border-red-500/20 bg-red-500/5 hover:bg-red-500/10'
-                    : 'text-emerald-400 border-emerald-500/20 bg-emerald-500/5 hover:bg-emerald-500/10'
+                    ? 'text-red-400 border-red-500/20 hover:bg-red-500/10'
+                    : 'text-emerald-400 border-emerald-500/20 hover:bg-emerald-500/10'
                 }`}
+                style={e.active ? { background: 'rgba(239,68,68,0.05)' } : { background: 'rgba(16,185,129,0.05)' }}
               >
                 {e.active ? 'Désactiver' : 'Activer'}
               </Button>
@@ -2141,9 +2247,9 @@ export default function Home() {
 
   if (loading) {
     return (
-      <div className="login-gradient-bg min-h-screen flex items-center justify-center">
+      <div className="min-h-screen flex items-center justify-center" style={{ background: '#0f1117' }}>
         <div className="flex flex-col items-center gap-3">
-          <div className="w-10 h-10 rounded-xl bg-violet-600/20 border border-violet-500/30 flex items-center justify-center float-animation">
+          <div className="w-10 h-10 rounded-xl border flex items-center justify-center float-animation" style={{ background: 'rgba(124,58,237,0.15)', borderColor: 'rgba(124,58,237,0.3)' }}>
             <Wallet className="w-5 h-5 text-violet-400" />
           </div>
           <RefreshCw className="w-5 h-5 animate-spin text-violet-400/50" />
@@ -2156,20 +2262,48 @@ export default function Home() {
     return <LoginScreen onLogin={login} onRegister={register} />
   }
 
+  const isAdmin = user?.role === 'admin'
+
   const renderView = () => {
+    // Admin section uses tabs
+    if (currentView === 'admin-users' || currentView === 'admin-tokens' || currentView === 'admin-exchanges') {
+      if (!isAdmin) return <DashboardView user={user} />
+      return (
+        <div className="space-y-6 page-transition">
+          <div className="fade-in-up">
+            <h1 className="text-2xl font-bold text-white/90">Administration</h1>
+            <p className="mt-1" style={{ color: 'rgba(255,255,255,0.3)' }}>Gérez les utilisateurs, tokens et exchanges</p>
+          </div>
+          <Tabs value={currentView} onValueChange={(v) => setCurrentView(v as View)} className="fade-in-up stagger-1">
+            <TabsList className="w-full justify-start rounded-xl p-1 h-auto" style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.06)' }}>
+              <TabsTrigger value="admin-users" className="rounded-lg px-4 py-2 text-sm data-[state=active]:text-white data-[state=active]:shadow-sm" style={{ color: 'rgba(255,255,255,0.4)' }}>Utilisateurs</TabsTrigger>
+              <TabsTrigger value="admin-tokens" className="rounded-lg px-4 py-2 text-sm data-[state=active]:text-white data-[state=active]:shadow-sm" style={{ color: 'rgba(255,255,255,0.4)' }}>Tokens</TabsTrigger>
+              <TabsTrigger value="admin-exchanges" className="rounded-lg px-4 py-2 text-sm data-[state=active]:text-white data-[state=active]:shadow-sm" style={{ color: 'rgba(255,255,255,0.4)' }}>Exchanges</TabsTrigger>
+            </TabsList>
+            <TabsContent value="admin-users" className="mt-6">
+              <AdminUsersView />
+            </TabsContent>
+            <TabsContent value="admin-tokens" className="mt-6">
+              <AdminTokensView />
+            </TabsContent>
+            <TabsContent value="admin-exchanges" className="mt-6">
+              <AdminExchangesView />
+            </TabsContent>
+          </Tabs>
+        </div>
+      )
+    }
+
     switch (currentView) {
       case 'dashboard': return <DashboardView user={user} />
       case 'transactions': return <TransactionsView user={user} />
       case 'profile': return <ProfileView user={user} />
-      case 'admin-users': return <AdminUsersView />
-      case 'admin-tokens': return <AdminTokensView />
-      case 'admin-exchanges': return <AdminExchangesView />
       default: return <DashboardView user={user} />
     }
   }
 
   return (
-    <div className="flex min-h-screen login-gradient-bg">
+    <div className="flex min-h-screen" style={{ background: '#0f1117' }}>
       <Sidebar
         currentView={currentView}
         setView={setCurrentView}
