@@ -25,3 +25,28 @@ Stage Summary:
 - Live crypto prices working via CryptoCompare API
 - All CRUD operations tested and working
 - Zero lint errors
+
+---
+Task ID: 2
+Agent: Super Z (Main)
+Task: Fix real-time crypto price display and auto-refresh
+
+Work Log:
+- Investigated current price refresh API (/api/prices) and dashboard frontend code
+- Found that the frontend DashboardView had NO auto-refresh timer - only fetched prices once on mount
+- Updated /api/prices/route.ts: Added ?force=true parameter to bypass server cache, replaced next: { revalidate: 60 } with cache: "no-store", added parallel DB updates with Promise.all
+- Updated DashboardView in page.tsx:
+  - Added auto-refresh every 60 seconds via setInterval
+  - Added lastUpdated state showing last price refresh time
+  - Added nextRefreshIn countdown timer (60s to 0s)
+  - Added green pulsing dot indicator for live data
+  - Manual refresh now uses ?force=true to bypass server cache
+  - Added cleanup of intervals on component unmount
+- Verified all 42 tokens have real-time prices from CryptoCompare API
+- Build succeeded, prices API returns all 42 token prices correctly
+
+Stage Summary:
+- Real-time price auto-refresh is now working (every 60 seconds)
+- Dashboard shows live status indicator with last update time and countdown
+- Prices API supports ?force=true for cache bypass on manual refresh
+- All 42 tokens have live prices from CryptoCompare API

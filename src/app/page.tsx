@@ -456,15 +456,20 @@ function DashboardView({ user }: { user: any }) {
   const [data, setData] = useState<DashboardData | null>(null)
   const [loading, setLoading] = useState(true)
   const [refreshing, setRefreshing] = useState(false)
+  const [lastUpdated, setLastUpdated] = useState<Date | null>(null)
+  const [nextRefreshIn, setNextRefreshIn] = useState(60)
 
-  const fetchData = useCallback(async () => {
+  const fetchData = useCallback(async (showToast = false, force = false) => {
     try {
-      // Refresh prices first
-      await fetch('/api/prices')
+      // Refresh prices first (force=true bypasses server cache on manual refresh)
+      await fetch(`/api/prices${force ? '?force=true' : ''}`)
       const res = await fetch('/api/dashboard')
       if (res.ok) {
         const d = await res.json()
         setData(d)
+        setLastUpdated(new Date())
+        setNextRefreshIn(60)
+        if (showToast) toast.success('Prix actualisés !')
       }
     } catch (err) {
       console.error(err)
@@ -473,13 +478,27 @@ function DashboardView({ user }: { user: any }) {
     }
   }, [])
 
-  useEffect(() => { fetchData() }, [fetchData])
+  // Initial fetch + auto-refresh every 60 seconds
+  useEffect(() => {
+    fetchData()
+    const interval = setInterval(() => {
+      fetchData(false)
+    }, 60000)
+    return () => clearInterval(interval)
+  }, [fetchData])
+
+  // Countdown timer for next refresh
+  useEffect(() => {
+    const timer = setInterval(() => {
+      setNextRefreshIn(prev => (prev > 0 ? prev - 1 : 60))
+    }, 1000)
+    return () => clearInterval(timer)
+  }, [])
 
   const handleRefresh = async () => {
     setRefreshing(true)
-    await fetchData()
+    await fetchData(true, true)
     setRefreshing(false)
-    toast.success('Prix actualisés !')
   }
 
   if (loading) {
@@ -530,11 +549,19 @@ function DashboardView({ user }: { user: any }) {
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
           <h1 className="text-2xl font-bold">Tableau de Bord</h1>
-          <p className="text-muted-foreground">Vue d&apos;ensemble de votre portefeuille</p>
+          <div className="flex items-center gap-2 text-sm text-muted-foreground">
+            <span>Vue d&apos;ensemble de votre portefeuille</span>
+            {lastUpdated && (
+              <span className="flex items-center gap-1.5">
+                • <span className="inline-block w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
+                Mis à jour {lastUpdated.toLocaleTimeString('fr-FR')} • Prochain refresh dans {nextRefreshIn}s
+              </span>
+            )}
+          </div>
         </div>
-        <Button variant="outline" onClick={handleRefresh} disabled={refreshing} className="gap-2">
+        <Button variant="outline" onClick={handleRefresh} disabled={refreshing} className="gap-2 shrink-0">
           <RefreshCw className={`w-4 h-4 ${refreshing ? 'animate-spin' : ''}`} />
-          Actualiser les prix
+          {refreshing ? 'Actualisation...' : 'Actualiser les prix'}
         </Button>
       </div>
 
