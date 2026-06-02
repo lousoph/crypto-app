@@ -139,6 +139,66 @@ const tokenGradientClass = (ticker: string) => {
   return 'token-gradient-default'
 }
 
+// Token logo CDN (cryptocurrency-icons)
+const TOKEN_LOGO_URL = (symbol: string) =>
+  `https://cdn.jsdelivr.net/gh/atomiclabs/cryptocurrency-icons@1a63530be6e374711a8554f31b17e4cb92c25fa5/128/color/${symbol.toLowerCase()}.png`
+
+// Exchange brand styles
+const EXCHANGE_STYLES: Record<string, { bg: string; text: string; icon: string }> = {
+  BINANCE:  { bg: '#F0B90B', text: '#1E1E1E', icon: 'BN' },
+  BYBIT:   { bg: '#F7A600', text: '#1E1E1E', icon: 'BY' },
+  COINBASE:{ bg: '#0052FF', text: '#FFFFFF', icon: 'CB' },
+  KRAKEN:  { bg: '#7B61FF', text: '#FFFFFF', icon: 'KR' },
+  OKX:     { bg: '#1A1A2E', text: '#FFFFFF', icon: 'OK' },
+}
+
+// ============================================================
+// TOKEN LOGO COMPONENT
+// ============================================================
+function TokenLogo({ ticker, size = 24, className = '' }: { ticker: string; size?: number; className?: string }) {
+  const [imgError, setImgError] = useState(false)
+  const symbol = ticker.toLowerCase()
+
+  if (imgError) {
+    return (
+      <div
+        className={`${tokenGradientClass(ticker)} flex items-center justify-center text-white font-bold shrink-0 ${className}`}
+        style={{ width: size, height: size, fontSize: Math.max(size * 0.35, 9), borderRadius: size * 0.22 }}
+      >
+        {ticker.slice(0, 2)}
+      </div>
+    )
+  }
+
+  return (
+    <img
+      src={TOKEN_LOGO_URL(symbol)}
+      alt={ticker}
+      width={size}
+      height={size}
+      className={`rounded-lg shrink-0 ${className}`}
+      style={{ width: size, height: size }}
+      onError={() => setImgError(true)}
+      loading="lazy"
+    />
+  )
+}
+
+// ============================================================
+// EXCHANGE LOGO COMPONENT
+// ============================================================
+function ExchangeLogo({ name, size = 24, className = '' }: { name: string; size?: number; className?: string }) {
+  const style = EXCHANGE_STYLES[name.toUpperCase()] || { bg: '#7c3aed', text: '#FFFFFF', icon: name.slice(0, 2) }
+  return (
+    <div
+      className={`flex items-center justify-center font-bold shrink-0 ${className}`}
+      style={{ width: size, height: size, fontSize: Math.max(size * 0.32, 9), background: style.bg, color: style.text, borderRadius: size * 0.22 }}
+    >
+      {style.icon}
+    </div>
+  )
+}
+
 // ============================================================
 // AUTH HOOK
 // ============================================================
@@ -650,9 +710,7 @@ function LivePriceTicker() {
           const isUp = change >= 0
           return (
             <div key={ticker} className="flex items-center gap-2 px-3 py-1.5 rounded-lg shrink-0 mr-1" style={{ background: 'rgba(255,255,255,0.03)' }}>
-              <div className={`w-6 h-6 rounded-md ${tokenGradientClass(ticker)} flex items-center justify-center text-[9px] font-bold text-white`}>
-                {ticker.slice(0, 2)}
-              </div>
+              <TokenLogo ticker={ticker} size={24} />
               <div className="flex flex-col">
                 <span className="text-[10px] font-semibold text-white/60">{ticker}</span>
                 <span className="text-xs font-semibold text-white/90">{fmtPrice(price)} $</span>
@@ -862,9 +920,7 @@ function DashboardView({ user }: { user: any }) {
                   <div key={t.ticker} className="space-y-1.5">
                     <div className="flex items-center justify-between">
                       <div className="flex items-center gap-2">
-                        <div className={`w-6 h-6 rounded-md ${tokenGradientClass(t.ticker)} flex items-center justify-center text-[9px] font-bold text-white`}>
-                          {t.ticker.slice(0, 2)}
-                        </div>
+                        <TokenLogo ticker={t.ticker} size={24} />
                         <span className="text-sm font-medium text-white/70">{t.ticker}</span>
                       </div>
                       <div className="flex items-center gap-2">
@@ -936,9 +992,7 @@ function DashboardView({ user }: { user: any }) {
                   <TableRow key={t.ticker} className="transition-colors" style={{ borderBottomColor: 'rgba(255,255,255,0.04)' }}>
                     <TableCell>
                       <div className="flex items-center gap-3">
-                        <div className={`w-9 h-9 rounded-xl ${tokenGradientClass(t.ticker)} flex items-center justify-center text-xs font-bold text-white shadow-lg`}>
-                          {t.ticker.slice(0, 2)}
-                        </div>
+                        <TokenLogo ticker={t.ticker} size={36} />
                         <div>
                           <p className="font-semibold text-white/80">{t.ticker}</p>
                           <p className="text-xs" style={{ color: 'rgba(255,255,255,0.25)' }}>{t.name}</p>
@@ -970,9 +1024,7 @@ function DashboardView({ user }: { user: any }) {
               <div key={t.ticker} className="glass-card rounded-2xl p-4 space-y-3 card-hover">
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-3">
-                    <div className={`w-10 h-10 rounded-xl ${tokenGradientClass(t.ticker)} flex items-center justify-center text-xs font-bold text-white shadow-lg`}>
-                      {t.ticker.slice(0, 2)}
-                    </div>
+                    <TokenLogo ticker={t.ticker} size={40} />
                     <div>
                       <p className="font-semibold text-white/80">{t.ticker}</p>
                       <p className="text-xs" style={{ color: 'rgba(255,255,255,0.25)' }}>{t.name}</p>
@@ -1333,9 +1385,7 @@ function TransactionsView({ user }: { user: any }) {
                         </TableCell>
                         <TableCell>
                           <div className="flex items-center gap-2">
-                            <div className={`w-7 h-7 rounded-lg ${tokenGradientClass(tx.tokenTicker)} flex items-center justify-center text-[10px] font-bold text-white`}>
-                              {tx.tokenTicker.slice(0, 2)}
-                            </div>
+                            <TokenLogo ticker={tx.tokenTicker} size={28} />
                             <Badge variant="outline" className="font-semibold border-white/10 text-white/70">
                               {tx.tokenTicker}
                             </Badge>
@@ -1346,7 +1396,10 @@ function TransactionsView({ user }: { user: any }) {
                         <TableCell className="text-right font-mono text-white/40">{fmtSmall(tx.quantite)}</TableCell>
                         <TableCell>
                           {tx.exchange ? (
-                            <Badge variant="secondary" className="text-xs border" style={{ background: 'rgba(255,255,255,0.04)', color: 'rgba(255,255,255,0.35)', borderColor: 'rgba(255,255,255,0.05)' }}>{tx.exchange.name}</Badge>
+                            <div className="flex items-center gap-1.5">
+                              <ExchangeLogo name={tx.exchange.name} size={20} />
+                              <span className="text-xs text-white/50">{tx.exchange.name}</span>
+                            </div>
                           ) : <span style={{ color: 'rgba(255,255,255,0.12)' }}>—</span>}
                         </TableCell>
                         <TableCell className="text-right">
@@ -1384,9 +1437,7 @@ function TransactionsView({ user }: { user: any }) {
               <div key={tx.id} className="glass-card rounded-2xl p-4 space-y-3 card-hover">
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-3">
-                    <div className={`w-10 h-10 rounded-xl ${tokenGradientClass(tx.tokenTicker)} flex items-center justify-center text-xs font-bold text-white shadow-lg`}>
-                      {tx.tokenTicker.slice(0, 2)}
-                    </div>
+                    <TokenLogo ticker={tx.tokenTicker} size={40} />
                     <div>
                       <p className="font-semibold text-white/80">{tx.tokenTicker}</p>
                       <p className="text-xs" style={{ color: 'rgba(255,255,255,0.25)' }}>{new Date(tx.date).toLocaleDateString('fr-FR')}</p>
@@ -1429,7 +1480,10 @@ function TransactionsView({ user }: { user: any }) {
                 {(tx.exchange || tx.notes) && (
                   <div className="flex items-center gap-2 pt-1" style={{ borderTop: '1px solid rgba(255,255,255,0.04)' }}>
                     {tx.exchange && (
-                      <Badge variant="secondary" className="text-xs border-0" style={{ background: 'rgba(255,255,255,0.04)', color: 'rgba(255,255,255,0.25)' }}>{tx.exchange.name}</Badge>
+                      <div className="flex items-center gap-1.5">
+                        <ExchangeLogo name={tx.exchange.name} size={20} />
+                        <span className="text-xs text-white/35">{tx.exchange.name}</span>
+                      </div>
                     )}
                     {tx.notes && (
                       <span className="text-xs truncate flex-1" style={{ color: 'rgba(255,255,255,0.15)' }}>{tx.notes}</span>
@@ -1939,9 +1993,7 @@ function AdminTokensView() {
                   <TableRow key={t.id} className="transition-colors" style={{ borderBottomColor: 'rgba(255,255,255,0.04)' }}>
                     <TableCell>
                       <div className="flex items-center gap-2">
-                        <div className={`w-7 h-7 rounded-lg ${tokenGradientClass(t.ticker)} flex items-center justify-center text-[10px] font-bold text-white`}>
-                          {t.ticker.slice(0, 2)}
-                        </div>
+                        <TokenLogo ticker={t.ticker} size={28} />
                         <Badge variant="outline" className="font-bold border-white/10 text-white/70">{t.ticker}</Badge>
                       </div>
                     </TableCell>
@@ -1989,9 +2041,7 @@ function AdminTokensView() {
           <div key={t.id} className="glass-card rounded-2xl p-4 space-y-3 card-hover">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-3">
-                <div className={`w-10 h-10 rounded-xl ${tokenGradientClass(t.ticker)} flex items-center justify-center text-xs font-bold text-white shadow-lg`}>
-                  {t.ticker.slice(0, 2)}
-                </div>
+                <TokenLogo ticker={t.ticker} size={40} />
                 <div>
                   <p className="font-semibold text-white/80">{t.ticker}</p>
                   <p className="text-xs" style={{ color: 'rgba(255,255,255,0.25)' }}>{t.name}</p>
@@ -2143,9 +2193,7 @@ function AdminExchangesView() {
                   <TableRow key={e.id} className="transition-colors" style={{ borderBottomColor: 'rgba(255,255,255,0.04)' }}>
                     <TableCell>
                       <div className="flex items-center gap-3">
-                        <div className="w-8 h-8 rounded-lg flex items-center justify-center" style={{ background: 'linear-gradient(135deg, rgba(6,182,212,0.15), rgba(124,58,237,0.15))' }}>
-                          <Building2 className="w-4 h-4 text-cyan-400/60" />
-                        </div>
+                        <ExchangeLogo name={e.name} size={32} />
                         <span className="font-semibold text-white/70">{e.name}</span>
                       </div>
                     </TableCell>
@@ -2188,9 +2236,7 @@ function AdminExchangesView() {
           <div key={e.id} className="glass-card rounded-2xl p-4 card-hover">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-xl flex items-center justify-center" style={{ background: 'linear-gradient(135deg, rgba(6,182,212,0.15), rgba(124,58,237,0.15))' }}>
-                  <Building2 className="w-5 h-5 text-cyan-400/60" />
-                </div>
+                <ExchangeLogo name={e.name} size={40} />
                 <div>
                   <p className="font-semibold text-white/80">{e.name}</p>
                   <p className="text-xs" style={{ color: 'rgba(255,255,255,0.25)' }}>{e._count.transactions} transactions</p>
