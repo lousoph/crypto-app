@@ -17,7 +17,7 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Badge } from '@/components/ui/badge'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogFooter, DialogClose } from '@/components/ui/dialog'
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogFooter, DialogClose, DialogDescription } from '@/components/ui/dialog'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Separator } from '@/components/ui/separator'
@@ -1268,6 +1268,7 @@ function TransactionsView({ user, onUpgrade }: { user: any; onUpgrade: () => voi
           <DialogContent className="rounded-2xl max-w-lg dialog-mobile-fullscreen text-white" style={{ background: 'rgba(26,29,46,0.95)', backdropFilter: 'blur(30px)', border: '1px solid rgba(255,255,255,0.1)' }}>
             <DialogHeader>
               <DialogTitle className="text-white/90">{editingTx ? 'Modifier la transaction' : 'Nouvelle transaction'}</DialogTitle>
+              <DialogDescription className="sr-only">{editingTx ? 'Formulaire de modification de transaction' : 'Formulaire d\'ajout de transaction'}</DialogDescription>
             </DialogHeader>
             <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -2366,6 +2367,7 @@ function AdminTokensView() {
           <DialogContent className="rounded-2xl dialog-mobile-fullscreen text-white" style={{ background: 'rgba(26,29,46,0.95)', backdropFilter: 'blur(30px)', border: '1px solid rgba(255,255,255,0.1)' }}>
             <DialogHeader>
               <DialogTitle className="text-white/90">Nouveau Token</DialogTitle>
+              <DialogDescription className="sr-only">Formulaire d\'ajout d\'un nouveau token</DialogDescription>
             </DialogHeader>
             <div className="space-y-4">
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -2601,6 +2603,7 @@ function AdminExchangesView() {
           <DialogContent className="rounded-2xl dialog-mobile-fullscreen text-white" style={{ background: 'rgba(26,29,46,0.95)', backdropFilter: 'blur(30px)', border: '1px solid rgba(255,255,255,0.1)' }}>
             <DialogHeader>
               <DialogTitle className="text-white/90">Nouvel Exchange</DialogTitle>
+              <DialogDescription className="sr-only">Formulaire d\'ajout d\'un nouvel exchange</DialogDescription>
             </DialogHeader>
             <div className="space-y-4">
               <div className="space-y-2">
