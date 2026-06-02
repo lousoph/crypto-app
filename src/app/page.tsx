@@ -1075,7 +1075,7 @@ const transactionSchema = z.object({
   notes: z.string().optional(),
 })
 
-function TransactionsView({ user }: { user: any }) {
+function TransactionsView({ user, onUpgrade }: { user: any; onUpgrade: () => void }) {
   const [transactions, setTransactions] = useState<TransactionData[]>([])
   const [tokens, setTokens] = useState<TokenData[]>([])
   const [exchanges, setExchanges] = useState<ExchangeData[]>([])
@@ -1318,9 +1318,19 @@ function TransactionsView({ user }: { user: any }) {
               <p className="font-medium text-amber-400">Plan Gratuit — Limité à 3 tokens et 10 transactions</p>
               <p style={{ color: 'rgba(255,255,255,0.25)' }}>Passez en Premium pour débloquer l&apos;accès illimité.</p>
             </div>
-            <Badge className="border shrink-0" style={{ background: 'rgba(245,158,11,0.12)', color: '#f59e0b', borderColor: 'rgba(245,158,11,0.2)' }}>
-              {transactions.length}/10
-            </Badge>
+            <div className="flex items-center gap-2 shrink-0">
+              <Badge className="border" style={{ background: 'rgba(245,158,11,0.12)', color: '#f59e0b', borderColor: 'rgba(245,158,11,0.2)' }}>
+                {transactions.length}/10
+              </Badge>
+              <Button
+                size="sm"
+                className="rounded-xl text-black font-semibold shadow-lg transition-all active:scale-[0.98]"
+                style={{ background: 'linear-gradient(135deg, #f59e0b, #f97316)', boxShadow: '0 4px 15px rgba(245,158,11,0.25)' }}
+                onClick={onUpgrade}
+              >
+                <Crown className="w-3.5 h-3.5 mr-1.5" /> Premium
+              </Button>
+            </div>
           </CardContent>
         </Card>
       )}
@@ -1509,11 +1519,403 @@ function TransactionsView({ user }: { user: any }) {
 }
 
 // ============================================================
+// SUBSCRIPTION PLANS
+// ============================================================
+const SUBSCRIPTION_PLANS = [
+  { months: 1,  discount: 0,  total: 9.99,  monthly: 9.99, label: '1 mois',  badge: '' },
+  { months: 3,  discount: 10, total: 26.97, monthly: 8.99, label: '3 mois',  badge: '-10%' },
+  { months: 6,  discount: 15, total: 50.95, monthly: 8.49, label: '6 mois',  badge: '-15%' },
+  { months: 12, discount: 20, total: 95.90, monthly: 7.99, label: '12 mois', badge: '-20%' },
+] as const
+
+// PayPal SDK types
+declare global {
+  interface Window {
+    paypal?: {
+      Buttons: (config: {
+        createOrder: () => Promise<string>
+        onApprove: (data: { orderID: string }) => Promise<void>
+        onError: (err: any) => void
+        style?: { layout?: string; color?: string; shape?: string; label?: string; height?: number }
+      }) => { render: (container: string) => Promise<void>; close: () => void }
+    }
+  }
+}
+
+// ============================================================
+// UPGRADE PREMIUM MODAL
+// ============================================================
+function UpgradePremiumModal({ open, onOpenChange, onSuccess }: {
+  open: boolean
+  onOpenChange: (v: boolean) => void
+  onSuccess: () => void
+}) {
+  const [step, setStep] = useState<'select' | 'paypal' | 'processing' | 'success'>('select')
+  const [selectedPlan, setSelectedPlan] = useState(1)
+  const [error, setError] = useState('')
+  const [paypalLoaded, setPaypalLoaded] = useState(false)
+  const [paypalLoading, setPaypalLoading] = useState(false)
+  const paypalContainerRef = useRef<HTMLDivElement>(null)
+  const paypalButtonsRef = useRef<any>(null)
+
+  const currentPlan = SUBSCRIPTION_PLANS.find(p => p.months === selectedPlan) || SUBSCRIPTION_PLANS[0]
+
+  // Load PayPal SDK dynamically
+  const loadPayPalSDK = useCallback(() => {
+    if (paypalLoaded || paypalLoading) return
+    setPaypalLoading(true)
+
+    const existingScript = document.querySelector('script[src*="paypal.com/sdk/js"]')
+    if (existingScript) {
+      setPaypalLoaded(true)
+      setPaypalLoading(false)
+      return
+    }
+
+    const script = document.createElement('script')
+    script.src = `https://www.paypal.com/sdk/js?client-id=${process.env.NEXT_PUBLIC_PAYPAL_CLIENT_ID || 'sb'}&currency=EUR&intent=capture&locale=fr_FR`
+    script.async = true
+    script.onload = () => {
+      setPaypalLoaded(true)
+      setPaypalLoading(false)
+    }
+    script.onerror = () => {
+      setError('Impossible de charger PayPal. Veuillez réessayer.')
+      setPaypalLoading(false)
+    }
+    document.body.appendChild(script)
+  }, [paypalLoaded, paypalLoading])
+
+  // Render PayPal buttons when SDK is loaded and modal is on paypal step
+  useEffect(() => {
+    if (!open || step !== 'paypal') return
+
+    const tryRenderButtons = () => {
+      if (!window.paypal || !paypalContainerRef.current) return false
+
+      if (paypalContainerRef.current) {
+        paypalContainerRef.current.innerHTML = ''
+      }
+
+      try {
+        paypalButtonsRef.current = window.paypal.Buttons({
+          createOrder: async () => {
+            setError('')
+            try {
+              const res = await fetch('/api/paypal/create-order', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ duration: selectedPlan }),
+              })
+              const data = await res.json()
+              if (!res.ok) {
+                setError(data.error || 'Erreur lors de la création de la commande')
+                return ''
+              }
+              return data.orderID
+            } catch (err: any) {
+              setError(err.message)
+              return ''
+            }
+          },
+          onApprove: async (data: { orderID: string }) => {
+            setStep('processing')
+            try {
+              const res = await fetch('/api/paypal/capture-order', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ orderID: data.orderID, duration: selectedPlan }),
+              })
+              const result = await res.json()
+              if (res.ok && result.success) {
+                setStep('success')
+                toast.success('Bienvenue en Premium !')
+                setTimeout(() => {
+                  onSuccess()
+                  onOpenChange(false)
+                  setStep('select')
+                }, 2000)
+              } else {
+                setError(result.error || 'Le paiement a échoué')
+                setStep('paypal')
+              }
+            } catch (err: any) {
+              setError(err.message)
+              setStep('paypal')
+            }
+          },
+          onError: (err: any) => {
+            console.error('PayPal button error:', err)
+            setError('Une erreur est survenue avec PayPal. Veuillez réessayer.')
+          },
+          style: {
+            layout: 'vertical',
+            color: 'gold',
+            shape: 'rect',
+            label: 'pay',
+            height: 45,
+          },
+        })
+
+        paypalButtonsRef.current.render('#paypal-button-container')
+        return true
+      } catch (err) {
+        console.error('PayPal render error:', err)
+        return false
+      }
+    }
+
+    loadPayPalSDK()
+
+    const timer1 = setTimeout(() => tryRenderButtons(), 500)
+    const timer2 = setTimeout(() => tryRenderButtons(), 1500)
+    const timer3 = setTimeout(() => tryRenderButtons(), 3000)
+
+    return () => {
+      clearTimeout(timer1)
+      clearTimeout(timer2)
+      clearTimeout(timer3)
+      if (paypalButtonsRef.current) {
+        try { paypalButtonsRef.current.close() } catch (e) {}
+      }
+    }
+  }, [open, step, paypalLoaded, loadPayPalSDK, onSuccess, onOpenChange, selectedPlan])
+
+  // Reset on close
+  const handleOpenChange = (v: boolean) => {
+    onOpenChange(v)
+    if (!v) {
+      setStep('select')
+      setError('')
+    }
+  }
+
+  return (
+    <Dialog open={open} onOpenChange={handleOpenChange}>
+      <DialogContent className="glass-card border-0 max-w-md" style={{ background: 'rgba(20,22,35,0.98)', backdropFilter: 'blur(30px)' }}>
+        {step === 'select' && (
+          <>
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2 text-white">
+                <div className="w-10 h-10 rounded-xl flex items-center justify-center" style={{ background: 'rgba(245,158,11,0.12)' }}>
+                  <Crown className="w-5 h-5 text-amber-400" />
+                </div>
+                Passer en Premium
+              </DialogTitle>
+              <DialogDescription className="sr-only">Choisissez votre durée d&apos;abonnement Premium et payez via PayPal</DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4 py-2">
+              {/* Features */}
+              <div className="space-y-2 text-sm">
+                <div className="flex items-center gap-2"><Check className="w-4 h-4 text-emerald-400 shrink-0" /> <span style={{ color: 'rgba(255,255,255,0.5)' }}>Tokens illimités</span></div>
+                <div className="flex items-center gap-2"><Check className="w-4 h-4 text-emerald-400 shrink-0" /> <span style={{ color: 'rgba(255,255,255,0.5)' }}>Transactions illimitées</span></div>
+                <div className="flex items-center gap-2"><Check className="w-4 h-4 text-emerald-400 shrink-0" /> <span style={{ color: 'rgba(255,255,255,0.5)' }}>Graphiques d&apos;évolution</span></div>
+                <div className="flex items-center gap-2"><Check className="w-4 h-4 text-emerald-400 shrink-0" /> <span style={{ color: 'rgba(255,255,255,0.5)' }}>Métriques avancées</span></div>
+              </div>
+
+              {/* Duration selector */}
+              <div className="space-y-2">
+                <p className="text-xs font-medium" style={{ color: 'rgba(255,255,255,0.4)' }}>Choisissez votre durée d&apos;engagement</p>
+                <div className="grid grid-cols-2 gap-2">
+                  {SUBSCRIPTION_PLANS.map((plan) => {
+                    const isSelected = selectedPlan === plan.months
+                    const isBest = plan.months === 12
+                    return (
+                      <button
+                        key={plan.months}
+                        onClick={() => setSelectedPlan(plan.months)}
+                        className={`relative p-3 rounded-xl border text-left transition-all ${
+                          isSelected
+                            ? 'border-amber-500/50'
+                            : 'border-white/5 hover:border-white/15'
+                        }`}
+                        style={{
+                          background: isSelected
+                            ? 'rgba(245,158,11,0.08)'
+                            : 'rgba(255,255,255,0.02)',
+                        }}
+                      >
+                        {plan.badge && (
+                          <span
+                            className="absolute -top-2 -right-1 text-[10px] font-bold px-1.5 py-0.5 rounded-md"
+                            style={{
+                              background: isBest
+                                ? 'linear-gradient(135deg, #f59e0b, #f97316)'
+                                : 'rgba(245,158,11,0.2)',
+                              color: isBest ? '#000' : '#f59e0b',
+                            }}
+                          >
+                            {plan.badge}
+                          </span>
+                        )}
+                        <p className={`text-sm font-semibold ${isSelected ? 'text-amber-400' : 'text-white/60'}`}>
+                          {plan.label}
+                        </p>
+                        <div className="mt-1">
+                          <span className={`text-lg font-bold ${isSelected ? 'text-white' : 'text-white/70'}`}>
+                            {plan.total.toFixed(2).replace('.', ',')} €
+                          </span>
+                        </div>
+                        <p className="text-[10px] mt-0.5" style={{ color: 'rgba(255,255,255,0.3)' }}>
+                          {plan.monthly.toFixed(2).replace('.', ',')} €/mois
+                        </p>
+                      </button>
+                    )
+                  })}
+                </div>
+              </div>
+
+              {/* Summary */}
+              <div className="p-3 rounded-xl" style={{ background: 'rgba(245,158,11,0.06)', border: '1px solid rgba(245,158,11,0.15)' }}>
+                <div className="flex items-center justify-between">
+                  <span className="text-sm" style={{ color: 'rgba(255,255,255,0.5)' }}>Total</span>
+                  <div className="text-right">
+                    <span className="text-xl font-bold text-amber-400">{currentPlan.total.toFixed(2).replace('.', ',')} €</span>
+                    {currentPlan.discount > 0 && (
+                      <span className="ml-2 text-xs font-semibold text-emerald-400">
+                        Économie de {((currentPlan.months * 9.99) - currentPlan.total).toFixed(2).replace('.', ',')} €
+                      </span>
+                    )}
+                  </div>
+                </div>
+                <p className="text-[10px] mt-1" style={{ color: 'rgba(255,255,255,0.25)' }}>
+                  Soit {currentPlan.monthly.toFixed(2).replace('.', ',')} €/mois
+                  {currentPlan.discount > 0 && ` au lieu de 9,99 €/mois`}
+                </p>
+              </div>
+
+              <div className="p-3 rounded-xl flex items-start gap-2" style={{ background: 'rgba(6,182,212,0.06)', border: '1px solid rgba(6,182,212,0.12)' }}>
+                <Shield className="w-4 h-4 text-cyan-400 shrink-0 mt-0.5" />
+                <p className="text-xs" style={{ color: 'rgba(255,255,255,0.35)' }}>
+                  Paiement sécurisé via PayPal. Annulation possible à tout moment depuis votre profil.
+                </p>
+              </div>
+              {error && (
+                <div className="flex items-center gap-2 text-red-400 text-sm p-3 rounded-xl" style={{ background: 'rgba(239,68,68,0.08)' }}>
+                  <AlertTriangle className="w-4 h-4 shrink-0" />
+                  {error}
+                </div>
+              )}
+            </div>
+            <DialogFooter className="gap-2 sm:gap-0">
+              <DialogClose asChild>
+                <Button variant="ghost" className="text-white/40 hover:text-white/60 rounded-xl">Annuler</Button>
+              </DialogClose>
+              <Button
+                onClick={() => setStep('paypal')}
+                className="rounded-xl text-black font-semibold shadow-lg"
+                style={{ background: 'linear-gradient(135deg, #f59e0b, #f97316)', boxShadow: '0 4px 20px rgba(245,158,11,0.3)' }}
+              >
+                <Crown className="w-4 h-4 mr-2" /> Payer avec PayPal
+              </Button>
+            </DialogFooter>
+          </>
+        )}
+        {step === 'paypal' && (
+          <>
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2 text-white">
+                <div className="w-10 h-10 rounded-xl flex items-center justify-center" style={{ background: 'rgba(245,158,11,0.12)' }}>
+                  <Crown className="w-5 h-5 text-amber-400" />
+                </div>
+                Paiement Premium — {currentPlan.label}
+              </DialogTitle>
+              <DialogDescription className="sr-only">Paiement sécurisé via PayPal pour l&apos;abonnement {currentPlan.label}</DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4 py-2">
+              {/* Order summary */}
+              <div className="p-4 rounded-xl" style={{ background: 'rgba(245,158,11,0.06)', border: '1px solid rgba(245,158,11,0.15)' }}>
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-sm font-semibold text-white/80">CryptoFolio Premium</p>
+                    <p className="text-xs" style={{ color: 'rgba(255,255,255,0.35)' }}>
+                      Abonnement {currentPlan.label}
+                      {currentPlan.discount > 0 && ` (-${currentPlan.discount}%)`}
+                    </p>
+                  </div>
+                  <span className="text-2xl font-bold text-amber-400">{currentPlan.total.toFixed(2).replace('.', ',')} €</span>
+                </div>
+              </div>
+
+              {/* PayPal Payment Section */}
+              <div className="space-y-3">
+                <div className="flex items-center gap-2 mb-2">
+                  <div className="h-px flex-1" style={{ background: 'rgba(255,255,255,0.08)' }} />
+                  <span className="text-xs font-medium" style={{ color: 'rgba(255,255,255,0.25)' }}>Paiement sécurisé via PayPal</span>
+                  <div className="h-px flex-1" style={{ background: 'rgba(255,255,255,0.08)' }} />
+                </div>
+
+                {paypalLoading && (
+                  <div className="flex items-center justify-center py-4 gap-2">
+                    <RefreshCw className="w-4 h-4 animate-spin text-amber-400/60" />
+                    <span className="text-xs" style={{ color: 'rgba(255,255,255,0.3)' }}>Chargement de PayPal...</span>
+                  </div>
+                )}
+
+                <div
+                  id="paypal-button-container"
+                  ref={paypalContainerRef}
+                  className="min-h-[45px]"
+                  style={{ opacity: paypalLoaded ? 1 : 0.3 }}
+                />
+
+                {!paypalLoaded && !paypalLoading && (
+                  <div className="flex items-center justify-center py-4">
+                    <p className="text-xs" style={{ color: 'rgba(255,255,255,0.25)' }}>Chargement du bouton de paiement...</p>
+                  </div>
+                )}
+              </div>
+
+              {error && (
+                <div className="flex items-center gap-2 text-red-400 text-sm p-3 rounded-xl" style={{ background: 'rgba(239,68,68,0.08)' }}>
+                  <AlertTriangle className="w-4 h-4 shrink-0" />
+                  {error}
+                </div>
+              )}
+            </div>
+            <DialogFooter>
+              <Button variant="ghost" className="text-white/40 hover:text-white/60 rounded-xl" onClick={() => { setStep('select'); setError('') }}>
+                Retour
+              </Button>
+            </DialogFooter>
+          </>
+        )}
+        {step === 'processing' && (
+          <div className="py-12 flex flex-col items-center gap-4">
+            <div className="relative">
+              <div className="w-16 h-16 rounded-full flex items-center justify-center" style={{ background: 'rgba(245,158,11,0.1)' }}>
+                <RefreshCw className="w-8 h-8 text-amber-400 animate-spin" />
+              </div>
+            </div>
+            <div className="text-center">
+              <p className="text-white/80 font-medium">Vérification du paiement...</p>
+              <p className="text-xs mt-1" style={{ color: 'rgba(255,255,255,0.3)' }}>Activation de votre abonnement Premium</p>
+            </div>
+          </div>
+        )}
+        {step === 'success' && (
+          <div className="py-12 flex flex-col items-center gap-4">
+            <div className="w-16 h-16 rounded-full flex items-center justify-center" style={{ background: 'rgba(16,185,129,0.15)' }}>
+              <Check className="w-8 h-8 text-emerald-400" />
+            </div>
+            <div className="text-center">
+              <p className="text-white/80 font-semibold text-lg">Bienvenue en Premium !</p>
+              <p className="text-xs mt-1" style={{ color: 'rgba(255,255,255,0.3)' }}>Votre accès illimité est maintenant activé</p>
+            </div>
+          </div>
+        )}
+      </DialogContent>
+    </Dialog>
+  )
+}
+
+// ============================================================
 // PROFILE VIEW
 // ============================================================
-function ProfileView({ user }: { user: any }) {
+function ProfileView({ user, onUpgrade }: { user: any; onUpgrade: () => void }) {
   const isPremium = user?.role === 'user_premium'
   const isAdmin = user?.role === 'admin'
+  const [showUpgrade, setShowUpgrade] = useState(false)
 
   return (
     <div className="space-y-6 max-w-2xl page-transition">
@@ -1604,17 +2006,37 @@ function ProfileView({ user }: { user: any }) {
               {isPremium ? (
                 <Badge className="mt-4 bg-amber-500 text-black border-0">Plan actuel</Badge>
               ) : !isAdmin ? (
-                <Button className="mt-4 rounded-xl" style={{ background: 'rgba(245,158,11,0.15)', color: '#f59e0b', border: '1px solid rgba(245,158,11,0.2)' }} disabled>
+                <Button
+                  className="mt-4 rounded-xl text-black font-semibold shadow-lg transition-all active:scale-[0.98]"
+                  style={{ background: 'linear-gradient(135deg, #f59e0b, #f97316)', boxShadow: '0 4px 20px rgba(245,158,11,0.3)' }}
+                  onClick={() => setShowUpgrade(true)}
+                >
                   <Crown className="w-4 h-4 mr-2" /> Passer en Premium
                 </Button>
               ) : null}
             </div>
           </div>
           {!isPremium && !isAdmin && (
-            <p className="text-xs text-center mt-5" style={{ color: 'rgba(255,255,255,0.15)' }}>
-              L&apos;intégration Stripe sera bientôt disponible. Contactez l&apos;administrateur pour activer votre compte Premium.
-            </p>
+            <div className="flex flex-col items-center mt-5 gap-3">
+              <p className="text-xs" style={{ color: 'rgba(255,255,255,0.3)' }}>
+                Débloquez l&apos;accès illimité pour {SUBSCRIPTION_PLANS[0].monthly.toFixed(2).replace('.', ',')} €/mois
+              </p>
+              <Button
+                className="rounded-xl text-black font-semibold shadow-lg transition-all active:scale-[0.98]"
+                style={{ background: 'linear-gradient(135deg, #f59e0b, #f97316)', boxShadow: '0 4px 20px rgba(245,158,11,0.3)' }}
+                onClick={() => setShowUpgrade(true)}
+              >
+                <Crown className="w-4 h-4 mr-2" /> Passer en Premium
+              </Button>
+            </div>
           )}
+
+          {/* Upgrade Modal */}
+          <UpgradePremiumModal
+            open={showUpgrade}
+            onOpenChange={setShowUpgrade}
+            onSuccess={onUpgrade}
+          />
         </CardContent>
       </Card>
     </div>
@@ -2281,8 +2703,14 @@ function AdminExchangesView() {
 // ============================================================
 export default function Home() {
   const { user, loading, login, register, logout } = useAuth()
+  const { update: updateSession } = useSession()
   const [currentView, setCurrentView] = useState<View>('dashboard')
+  const [showUpgrade, setShowUpgrade] = useState(false)
   const [seeded, setSeeded] = useState(false)
+
+  const refreshSession = useCallback(async () => {
+    await updateSession({})
+  }, [updateSession])
 
   // Seed DB on first load
   useEffect(() => {
@@ -2342,8 +2770,8 @@ export default function Home() {
 
     switch (currentView) {
       case 'dashboard': return <DashboardView user={user} />
-      case 'transactions': return <TransactionsView user={user} />
-      case 'profile': return <ProfileView user={user} />
+      case 'transactions': return <TransactionsView user={user} onUpgrade={() => setShowUpgrade(true)} />
+      case 'profile': return <ProfileView user={user} onUpgrade={refreshSession} />
       default: return <DashboardView user={user} />
     }
   }
@@ -2365,6 +2793,13 @@ export default function Home() {
         currentView={currentView}
         setView={setCurrentView}
         user={user}
+      />
+
+      {/* Global Upgrade Modal (accessible from TransactionsView freemium banner) */}
+      <UpgradePremiumModal
+        open={showUpgrade}
+        onOpenChange={setShowUpgrade}
+        onSuccess={refreshSession}
       />
     </div>
   )
