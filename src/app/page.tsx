@@ -731,7 +731,7 @@ function LivePriceTicker() {
 // ============================================================
 // DASHBOARD VIEW
 // ============================================================
-function DashboardView({ user }: { user: any }) {
+function DashboardView({ user, onUpgrade }: { user: any; onUpgrade: () => void }) {
   const [data, setData] = useState<DashboardData | null>(null)
   const [loading, setLoading] = useState(true)
   const [refreshing, setRefreshing] = useState(false)
@@ -883,6 +883,28 @@ function DashboardView({ user }: { user: any }) {
 
       {/* Live Price Ticker */}
       <LivePriceTicker />
+
+      {/* Freemium Upgrade Banner */}
+      {user?.role === 'user_free' && (
+        <Card className="glass-card rounded-2xl fade-in-up" style={{ borderColor: 'rgba(245,158,11,0.25)', background: 'rgba(245,158,11,0.04)' }}>
+          <CardContent className="p-4 flex flex-col sm:flex-row items-start sm:items-center gap-3">
+            <div className="w-10 h-10 rounded-xl flex items-center justify-center shrink-0" style={{ background: 'rgba(245,158,11,0.12)' }}>
+              <Crown className="w-5 h-5 text-amber-400" />
+            </div>
+            <div className="flex-1 text-sm">
+              <p className="font-semibold text-amber-400">Débloquez l&apos;accès illimité</p>
+              <p style={{ color: 'rgba(255,255,255,0.35)' }}>Plan Gratuit limité à 3 tokens et 10 transactions. Passez en Premium pour profiter de toutes les fonctionnalités.</p>
+            </div>
+            <Button
+              className="rounded-xl text-black font-semibold shadow-lg transition-all active:scale-[0.98] shrink-0"
+              style={{ background: 'linear-gradient(135deg, #f59e0b, #f97316)', boxShadow: '0 4px 15px rgba(245,158,11,0.25)' }}
+              onClick={onUpgrade}
+            >
+              <Crown className="w-4 h-4 mr-2" /> Passer en Premium
+            </Button>
+          </CardContent>
+        </Card>
+      )}
 
       {/* KPI Cards */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-5">
@@ -2741,7 +2763,7 @@ export default function Home() {
   const renderView = () => {
     // Admin section uses tabs
     if (currentView === 'admin-users' || currentView === 'admin-tokens' || currentView === 'admin-exchanges') {
-      if (!isAdmin) return <DashboardView user={user} />
+      if (!isAdmin) return <DashboardView user={user} onUpgrade={() => setShowUpgrade(true)} />
       return (
         <div className="space-y-6 page-transition">
           <div className="fade-in-up">
@@ -2769,10 +2791,10 @@ export default function Home() {
     }
 
     switch (currentView) {
-      case 'dashboard': return <DashboardView user={user} />
+      case 'dashboard': return <DashboardView user={user} onUpgrade={() => setShowUpgrade(true)} />
       case 'transactions': return <TransactionsView user={user} onUpgrade={() => setShowUpgrade(true)} />
       case 'profile': return <ProfileView user={user} onUpgrade={refreshSession} />
-      default: return <DashboardView user={user} />
+      default: return <DashboardView user={user} onUpgrade={() => setShowUpgrade(true)} />
     }
   }
 
