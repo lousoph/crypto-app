@@ -9,7 +9,7 @@ import {
   LogOut, LogIn, TrendingUp, TrendingDown, DollarSign, Wallet,
   Plus, Trash2, Edit3, ChevronDown, ChevronUp, RefreshCw,
   BarChart3, Crown, AlertTriangle, Check, X, Menu,
-  Search, Activity, Zap, Eye
+  Search, Activity, Zap, Eye, Gauge, ShoppingCart, Tag, ArrowUpCircle, ArrowDownCircle
 } from 'lucide-react'
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
@@ -27,7 +27,7 @@ import { Switch } from '@/components/ui/switch'
 import { toast } from 'sonner'
 import {
   BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
-  Legend
+  Legend, AreaChart, Area, ReferenceLine
 } from 'recharts'
 import { signIn, signOut, useSession } from 'next-auth/react'
 
@@ -729,6 +729,399 @@ function LivePriceTicker() {
 }
 
 // ============================================================
+// FEAR & GREED INDEX WIDGET
+// ============================================================
+interface FearGreedData {
+  value: number
+  classification: string
+  timestamp: string
+  timeUntilUpdate: string
+  history: { value: number; classification: string; date: string }[]
+}
+
+function FearGreedWidget() {
+  const [data, setData] = useState<FearGreedData | null>(null)
+  const [loading, setLoading] = useState(true)
+
+  useEffect(() => {
+    const fetchFG = async () => {
+      try {
+        const res = await fetch('/api/fear-greed')
+        if (res.ok) {
+          const d = await res.json()
+          setData(d)
+        }
+      } catch (err) {
+        console.error('Fear & Greed fetch error:', err)
+      } finally {
+        setLoading(false)
+      }
+    }
+    fetchFG()
+    const interval = setInterval(fetchFG, 900000) // refresh every 15 min
+    return () => clearInterval(interval)
+  }, [])
+
+  const getFGColor = (value: number) => {
+    if (value <= 20) return '#ef4444'       // Extreme Fear
+    if (value <= 40) return '#f97316'      // Fear
+    if (value <= 60) return '#eab308'      // Neutral
+    if (value <= 80) return '#22c55e'      // Greed
+    return '#16a34a'                       // Extreme Greed
+  }
+
+  const getFGLabel = (classification: string) => {
+    const labels: Record<string, string> = {
+      'Extreme Fear': 'Peur Extrême',
+      'Fear': 'Peur',
+      'Neutral': 'Neutre',
+      'Greed': 'Cupidité',
+      'Extreme Greed': 'Cupidité Extrême',
+    }
+    return labels[classification] || classification
+  }
+
+  const getSignal = (value: number) => {
+    if (value <= 25) return { label: 'Moment d\'achat idéal', icon: ShoppingCart, color: '#22c55e', bg: 'rgba(34,197,94,0.08)', borderColor: 'rgba(34,197,94,0.2)' }
+    if (value <= 45) return { label: 'Fenêtre d\'achat favorable', icon: ArrowUpCircle, color: '#84cc16', bg: 'rgba(132,204,22,0.08)', borderColor: 'rgba(132,204,22,0.2)' }
+    if (value <= 55) return { label: 'Zone neutre – Prudence', icon: Eye, color: '#eab308', bg: 'rgba(234,179,8,0.08)', borderColor: 'rgba(234,179,8,0.2)' }
+    if (value <= 75) return { label: 'Zone de prudence – Envisagez de vendre', icon: Tag, color: '#f97316', bg: 'rgba(249,115,22,0.08)', borderColor: 'rgba(249,115,22,0.2)' }
+    return { label: 'Moment de vente opportun', icon: ArrowDownCircle, color: '#ef4444', bg: 'rgba(239,68,68,0.08)', borderColor: 'rgba(239,68,68,0.2)' }
+  }
+
+  if (loading) {
+    return (
+      <Card className="glass-card rounded-2xl shimmer fade-in-up">
+        <CardContent className="p-6">
+          <div className="h-48 rounded-xl" style={{ background: 'rgba(255,255,255,0.03)' }} />
+        </CardContent>
+      </Card>
+    )
+  }
+
+  if (!data) return null
+
+  const signal = getSignal(data.value)
+  const fgColor = getFGColor(data.value)
+  const gaugeAngle = (data.value / 100) * 180 - 90 // -90 to 90 degrees
+
+  // Area chart data for history
+  const chartData = [...data.history].reverse().map(h => ({
+    date: h.date.slice(5), // MM-DD
+    value: h.value,
+  }))
+
+  return (
+    <Card className="glass-card rounded-2xl card-hover fade-in-up">
+      <CardContent className="p-5 sm:p-6 space-y-5">
+        {/* Header */}
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <div className="w-9 h-9 rounded-xl flex items-center justify-center" style={{ background: `${fgColor}18` }}>
+              <Gauge className="w-4 h-4" style={{ color: fgColor }} />
+            </div>
+            <div>
+              <h3 className="text-sm font-semibold text-white/80">Indice de Peur & Cupidité</h3>
+              <p className="text-xs" style={{ color: 'rgba(255,255,255,0.3)' }}>Marché crypto global</p>
+            </div>
+          </div>
+          <div className="text-right">
+            <p className="text-3xl font-bold" style={{ color: fgColor }}>{data.value}</p>
+            <p className="text-xs font-semibold" style={{ color: fgColor }}>{getFGLabel(data.classification)}</p>
+          </div>
+        </div>
+
+        {/* Gauge */}
+        <div className="flex justify-center">
+          <div className="relative" style={{ width: 220, height: 120 }}>
+            <svg viewBox="0 0 220 120" className="w-full h-full">
+              {/* Background arc */}
+              <defs>
+                <linearGradient id="fgGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+                  <stop offset="0%" stopColor="#ef4444" />
+                  <stop offset="25%" stopColor="#f97316" />
+                  <stop offset="50%" stopColor="#eab308" />
+                  <stop offset="75%" stopColor="#22c55e" />
+                  <stop offset="100%" stopColor="#16a34a" />
+                </linearGradient>
+              </defs>
+              {/* Arc background */}
+              <path
+                d="M 20 110 A 90 90 0 0 1 200 110"
+                fill="none"
+                stroke="rgba(255,255,255,0.06)"
+                strokeWidth="14"
+                strokeLinecap="round"
+              />
+              {/* Colored arc */}
+              <path
+                d="M 20 110 A 90 90 0 0 1 200 110"
+                fill="none"
+                stroke="url(#fgGrad)"
+                strokeWidth="14"
+                strokeLinecap="round"
+              />
+              {/* Needle */}
+              <line
+                x1="110"
+                y1="110"
+                x2={110 + 80 * Math.cos((gaugeAngle - 90) * Math.PI / 180)}
+                y2={110 + 80 * Math.sin((gaugeAngle - 90) * Math.PI / 180)}
+                stroke="white"
+                strokeWidth="2.5"
+                strokeLinecap="round"
+                style={{ transition: 'all 1s ease-out' }}
+              />
+              {/* Center dot */}
+              <circle cx="110" cy="110" r="6" fill="white" />
+              {/* Labels */}
+              <text x="20" y="108" fill="rgba(255,255,255,0.3)" fontSize="9" textAnchor="middle">0</text>
+              <text x="110" y="15" fill="rgba(255,255,255,0.3)" fontSize="9" textAnchor="middle">50</text>
+              <text x="200" y="108" fill="rgba(255,255,255,0.3)" fontSize="9" textAnchor="middle">100</text>
+            </svg>
+          </div>
+        </div>
+
+        {/* Buy/Sell Signal */}
+        <div
+          className="flex items-center gap-3 rounded-xl p-3.5 border"
+          style={{ background: signal.bg, borderColor: signal.borderColor }}
+        >
+          <signal.icon className="w-5 h-5 shrink-0" style={{ color: signal.color }} />
+          <div className="flex-1">
+            <p className="text-sm font-semibold" style={{ color: signal.color }}>{signal.label}</p>
+            <p className="text-xs" style={{ color: 'rgba(255,255,255,0.35)' }}>
+              {data.value <= 25 ? 'Le marché est dans un état de peur extrême – c\'est souvent le meilleur moment pour acheter à bas prix.' :
+               data.value <= 45 ? 'Le marché est craintif – les prix peuvent être sous-évalués, c\'est une fenêtre d\'achat potentielle.' :
+               data.value <= 55 ? 'Le marché est neutre – ni peur ni cupidité excessive. Restez prudent et surveillez les tendances.' :
+               data.value <= 75 ? 'Le marché devient cupide – les prix pourraient être surévalués. Envisagez de prendre des bénéfices partiels.' :
+               'Le marché est en cupidié extrême – c\'est souvent le moment de vendre avant une correction.'}
+            </p>
+          </div>
+        </div>
+
+        {/* 30-Day History Chart */}
+        {chartData.length > 1 && (
+          <div>
+            <p className="text-xs font-medium mb-2" style={{ color: 'rgba(255,255,255,0.35)' }}>Historique 30 jours</p>
+            <ResponsiveContainer width="100%" height={100}>
+              <AreaChart data={chartData}>
+                <defs>
+                  <linearGradient id="fgAreaGrad" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="0%" stopColor={fgColor} stopOpacity={0.3} />
+                    <stop offset="100%" stopColor={fgColor} stopOpacity={0} />
+                  </linearGradient>
+                </defs>
+                <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.03)" />
+                <XAxis dataKey="date" stroke="rgba(255,255,255,0.2)" fontSize={9} tickLine={false} interval="preserveStartEnd" />
+                <YAxis domain={[0, 100]} stroke="rgba(255,255,255,0.2)" fontSize={9} tickLine={false} axisLine={false} width={25} />
+                <Tooltip
+                  contentStyle={{
+                    background: 'rgba(26,29,46,0.95)',
+                    border: '1px solid rgba(255,255,255,0.1)',
+                    borderRadius: '12px',
+                    fontSize: '12px',
+                    color: 'white',
+                  }}
+                />
+                <ReferenceLine y={25} stroke="rgba(34,197,94,0.3)" strokeDasharray="4 4" />
+                <ReferenceLine y={75} stroke="rgba(239,68,68,0.3)" strokeDasharray="4 4" />
+                <Area type="monotone" dataKey="value" stroke={fgColor} strokeWidth={2} fill="url(#fgAreaGrad)" />
+              </AreaChart>
+            </ResponsiveContainer>
+          </div>
+        )}
+
+        {/* Legend */}
+        <div className="flex items-center justify-between text-[10px]" style={{ color: 'rgba(255,255,255,0.25)' }}>
+          <span className="flex items-center gap-1"><span className="w-2 h-2 rounded-full bg-red-500" /> Peur Extrême</span>
+          <span className="flex items-center gap-1"><span className="w-2 h-2 rounded-full bg-orange-500" /> Peur</span>
+          <span className="flex items-center gap-1"><span className="w-2 h-2 rounded-full bg-yellow-500" /> Neutre</span>
+          <span className="flex items-center gap-1"><span className="w-2 h-2 rounded-full bg-green-500" /> Cupidité</span>
+          <span className="flex items-center gap-1"><span className="w-2 h-2 rounded-full bg-emerald-600" /> Cupidité Extr.</span>
+        </div>
+      </CardContent>
+    </Card>
+  )
+}
+
+// ============================================================
+// TOKEN BUY/SELL SIGNALS
+// ============================================================
+function TokenSignals() {
+  const [data, setData] = useState<DashboardData | null>(null)
+  const [fgValue, setFgValue] = useState<number | null>(null)
+  const [loading, setLoading] = useState(true)
+
+  useEffect(() => {
+    const fetchAll = async () => {
+      try {
+        const [dashRes, fgRes] = await Promise.all([
+          fetch('/api/dashboard'),
+          fetch('/api/fear-greed'),
+        ])
+        if (dashRes.ok) setData(await dashRes.json())
+        if (fgRes.ok) {
+          const fg = await fgRes.json()
+          setFgValue(fg.value)
+        }
+      } catch (err) {
+        console.error(err)
+      } finally {
+        setLoading(false)
+      }
+    }
+    fetchAll()
+    const interval = setInterval(fetchAll, 60000)
+    return () => clearInterval(interval)
+  }, [])
+
+  if (loading) {
+    return (
+      <Card className="glass-card rounded-2xl shimmer fade-in-up">
+        <CardContent className="p-6">
+          <div className="h-48 rounded-xl" style={{ background: 'rgba(255,255,255,0.03)' }} />
+        </CardContent>
+      </Card>
+    )
+  }
+
+  if (!data || data.tokens.length === 0) return null
+
+  const getTokenSignal = (token: TokenDashboard) => {
+    const priceVsPRU = token.pru > 0 ? (token.currentPrice - token.pru) / token.pru : 0
+    const signals: { ticker: string; signal: 'ACHAT' | 'VENTE' | 'HOLD'; color: string; bg: string; borderColor: string; reason: string; icon: any }[] = []
+
+    // Token is significantly below PRU (bought price) → buy opportunity
+    if (priceVsPRU <= -0.20) {
+      signals.push({
+        ticker: token.ticker,
+        signal: 'ACHAT',
+        color: '#22c55e',
+        bg: 'rgba(34,197,94,0.08)',
+        borderColor: 'rgba(34,197,94,0.2)',
+        reason: `Le cours actuel est ${Math.abs(priceVsPRU * 100).toFixed(1)}% sous votre PRU – Opportunité de moyenne à la baisse`,
+        icon: ShoppingCart,
+      })
+    } else if (priceVsPRU <= -0.05) {
+      signals.push({
+        ticker: token.ticker,
+        signal: 'ACHAT',
+        color: '#84cc16',
+        bg: 'rgba(132,204,22,0.08)',
+        borderColor: 'rgba(132,204,22,0.2)',
+        reason: `Le cours est ${(Math.abs(priceVsPRU) * 100).toFixed(1)}% sous votre PRU – Possibilité d'achat à prix réduit`,
+        icon: ArrowUpCircle,
+      })
+    } else if (priceVsPRU >= 0.50) {
+      signals.push({
+        ticker: token.ticker,
+        signal: 'VENTE',
+        color: '#ef4444',
+        bg: 'rgba(239,68,68,0.08)',
+        borderColor: 'rgba(239,68,68,0.2)',
+        reason: `Plus-value de +${(priceVsPRU * 100).toFixed(1)}% – Envisagez de prendre des bénéfices importants`,
+        icon: ArrowDownCircle,
+      })
+    } else if (priceVsPRU >= 0.25) {
+      signals.push({
+        ticker: token.ticker,
+        signal: 'VENTE',
+        color: '#f97316',
+        bg: 'rgba(249,115,22,0.08)',
+        borderColor: 'rgba(249,115,22,0.2)',
+        reason: `Plus-value de +${(priceVsPRU * 100).toFixed(1)}% – Pensez à sécuriser une partie de vos gains`,
+        icon: Tag,
+      })
+    } else {
+      signals.push({
+        ticker: token.ticker,
+        signal: 'HOLD',
+        color: '#eab308',
+        bg: 'rgba(234,179,8,0.06)',
+        borderColor: 'rgba(234,179,8,0.15)',
+        reason: `Proche de votre PRU (${(priceVsPRU >= 0 ? '+' : '')}${(priceVsPRU * 100).toFixed(1)}%) – Conservez et surveillez`,
+        icon: Eye,
+      })
+    }
+    return signals[0]
+  }
+
+  const tokenSignals = data.tokens
+    .map(t => getTokenSignal(t))
+    .sort((a, b) => {
+      const order = { 'ACHAT': 0, 'VENTE': 1, 'HOLD': 2 }
+      return order[a.signal] - order[b.signal]
+    })
+
+  // Market context summary
+  const marketContext = fgValue !== null
+    ? fgValue <= 25 ? { text: 'Marché en peur extrême – Opportunités d\'achat', color: '#22c55e' }
+      : fgValue <= 45 ? { text: 'Marché craintif – Favorable aux achats', color: '#84cc16' }
+      : fgValue <= 55 ? { text: 'Marché neutre – Restez prudent', color: '#eab308' }
+      : fgValue <= 75 ? { text: 'Marché confiant – Prudence recommandée', color: '#f97316' }
+      : { text: 'Marché euphorique – Risque de correction', color: '#ef4444' }
+    : null
+
+  return (
+    <Card className="glass-card rounded-2xl card-hover fade-in-up">
+      <CardContent className="p-5 sm:p-6 space-y-4">
+        <div className="flex items-center gap-3">
+          <div className="w-9 h-9 rounded-xl flex items-center justify-center" style={{ background: 'rgba(124,58,237,0.12)' }}>
+            <Activity className="w-4 h-4 text-violet-400" />
+          </div>
+          <div>
+            <h3 className="text-sm font-semibold text-white/80">Signaux d&apos;Achat & Vente</h3>
+            <p className="text-xs" style={{ color: 'rgba(255,255,255,0.3)' }}>Basé sur votre PRU et le contexte marché</p>
+          </div>
+        </div>
+
+        {/* Market Context Banner */}
+        {marketContext && (
+          <div className="flex items-center gap-2 rounded-lg p-2.5 border" style={{ background: `${marketContext.color}10`, borderColor: `${marketContext.color}30` }}>
+            <Zap className="w-4 h-4 shrink-0" style={{ color: marketContext.color }} />
+            <p className="text-xs font-medium" style={{ color: marketContext.color }}>{marketContext.text}</p>
+          </div>
+        )}
+
+        {/* Signal List */}
+        <div className="space-y-2 max-h-[320px] overflow-y-auto custom-scrollbar pr-1">
+          {tokenSignals.map(ts => (
+            <div
+              key={ts.ticker}
+              className="flex items-start gap-3 rounded-xl p-3 border transition-colors"
+              style={{ background: ts.bg, borderColor: ts.borderColor }}
+            >
+              <div className="flex items-center gap-2 shrink-0">
+                <TokenLogo ticker={ts.ticker} size={28} />
+                <Badge
+                  className="font-bold text-[10px] px-2 py-0.5 border-0"
+                  style={{ background: `${ts.color}20`, color: ts.color }}
+                >
+                  {ts.signal}
+                </Badge>
+              </div>
+              <div className="flex-1 min-w-0">
+                <div className="flex items-center gap-1.5 mb-0.5">
+                  <ts.icon className="w-3.5 h-3.5 shrink-0" style={{ color: ts.color }} />
+                  <span className="text-xs font-semibold" style={{ color: ts.color }}>{ts.ticker}</span>
+                </div>
+                <p className="text-[11px] leading-relaxed" style={{ color: 'rgba(255,255,255,0.45)' }}>{ts.reason}</p>
+              </div>
+            </div>
+          ))}
+        </div>
+
+        {/* Info note */}
+        <p className="text-[10px] text-center" style={{ color: 'rgba(255,255,255,0.2)' }}>
+          Ces signaux sont indicatifs et ne constituent pas un conseil financier. Faites vos propres recherches.
+        </p>
+      </CardContent>
+    </Card>
+  )
+}
+
+// ============================================================
 // DASHBOARD VIEW
 // ============================================================
 function DashboardView({ user, onUpgrade }: { user: any; onUpgrade: () => void }) {
@@ -883,6 +1276,13 @@ function DashboardView({ user, onUpgrade }: { user: any; onUpgrade: () => void }
 
       {/* Live Price Ticker */}
       <LivePriceTicker />
+
+      {/* Fear & Greed Index + Market Signals */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-5 fade-in-up">
+        <FearGreedWidget />
+        {/* Token Buy/Sell Signals */}
+        <TokenSignals />
+      </div>
 
       {/* Freemium Upgrade Banner */}
       {user?.role === 'user_free' && (
@@ -2736,6 +3136,18 @@ export default function Home() {
   const refreshSession = useCallback(async () => {
     await updateSession({})
   }, [updateSession])
+
+  // Persist & restore current view from localStorage
+  useEffect(() => {
+    const saved = localStorage.getItem('cf_view') as View | null
+    if (saved && saved !== currentView) {
+      setCurrentView(saved)
+    }
+  }, []) // eslint-disable-line react-hooks/exhaustive-deps
+
+  useEffect(() => {
+    localStorage.setItem('cf_view', currentView)
+  }, [currentView])
 
   // Seed DB on first load
   useEffect(() => {

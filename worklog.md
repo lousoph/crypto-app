@@ -1,24 +1,23 @@
 ---
 Task ID: 1
 Agent: Main
-Task: Fix logout issue and enable Premium upgrade for free users
+Task: Fix client-side exception, add Fear & Greed Index, add buy/sell signals, persist view on refresh
 
 Work Log:
-- Fixed logout: Removed mockUser hack and restored LoginScreen when user is null
-- Created UpgradePremiumModal component with 4 subscription plans (1/3/6/12 months) and PayPal integration
-- Updated ProfileView: replaced disabled "Passer en Premium" button with functional one that opens the upgrade modal
-- Added "Premium" button in TransactionsView freemium banner for easy upgrade access
-- Added global UpgradePremiumModal in Home component accessible from any view
-- Recreated missing API routes: /api/paypal/create-order, /api/paypal/capture-order, /api/fear-greed, /api/subscription
-- Restored PayPal production credentials in .env file
-- Build compiles successfully with all API routes present
+- Investigated client-side exception - build was successful, no compile errors found
+- Added FearGreedWidget component with SVG gauge, classification labels in French, buy/sell signal panel, 30-day area chart history
+- Added TokenSignals component showing per-token ACHAT/VENTE/HOLD signals based on PRU vs current price
+- Both widgets placed in grid layout on Dashboard view after Live Price Ticker
+- Added localStorage persistence for currentView so page stays on same tab after refresh
+- Fixed unused variable `roi` in TokenSignals
+- Used useEffect for localStorage to avoid SSR hydration mismatch
+- Added new lucide-react icons: Gauge, ShoppingCart, Tag, ArrowUpCircle, ArrowDownCircle
+- Added recharts imports: AreaChart, Area, ReferenceLine
+- Fixed package.json build/start scripts (removed standalone references)
+- Build passes successfully, server responds 200 on first request
 
 Stage Summary:
-- Logout now works correctly (signOut redirects to LoginScreen)
-- Free users can now purchase Premium via PayPal with duration options:
-  - 1 month: 9,99€ (no discount)
-  - 3 months: 26,97€ (-10%)
-  - 6 months: 50,95€ (-15%)
-  - 12 months: 95,90€ (-20%)
-- PayPal integration uses production API (api-m.paypal.com)
-- All API routes restored and functional
+- Fear & Greed Index widget: Live gauge with SVG, 30-day history chart, buy/sell signal based on index value
+- Token Signals: Per-token analysis comparing current price to PRU with ACHAT/VENTE/HOLD recommendations
+- View persistence: localStorage saves and restores currentView across page refreshes
+- Server environment: Kubernetes kills background processes, but preview system handles this
