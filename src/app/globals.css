@@ -1007,3 +1007,727 @@ input:focus, select:focus, textarea:focus {
 .demo-account-btn:hover {
   transform: translateX(4px);
 }
+
+/* ============================================================
+   PARTICLE FIELD — FLOATING DOTS
+   ============================================================ */
+.particle-field {
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+.particle {
+  position: absolute;
+  border-radius: 50%;
+  animation: particleFloat linear infinite;
+  will-change: transform, opacity;
+}
+
+@keyframes particleFloat {
+  0% {
+    transform: translateY(100vh) translateX(0) scale(0);
+    opacity: 0;
+  }
+  10% {
+    opacity: 1;
+    transform: translateY(80vh) translateX(5px) scale(1);
+  }
+  90% {
+    opacity: 0.6;
+  }
+  100% {
+    transform: translateY(-10vh) translateX(-5px) scale(0.3);
+    opacity: 0;
+  }
+}
+
+/* ============================================================
+   MOUSE GLOW — CURSOR FOLLOWING RADIAL GRADIENT
+   ============================================================ */
+.mouse-glow {
+  position: fixed;
+  width: 600px;
+  height: 600px;
+  border-radius: 50%;
+  pointer-events: none;
+  z-index: 0;
+  background: radial-gradient(circle, rgba(124, 92, 252, 0.06) 0%, rgba(6, 182, 212, 0.02) 40%, transparent 70%);
+  transform: translate(-50%, -50%);
+  transition: left 0.3s cubic-bezier(0.16, 1, 0.3, 1), top 0.3s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.5s ease;
+  will-change: left, top;
+  opacity: 0;
+}
+
+.mouse-glow.active {
+  opacity: 1;
+}
+
+/* ============================================================
+   3D TILT CARD — PERSPECTIVE TRANSFORM
+   ============================================================ */
+.tilt-card {
+  transform-style: preserve-3d;
+  transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+  will-change: transform;
+}
+
+.tilt-card .tilt-inner {
+  transform: translateZ(20px);
+  transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.tilt-card:hover .tilt-inner {
+  transform: translateZ(30px);
+}
+
+/* ============================================================
+   AURORA / MORPHING BLOB BACKGROUND
+   ============================================================ */
+.aurora-blob {
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(80px);
+  animation: auroraMorph 12s ease-in-out infinite alternate;
+  will-change: transform, border-radius;
+}
+
+@keyframes auroraMorph {
+  0% {
+    border-radius: 40% 60% 60% 40% / 60% 30% 70% 40%;
+    transform: rotate(0deg) scale(1);
+  }
+  33% {
+    border-radius: 60% 40% 30% 70% / 40% 60% 40% 60%;
+    transform: rotate(60deg) scale(1.05);
+  }
+  66% {
+    border-radius: 30% 70% 50% 50% / 50% 40% 60% 50%;
+    transform: rotate(120deg) scale(0.95);
+  }
+  100% {
+    border-radius: 50% 50% 40% 60% / 60% 50% 50% 40%;
+    transform: rotate(180deg) scale(1);
+  }
+}
+
+/* ============================================================
+   WAVE BACKGROUND — ANIMATED SVG WAVES
+   ============================================================ */
+.wave-container {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+.wave {
+  animation: waveDrift 8s ease-in-out infinite;
+  will-change: transform;
+}
+
+.wave-slow {
+  animation: waveDrift 12s ease-in-out infinite;
+}
+
+@keyframes waveDrift {
+  0%, 100% { transform: translateX(0) scaleY(1); }
+  50% { transform: translateX(-25px) scaleY(1.05); }
+}
+
+/* ============================================================
+   ENHANCED CARD HOVER — 3D LIFT WITH GRADIENT EDGE GLOW
+   ============================================================ */
+.card-hover-3d {
+  transition: all 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+  position: relative;
+  transform-style: preserve-3d;
+  perspective: 1000px;
+}
+
+.card-hover-3d:hover {
+  transform: translateY(-6px) rotateX(2deg);
+  box-shadow:
+    0 20px 60px rgba(0, 0, 0, 0.6),
+    0 0 0 1px rgba(124, 92, 252, 0.12),
+    0 0 40px rgba(124, 92, 252, 0.06),
+    inset 0 1px 0 rgba(255, 255, 255, 0.05);
+  border-color: rgba(124, 92, 252, 0.2);
+}
+
+.card-hover-3d::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  opacity: 0;
+  background: linear-gradient(135deg, rgba(124, 92, 252, 0.04), rgba(6, 182, 212, 0.02), transparent);
+  transition: opacity 0.5s ease;
+  pointer-events: none;
+}
+
+.card-hover-3d:hover::after {
+  opacity: 1;
+}
+
+/* ============================================================
+   MAGNETIC BUTTON — CURSOR-ATTRACTED HOVER
+   ============================================================ */
+.magnetic-btn {
+  transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+  will-change: transform;
+}
+
+/* ============================================================
+   ENHANCED SHIMMER — MULTI-COLOR SWEEP
+   ============================================================ */
+.shimmer-vivid {
+  position: relative;
+  overflow: hidden;
+}
+
+.shimmer-vivid::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    105deg,
+    transparent 20%,
+    rgba(124, 92, 252, 0.04) 35%,
+    rgba(6, 182, 212, 0.06) 42%,
+    rgba(167, 139, 250, 0.04) 50%,
+    transparent 65%
+  );
+  animation: shimmerVivid 3s ease-in-out infinite;
+}
+
+@keyframes shimmerVivid {
+  0% { transform: translateX(-100%); }
+  100% { transform: translateX(100%); }
+}
+
+/* ============================================================
+   GLOW PULSE BORDER — BREATHING GRADIENT BORDER
+   ============================================================ */
+.glow-pulse-border {
+  position: relative;
+}
+
+.glow-pulse-border::before {
+  content: '';
+  position: absolute;
+  inset: -1px;
+  border-radius: inherit;
+  padding: 1px;
+  background: linear-gradient(135deg, #7c5cfc, #06b6d4, #a78bfa, #7c5cfc);
+  background-size: 300% 300%;
+  animation: borderGlow 4s ease infinite, glowPulseOpacity 3s ease-in-out infinite;
+  -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  pointer-events: none;
+}
+
+@keyframes glowPulseOpacity {
+  0%, 100% { opacity: 0.3; }
+  50% { opacity: 0.8; }
+}
+
+/* ============================================================
+   ANIMATED NUMBER COUNTER — GLOW ON CHANGE
+   ============================================================ */
+.counter-animate {
+  transition: all 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.counter-animate.updating {
+  animation: counterFlash 0.8s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+@keyframes counterFlash {
+  0% { color: inherit; text-shadow: none; }
+  30% { text-shadow: 0 0 20px rgba(124, 92, 252, 0.5); transform: scale(1.05); }
+  100% { text-shadow: none; transform: scale(1); }
+}
+
+/* ============================================================
+   PARALLAX LAYER — DEPTH SCROLL
+   ============================================================ */
+.parallax-slow {
+  will-change: transform;
+  transition: transform 0.1s linear;
+}
+
+.parallax-fast {
+  will-change: transform;
+  transition: transform 0.05s linear;
+}
+
+/* ============================================================
+   BREATHE ANIMATION — SUBTLE SCALE PULSE
+   ============================================================ */
+.breathe {
+  animation: breathe 4s ease-in-out infinite;
+}
+
+@keyframes breathe {
+  0%, 100% { transform: scale(1); opacity: 0.8; }
+  50% { transform: scale(1.02); opacity: 1; }
+}
+
+/* ============================================================
+   ROTATE SLOW — CONTINUOUS SLOW ROTATION
+   ============================================================ */
+.rotate-slow {
+  animation: rotateSlow 20s linear infinite;
+}
+
+@keyframes rotateSlow {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+/* ============================================================
+   GRADIENT ROLL — ANIMATED GRADIENT THAT ROLLS
+   ============================================================ */
+.gradient-roll {
+  background-size: 400% 400%;
+  animation: gradientRoll 8s ease infinite;
+}
+
+@keyframes gradientRoll {
+  0% { background-position: 0% 50%; }
+  25% { background-position: 100% 0%; }
+  50% { background-position: 100% 100%; }
+  75% { background-position: 0% 100%; }
+  100% { background-position: 0% 50%; }
+}
+
+/* ============================================================
+   BLINK CURSOR — TYPING EFFECT
+   ============================================================ */
+.blink-cursor::after {
+  content: '|';
+  animation: blink 1s step-end infinite;
+  color: #7c5cfc;
+}
+
+@keyframes blink {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0; }
+}
+
+/* ============================================================
+   STAGGER WAVE — WAVE-LIKE STAGGER EFFECT
+   ============================================================ */
+.wave-stagger > *:nth-child(1) { animation-delay: 0s; }
+.wave-stagger > *:nth-child(2) { animation-delay: 0.08s; }
+.wave-stagger > *:nth-child(3) { animation-delay: 0.16s; }
+.wave-stagger > *:nth-child(4) { animation-delay: 0.24s; }
+.wave-stagger > *:nth-child(5) { animation-delay: 0.32s; }
+.wave-stagger > *:nth-child(6) { animation-delay: 0.40s; }
+.wave-stagger > *:nth-child(7) { animation-delay: 0.48s; }
+.wave-stagger > *:nth-child(8) { animation-delay: 0.56s; }
+
+/* ============================================================
+   ELASTIC BOUNCE — SPRING ENTRANCE
+   ============================================================ */
+.elastic-bounce {
+  animation: elasticBounce 0.8s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+}
+
+@keyframes elasticBounce {
+  0% { transform: scale(0); opacity: 0; }
+  60% { transform: scale(1.15); opacity: 1; }
+  80% { transform: scale(0.95); }
+  100% { transform: scale(1); opacity: 1; }
+}
+
+/* ============================================================
+   SLIDE FROM RIGHT
+   ============================================================ */
+.slide-from-right {
+  animation: slideFromRight 0.5s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+@keyframes slideFromRight {
+  from { opacity: 0; transform: translateX(30px); }
+  to { opacity: 1; transform: translateX(0); }
+}
+
+/* ============================================================
+   SLIDE FROM BOTTOM
+   ============================================================ */
+.slide-from-bottom {
+  animation: slideFromBottom 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+@keyframes slideFromBottom {
+  from { opacity: 0; transform: translateY(40px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* ============================================================
+   GLOW TEXT — NEON TEXT EFFECT
+   ============================================================ */
+.glow-text {
+  text-shadow: 0 0 10px rgba(124, 92, 252, 0.3),
+               0 0 20px rgba(124, 92, 252, 0.15),
+               0 0 40px rgba(124, 92, 252, 0.08);
+}
+
+/* ============================================================
+   FLIP CARD — 3D FLIP ON HOVER
+   ============================================================ */
+.flip-card {
+  perspective: 1000px;
+}
+
+.flip-card-inner {
+  transition: transform 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+  transform-style: preserve-3d;
+}
+
+.flip-card:hover .flip-card-inner {
+  transform: rotateY(5deg);
+}
+
+/* ============================================================
+   RAINBOW BORDER — ANIMATED RAINBOW GRADIENT BORDER
+   ============================================================ */
+.rainbow-border {
+  position: relative;
+}
+
+.rainbow-border::before {
+  content: '';
+  position: absolute;
+  inset: -2px;
+  border-radius: inherit;
+  padding: 2px;
+  background: conic-gradient(from var(--rainbow-angle, 0deg), #7c5cfc, #06b6d4, #10b981, #f59e0b, #ef4444, #ec4899, #7c5cfc);
+  animation: rainbowSpin 4s linear infinite;
+  -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.5s ease;
+}
+
+.rainbow-border:hover::before {
+  opacity: 1;
+}
+
+@keyframes rainbowSpin {
+  from { --rainbow-angle: 0deg; }
+  to { --rainbow-angle: 360deg; }
+}
+
+/* Fallback for browsers without @property */
+@property --rainbow-angle {
+  syntax: '<angle>';
+  initial-value: 0deg;
+  inherits: false;
+}
+
+/* ============================================================
+   TEXT REVEAL — CHARACTER BY CHARACTER
+   ============================================================ */
+.text-reveal {
+  overflow: hidden;
+}
+
+.text-reveal span {
+  display: inline-block;
+  animation: textRevealChar 0.5s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  opacity: 0;
+  transform: translateY(100%);
+}
+
+@keyframes textRevealChar {
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* ============================================================
+   SKELETON WAVE — PREMIUM LOADING EFFECT
+   ============================================================ */
+.skeleton-wave {
+  position: relative;
+  overflow: hidden;
+  background: rgba(255, 255, 255, 0.03);
+  border-radius: 12px;
+}
+
+.skeleton-wave::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    90deg,
+    rgba(255, 255, 255, 0) 0%,
+    rgba(124, 92, 252, 0.06) 25%,
+    rgba(6, 182, 212, 0.08) 50%,
+    rgba(124, 92, 252, 0.06) 75%,
+    rgba(255, 255, 255, 0) 100%
+  );
+  animation: skeletonWave 2s ease-in-out infinite;
+  border-radius: inherit;
+}
+
+@keyframes skeletonWave {
+  0% { transform: translateX(-100%); }
+  100% { transform: translateX(100%); }
+}
+
+/* ============================================================
+   ORBIT ANIMATION — ROTATING ORBIT RINGS
+   ============================================================ */
+.orbit {
+  animation: orbitSpin linear infinite;
+}
+
+@keyframes orbitSpin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+.orbit-reverse {
+  animation: orbitSpinReverse linear infinite;
+}
+
+@keyframes orbitSpinReverse {
+  from { transform: rotate(360deg); }
+  to { transform: rotate(0deg); }
+}
+
+/* ============================================================
+   DATA FLOW — ANIMATED DASHED LINE
+   ============================================================ */
+.data-flow {
+  stroke-dasharray: 8 4;
+  animation: dataFlow 1s linear infinite;
+}
+
+@keyframes dataFlow {
+  from { stroke-dashoffset: 12; }
+  to { stroke-dashoffset: 0; }
+}
+
+/* ============================================================
+   HOVER LIFT — SUBTLE 3D LIFT ON HOVER
+   ============================================================ */
+.hover-lift {
+  transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+  transform: translateY(0);
+}
+
+.hover-lift:hover {
+  transform: translateY(-3px);
+  box-shadow:
+    0 8px 30px rgba(0, 0, 0, 0.4),
+    0 0 0 1px rgba(124, 92, 252, 0.08);
+}
+
+/* ============================================================
+   GLOW DOT — PULSING DOT INDICATOR
+   ============================================================ */
+.glow-dot {
+  position: relative;
+}
+
+.glow-dot::before {
+  content: '';
+  position: absolute;
+  inset: -4px;
+  border-radius: 50%;
+  background: inherit;
+  animation: glowDotPulse 2s ease-in-out infinite;
+  opacity: 0.4;
+}
+
+@keyframes glowDotPulse {
+  0%, 100% { transform: scale(1); opacity: 0.4; }
+  50% { transform: scale(1.8); opacity: 0; }
+}
+
+/* ============================================================
+   GLITCH TEXT — CYBER GLITCH EFFECT
+   ============================================================ */
+.glitch-text {
+  position: relative;
+}
+
+.glitch-text:hover {
+  animation: glitch 0.3s ease both;
+}
+
+@keyframes glitch {
+  0% { transform: translate(0); }
+  20% { transform: translate(-2px, 2px); }
+  40% { transform: translate(-2px, -2px); }
+  60% { transform: translate(2px, 2px); }
+  80% { transform: translate(2px, -2px); }
+  100% { transform: translate(0); }
+}
+
+/* ============================================================
+   SPOTLIGHT — HOVER SPOTLIGHT EFFECT ON CARDS
+   ============================================================ */
+.spotlight-card {
+  position: relative;
+  overflow: hidden;
+}
+
+.spotlight-card::before {
+  content: '';
+  position: absolute;
+  width: 200px;
+  height: 200px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(124, 92, 252, 0.08), transparent 70%);
+  pointer-events: none;
+  transform: translate(-50%, -50%);
+  opacity: 0;
+  transition: opacity 0.4s ease;
+}
+
+.spotlight-card:hover::before {
+  opacity: 1;
+}
+
+/* ============================================================
+   RIPPLE CLICK — EXPANDING RIPPLE ON CLICK
+   ============================================================ */
+.ripple-click {
+  position: relative;
+  overflow: hidden;
+}
+
+.ripple-click .ripple-effect {
+  position: absolute;
+  border-radius: 50%;
+  background: rgba(124, 92, 252, 0.15);
+  animation: rippleExpand 0.6s ease-out forwards;
+  pointer-events: none;
+}
+
+@keyframes rippleExpand {
+  from { transform: scale(0); opacity: 1; }
+  to { transform: scale(4); opacity: 0; }
+}
+
+/* ============================================================
+   VIEW TRANSITION — SMOOTH CROSSFADE BETWEEN VIEWS
+   ============================================================ */
+.view-enter {
+  animation: viewEnter 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+@keyframes viewEnter {
+  from {
+    opacity: 0;
+    transform: translateY(16px) scale(0.98);
+    filter: blur(4px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+    filter: blur(0);
+  }
+}
+
+/* ============================================================
+   COUNTER BAR — ANIMATED PROGRESS BAR
+   ============================================================ */
+.counter-bar {
+  position: relative;
+  overflow: hidden;
+}
+
+.counter-bar::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  bottom: 0;
+  width: 30px;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.1), transparent);
+  animation: counterBarShine 2s ease-in-out infinite;
+}
+
+@keyframes counterBarShine {
+  0% { transform: translateX(-30px); }
+  100% { transform: translateX(calc(100vw)); }
+}
+
+/* ============================================================
+   NOISE TEXTURE — SUBTLE GRAIN OVERLAY
+   ============================================================ */
+.noise-overlay::after {
+  content: '';
+  position: fixed;
+  inset: 0;
+  opacity: 0.015;
+  pointer-events: none;
+  z-index: 9999;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E");
+  background-repeat: repeat;
+  background-size: 256px;
+}
+
+/* ============================================================
+   GRADIENT MESH — ANIMATED MESH GRADIENT BACKGROUND
+   ============================================================ */
+.mesh-gradient {
+  position: relative;
+  overflow: hidden;
+}
+
+.mesh-gradient::before {
+  content: '';
+  position: absolute;
+  inset: -50%;
+  background:
+    radial-gradient(ellipse at 20% 50%, rgba(124, 92, 252, 0.08) 0%, transparent 50%),
+    radial-gradient(ellipse at 80% 20%, rgba(6, 182, 212, 0.06) 0%, transparent 50%),
+    radial-gradient(ellipse at 40% 80%, rgba(167, 139, 250, 0.05) 0%, transparent 50%);
+  animation: meshMove 15s ease-in-out infinite alternate;
+  pointer-events: none;
+}
+
+@keyframes meshMove {
+  0% { transform: translate(0, 0) rotate(0deg) scale(1); }
+  100% { transform: translate(5%, -5%) rotate(10deg) scale(1.1); }
+}
+
+/* ============================================================
+   ENHANCED INPUT GLOW — FOCUSED INPUT WITH ANIMATED GLOW
+   ============================================================ */
+.input-glow {
+  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.input-glow:focus {
+  box-shadow:
+    0 0 0 2px rgba(124, 92, 252, 0.3),
+    0 0 20px rgba(124, 92, 252, 0.1),
+    inset 0 0 10px rgba(124, 92, 252, 0.03);
+  border-color: rgba(124, 92, 252, 0.5);
+}
+
+/* ============================================================
+   FLOATING SHADOW — ANIMATED SHADOW THAT FOLLOWS ELEMENT
+   ============================================================ */
+.floating-shadow {
+  filter: drop-shadow(0 4px 12px rgba(0, 0, 0, 0.3));
+  transition: filter 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.floating-shadow:hover {
+  filter: drop-shadow(0 8px 24px rgba(124, 92, 252, 0.15));
+}

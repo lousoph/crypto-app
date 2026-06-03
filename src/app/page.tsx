@@ -147,10 +147,150 @@ function ScrollReveal({ children, className = '', direction = 'up' }: {
 }
 
 // ============================================================
-// AMBIENT BACKGROUND — IMMERSIVE GRADIENT GLOW
+// AMBIENT BACKGROUND — IMMERSIVE GRADIENT GLOW + AURORA BLOBS
 // ============================================================
 function AmbientBackground() {
-  return <div className="ambient-bg" />
+  return (
+    <div className="ambient-bg">
+      {/* Aurora morphing blobs */}
+      <div className="aurora-blob" style={{
+        top: '10%', left: '5%', width: '35%', height: '35%',
+        background: 'rgba(124, 92, 252, 0.06)',
+        animationDuration: '15s',
+      }} />
+      <div className="aurora-blob" style={{
+        bottom: '5%', right: '10%', width: '30%', height: '30%',
+        background: 'rgba(6, 182, 212, 0.04)',
+        animationDuration: '20s',
+        animationDirection: 'reverse',
+      }} />
+      <div className="aurora-blob" style={{
+        top: '40%', right: '30%', width: '25%', height: '25%',
+        background: 'rgba(167, 139, 250, 0.03)',
+        animationDuration: '25s',
+      }} />
+    </div>
+  )
+}
+
+// ============================================================
+// PARTICLE FIELD — FLOATING LUMINOUS PARTICLES
+// ============================================================
+function ParticleField() {
+  const [particles] = useState(() => {
+    if (typeof window === 'undefined') return []
+    const colors = [
+      'rgba(124, 92, 252, 0.4)',
+      'rgba(6, 182, 212, 0.3)',
+      'rgba(167, 139, 250, 0.3)',
+      'rgba(16, 185, 129, 0.25)',
+    ]
+    return Array.from({ length: 25 }, (_, i) => ({
+      id: i,
+      size: Math.random() * 3 + 1,
+      x: Math.random() * 100,
+      duration: Math.random() * 20 + 15,
+      delay: Math.random() * 15,
+      color: colors[Math.floor(Math.random() * colors.length)],
+    }))
+  })
+
+  return (
+    <div className="particle-field">
+      {particles.map(p => (
+        <div
+          key={p.id}
+          className="particle"
+          style={{
+            width: p.size,
+            height: p.size,
+            left: `${p.x}%`,
+            background: p.color,
+            animationDuration: `${p.duration}s`,
+            animationDelay: `${p.delay}s`,
+            boxShadow: `0 0 ${p.size * 3}px ${p.color}`,
+          }}
+        />
+      ))}
+    </div>
+  )
+}
+
+// ============================================================
+// MOUSE GLOW — CURSOR-FOLLOWING RADIAL GLOW
+// ============================================================
+function MouseGlow() {
+  const glowRef = useRef<HTMLDivElement>(null)
+  const [mounted, setMounted] = useState(false)
+
+  useEffect(() => {
+    setMounted(true)
+    const handleMove = (e: MouseEvent) => {
+      if (glowRef.current) {
+        glowRef.current.style.left = `${e.clientX}px`
+        glowRef.current.style.top = `${e.clientY}px`
+        if (!glowRef.current.classList.contains('active')) {
+          glowRef.current.classList.add('active')
+        }
+      }
+    }
+    window.addEventListener('mousemove', handleMove)
+    return () => window.removeEventListener('mousemove', handleMove)
+  }, [])
+
+  if (!mounted) return null
+  return <div ref={glowRef} className="mouse-glow" />
+}
+
+// ============================================================
+// ANIMATED COUNTER — SMOOTH NUMBER COUNT-UP
+// ============================================================
+function AnimatedCounter({ value, className = '', prefix = '', suffix = '' }: {
+  value: number
+  className?: string
+  prefix?: string
+  suffix?: string
+}) {
+  const [displayed, setDisplayed] = useState(0)
+  const [prevValue, setPrevValue] = useState(value)
+  const [isUpdating, setIsUpdating] = useState(false)
+
+  useEffect(() => {
+    if (value !== prevValue) {
+      setIsUpdating(true)
+      const duration = 800
+      const start = prevValue
+      const diff = value - start
+      const startTime = Date.now()
+
+      const animate = () => {
+        const elapsed = Date.now() - startTime
+        const progress = Math.min(elapsed / duration, 1)
+        // Easing: cubic-bezier approximation
+        const eased = 1 - Math.pow(1 - progress, 3)
+        setDisplayed(start + diff * eased)
+
+        if (progress < 1) {
+          requestAnimationFrame(animate)
+        } else {
+          setDisplayed(value)
+          setPrevValue(value)
+          setIsUpdating(false)
+        }
+      }
+      requestAnimationFrame(animate)
+    }
+  }, [value, prevValue])
+
+  useEffect(() => {
+    setDisplayed(value)
+  }, []) // eslint-disable-line react-hooks/exhaustive-deps
+
+  return (
+    <span className={`${className} ${isUpdating ? 'counter-animate updating' : 'counter-animate'}`}>
+      {prefix}{fmt(displayed)}{suffix}
+    </span>
+  )
 }
 
 // ============================================================
@@ -360,6 +500,15 @@ function LoginScreen({ onLogin, onRegister }: {
         <div className="absolute bottom-[-20%] right-[10%] w-[50%] h-[50%] rounded-full" style={{ background: 'radial-gradient(ellipse, rgba(6,182,212,0.08) 0%, transparent 70%)', animation: 'ambientDrift2 25s ease-in-out infinite' }} />
         <div className="absolute top-[50%] left-[60%] w-[40%] h-[40%] rounded-full" style={{ background: 'radial-gradient(ellipse, rgba(168,85,247,0.06) 0%, transparent 70%)', animation: 'ambientDrift3 30s ease-in-out infinite' }} />
       </div>
+
+      {/* Aurora morphing blobs on login */}
+      <div className="absolute inset-0 overflow-hidden pointer-events-none">
+        <div className="aurora-blob" style={{ top: '20%', left: '10%', width: '40%', height: '40%', background: 'rgba(124, 92, 252, 0.05)', animationDuration: '18s' }} />
+        <div className="aurora-blob" style={{ bottom: '10%', right: '5%', width: '35%', height: '35%', background: 'rgba(6, 182, 212, 0.04)', animationDuration: '22s', animationDirection: 'reverse' }} />
+      </div>
+
+      {/* Floating particles */}
+      <ParticleField />
 
       {/* Particle grid background */}
       <div className="absolute inset-0 pointer-events-none" style={{
@@ -690,8 +839,10 @@ function Sidebar({ currentView, setView, user, onLogout }: {
     <>
       {/* Logo */}
       <div className={`flex items-center gap-3 px-5 py-5 border-b ${collapsed ? 'justify-center' : ''}`} style={{ borderColor: 'rgba(255,255,255,0.05)' }}>
-        <div className="w-10 h-10 rounded-xl flex items-center justify-center shrink-0 shadow-lg" style={{ background: 'linear-gradient(135deg, rgba(124,92,252,0.3), rgba(6,182,212,0.3))', border: '1px solid rgba(124,92,252,0.2)', boxShadow: '0 0 20px rgba(124,92,252,0.1)' }}>
+        <div className="w-10 h-10 rounded-xl flex items-center justify-center shrink-0 shadow-lg relative" style={{ background: 'linear-gradient(135deg, rgba(124,92,252,0.3), rgba(6,182,212,0.3))', border: '1px solid rgba(124,92,252,0.2)', boxShadow: '0 0 20px rgba(124,92,252,0.1)' }}>
           <Wallet className="w-5 h-5 text-violet-400" />
+          {/* Animated ring around logo */}
+          <div className="absolute inset-[-3px] rounded-xl orbit" style={{ animationDuration: '8s', border: '1px solid transparent', borderTopColor: 'rgba(124,92,252,0.3)', borderRightColor: 'rgba(6,182,212,0.2)' }} />
         </div>
         {!collapsed && (
           <span className="text-lg font-bold gradient-text">CryptoFolio</span>
@@ -846,12 +997,12 @@ function LivePriceTicker() {
   if (entries.length === 0) return null
 
   return (
-    <div className="glass-card rounded-2xl overflow-hidden fade-in-up">
+    <div className="glass-card rounded-2xl overflow-hidden fade-in-up gradient-border">
       <div className="flex items-center gap-3 px-4 py-2.5 border-b" style={{ borderColor: 'rgba(255,255,255,0.04)' }}>
         <div className="flex items-center gap-1.5">
           <span className="relative flex h-2 w-2">
             <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
-            <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-400"></span>
+            <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-400 glow-dot"></span>
           </span>
           <span className="text-xs font-semibold text-emerald-400">LIVE</span>
         </div>
@@ -863,7 +1014,7 @@ function LivePriceTicker() {
           const change = prev && prev !== price ? ((price - prev) / prev) * 100 : 0
           const isUp = change >= 0
           return (
-            <div key={ticker} className="flex items-center gap-2 px-3 py-1.5 rounded-lg shrink-0 mr-1" style={{ background: 'rgba(255,255,255,0.03)' }}>
+            <div key={ticker} className="flex items-center gap-2 px-3 py-1.5 rounded-lg shrink-0 mr-1 hover-lift" style={{ background: 'rgba(255,255,255,0.03)' }}>
               <TokenLogo ticker={ticker} size={24} />
               <div className="flex flex-col">
                 <span className="text-[10px] font-semibold text-white/60">{ticker}</span>
@@ -945,7 +1096,7 @@ function FearGreedWidget() {
 
   if (loading) {
     return (
-      <Card className="glass-card rounded-2xl shimmer fade-in-up">
+      <Card className="glass-card rounded-2xl skeleton-wave fade-in-up">
         <CardContent className="p-6">
           <div className="h-48 rounded-xl" style={{ background: 'rgba(255,255,255,0.03)' }} />
         </CardContent>
@@ -966,7 +1117,7 @@ function FearGreedWidget() {
   }))
 
   return (
-    <Card className="glass-card rounded-2xl card-hover fade-in-up">
+    <Card className="glass-card rounded-2xl card-hover-3d gradient-border fade-in-up">
       <CardContent className="p-5 sm:p-6 space-y-5">
         {/* Header */}
         <div className="flex items-center justify-between">
@@ -1132,7 +1283,7 @@ function TokenSignals() {
 
   if (loading) {
     return (
-      <Card className="glass-card rounded-2xl shimmer fade-in-up">
+      <Card className="glass-card rounded-2xl skeleton-wave fade-in-up">
         <CardContent className="p-6">
           <div className="h-48 rounded-xl" style={{ background: 'rgba(255,255,255,0.03)' }} />
         </CardContent>
@@ -1218,7 +1369,7 @@ function TokenSignals() {
     : null
 
   return (
-    <Card className="glass-card rounded-2xl card-hover fade-in-up">
+    <Card className="glass-card rounded-2xl card-hover-3d gradient-border fade-in-up">
       <CardContent className="p-5 sm:p-6 space-y-4">
         <div className="flex items-center gap-3">
           <div className="w-9 h-9 rounded-xl flex items-center justify-center" style={{ background: 'rgba(124,92,252,0.12)' }}>
@@ -1329,10 +1480,17 @@ function DashboardView({ user, onUpgrade }: { user: any; onUpgrade: () => void }
       <div className="space-y-6 page-transition">
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
           {[1, 2, 3, 4].map(i => (
-            <Card key={i} className="glass-card rounded-2xl shimmer">
-              <CardContent className="p-6"><div className="h-20 rounded-xl" style={{ background: 'rgba(255,255,255,0.03)' }} /></CardContent>
+            <Card key={i} className="glass-card rounded-2xl skeleton-wave" style={{ height: '120px' }}>
+              <CardContent className="p-6">
+                <div className="h-4 w-2/3 rounded-lg mb-4 skeleton-wave" style={{ background: 'rgba(255,255,255,0.04)' }} />
+                <div className="h-8 w-1/2 rounded-lg skeleton-wave" style={{ background: 'rgba(255,255,255,0.04)' }} />
+              </CardContent>
             </Card>
           ))}
+        </div>
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">
+          <Card className="glass-card rounded-2xl skeleton-wave" style={{ height: '350px' }} />
+          <Card className="glass-card rounded-2xl skeleton-wave" style={{ height: '350px' }} />
         </div>
       </div>
     )
@@ -1364,48 +1522,61 @@ function DashboardView({ user, onUpgrade }: { user: any; onUpgrade: () => void }
   const kpiCards = [
     {
       label: 'Valeur du Portefeuille',
-      value: `${fmt(data.valeurActuelle)} $`,
+      value: data.valeurActuelle,
       icon: Wallet,
       barClass: 'kpi-bar-violet',
       iconBg: 'rgba(124,92,252,0.12)',
       iconColor: 'text-violet-400',
       colorClass: '',
+      prefix: '',
+      suffix: ' $',
+      glowColor: 'rgba(124,92,252,0.08)',
     },
     {
       label: 'P/L Global',
-      value: `${data.pl >= 0 ? '+' : ''}${fmt(data.pl)} $`,
+      value: data.pl,
       icon: data.pl >= 0 ? TrendingUp : TrendingDown,
       barClass: data.pl >= 0 ? 'kpi-bar-emerald' : 'kpi-bar-red',
       iconBg: data.pl >= 0 ? 'rgba(16,185,129,0.12)' : 'rgba(239,68,68,0.12)',
       iconColor: data.pl >= 0 ? 'text-emerald-400' : 'text-red-400',
       colorClass: plColor(data.pl),
+      prefix: data.pl >= 0 ? '+' : '',
+      suffix: ' $',
+      glowColor: data.pl >= 0 ? 'rgba(16,185,129,0.06)' : 'rgba(239,68,68,0.06)',
     },
     {
       label: 'Investissement Total',
-      value: `${fmt(data.investissementTotal)} $`,
+      value: data.investissementTotal,
       icon: DollarSign,
       barClass: 'kpi-bar-cyan',
       iconBg: 'rgba(6,182,212,0.12)',
       iconColor: 'text-cyan-400',
       colorClass: '',
+      prefix: '',
+      suffix: ' $',
+      glowColor: 'rgba(6,182,212,0.06)',
     },
     {
       label: 'ROI',
-      value: `${data.roi >= 0 ? '+' : ''}${fmtPct(data.roi)}`,
+      value: data.roi,
       icon: data.roi >= 0 ? TrendingUp : TrendingDown,
       barClass: data.roi >= 0 ? 'kpi-bar-amber' : 'kpi-bar-red',
       iconBg: data.roi >= 0 ? 'rgba(245,158,11,0.12)' : 'rgba(239,68,68,0.12)',
       iconColor: data.roi >= 0 ? 'text-amber-400' : 'text-red-400',
       colorClass: plColor(data.roi),
+      prefix: data.roi >= 0 ? '+' : '',
+      suffix: '',
+      isPercent: true,
+      glowColor: data.roi >= 0 ? 'rgba(245,158,11,0.06)' : 'rgba(239,68,68,0.06)',
     },
   ]
 
   return (
-    <div className="space-y-6 page-transition">
+    <div className="space-y-6 view-enter">
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 fade-in-up">
         <div>
-          <h1 className="text-2xl font-bold text-white/90">Tableau de Bord</h1>
+          <h1 className="text-2xl font-bold text-white/90 glow-text">Tableau de Bord</h1>
           <div className="flex items-center gap-2 text-sm mt-1" style={{ color: 'rgba(255,255,255,0.3)' }}>
             <span>Vue d&apos;ensemble de votre portefeuille</span>
             {lastUpdated && (
@@ -1440,7 +1611,7 @@ function DashboardView({ user, onUpgrade }: { user: any; onUpgrade: () => void }
 
       {/* Freemium Upgrade Banner */}
       {user?.role === 'user_free' && (
-        <Card className="glass-card rounded-2xl fade-in-up" style={{ borderColor: 'rgba(245,158,11,0.25)', background: 'rgba(245,158,11,0.04)' }}>
+        <Card className="glass-card rounded-2xl fade-in-up rainbow-border" style={{ borderColor: 'rgba(245,158,11,0.25)', background: 'rgba(245,158,11,0.04)' }}>
           <CardContent className="p-4 flex flex-col sm:flex-row items-start sm:items-center gap-3">
             <div className="w-10 h-10 rounded-xl flex items-center justify-center shrink-0" style={{ background: 'rgba(245,158,11,0.12)' }}>
               <Crown className="w-5 h-5 text-amber-400" />
@@ -1465,17 +1636,25 @@ function DashboardView({ user, onUpgrade }: { user: any; onUpgrade: () => void }
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-5">
         {kpiCards.map((card, i) => (
           <div key={card.label} className={`fade-in-up stagger-${i + 1}`}>
-            <Card className={`glass-card rounded-2xl card-hover ${card.barClass}`}>
-              <CardContent className="p-5 sm:p-6">
+            <Card className={`glass-card rounded-2xl card-hover-3d gradient-border shimmer-vivid ${card.barClass}`}>
+              <CardContent className="p-5 sm:p-6 relative">
                 <div className="flex items-center justify-between mb-3">
                   <span className="text-xs font-medium uppercase tracking-wider" style={{ color: 'rgba(255,255,255,0.35)' }}>{card.label}</span>
-                  <div className="w-9 h-9 rounded-xl flex items-center justify-center" style={{ background: card.iconBg }}>
+                  <div className="w-9 h-9 rounded-xl flex items-center justify-center kpi-icon-glow" style={{ background: card.iconBg }}>
                     <card.icon className={`w-4 h-4 ${card.iconColor}`} />
                   </div>
                 </div>
-                <p className={`text-xl sm:text-2xl font-bold kpi-value-animate ${card.colorClass || 'text-white/90'}`}>
-                  {card.value}
-                </p>
+                {card.isPercent ? (
+                  <p className={`text-xl sm:text-2xl font-bold kpi-value-animate ${card.colorClass || 'text-white/90'}`}>
+                    <AnimatedCounter value={card.value} prefix={card.prefix} suffix="%" className={card.colorClass || 'text-white/90'} />
+                  </p>
+                ) : (
+                  <p className={`text-xl sm:text-2xl font-bold kpi-value-animate ${card.colorClass || 'text-white/90'}`}>
+                    <AnimatedCounter value={card.value} prefix={card.prefix} suffix={card.suffix} className={card.colorClass || 'text-white/90'} />
+                  </p>
+                )}
+                {/* Subtle gradient glow behind value */}
+                <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-3/4 h-8 rounded-full" style={{ background: card.glowColor, filter: 'blur(20px)' }} />
               </CardContent>
             </Card>
           </div>
@@ -1487,7 +1666,7 @@ function DashboardView({ user, onUpgrade }: { user: any; onUpgrade: () => void }
       <ScrollReveal direction="scale">
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">
         {/* Portfolio Distribution - Dynamic Pie Chart */}
-        <Card className="glass-card rounded-2xl card-hover fade-in-up stagger-5">
+        <Card className="glass-card rounded-2xl card-hover-3d gradient-border spotlight-card fade-in-up stagger-5">
           <CardHeader className="pb-2">
             <CardTitle className="text-sm font-medium" style={{ color: 'rgba(255,255,255,0.45)' }}>Répartition du Portefeuille</CardTitle>
           </CardHeader>
@@ -1546,7 +1725,7 @@ function DashboardView({ user, onUpgrade }: { user: any; onUpgrade: () => void }
         </Card>
 
         {/* Investment vs Value Bar Chart */}
-        <Card className="glass-card rounded-2xl card-hover fade-in-up stagger-6">
+        <Card className="glass-card rounded-2xl card-hover-3d gradient-border spotlight-card fade-in-up stagger-6">
           <CardHeader className="pb-2">
             <CardTitle className="text-sm font-medium" style={{ color: 'rgba(255,255,255,0.45)' }}>Investissement vs Valeur Actuelle</CardTitle>
           </CardHeader>
@@ -1569,7 +1748,7 @@ function DashboardView({ user, onUpgrade }: { user: any; onUpgrade: () => void }
 
       {/* Detailed Table - Desktop / Cards - Mobile */}
       <ScrollReveal direction="left">
-      <Card className="glass-card rounded-2xl fade-in-up">
+      <Card className="glass-card rounded-2xl fade-in-up gradient-border shimmer-vivid">
         <CardHeader className="pb-3">
           <CardTitle className="text-base font-medium text-white/70">Détail par Token</CardTitle>
           <CardDescription style={{ color: 'rgba(255,255,255,0.25)' }}>Analyse détaillée de chaque crypto-actif de votre portefeuille</CardDescription>
@@ -1592,7 +1771,7 @@ function DashboardView({ user, onUpgrade }: { user: any; onUpgrade: () => void }
               </TableHeader>
               <TableBody>
                 {sortedTokens.map((t) => (
-                  <TableRow key={t.ticker} className="transition-colors" style={{ borderBottomColor: 'rgba(255,255,255,0.04)' }}>
+                  <TableRow key={t.ticker} className="data-row-hover transition-colors" style={{ borderBottomColor: 'rgba(255,255,255,0.04)' }}>
                     <TableCell>
                       <div className="flex items-center gap-3">
                         <TokenLogo ticker={t.ticker} size={36} />
@@ -1624,7 +1803,7 @@ function DashboardView({ user, onUpgrade }: { user: any; onUpgrade: () => void }
           {/* Mobile Cards */}
           <div className="md:hidden space-y-3">
             {sortedTokens.map((t) => (
-              <div key={t.ticker} className="glass-card rounded-2xl p-4 space-y-3 card-hover">
+              <div key={t.ticker} className="glass-card rounded-2xl p-4 space-y-3 card-hover-3d gradient-border">
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-3">
                     <TokenLogo ticker={t.ticker} size={40} />
@@ -1838,11 +2017,11 @@ function TransactionsView({ user, onUpgrade }: { user: any; onUpgrade: () => voi
   }
 
   return (
-    <div className="space-y-6 page-transition">
+    <div className="space-y-6 view-enter">
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 fade-in-up">
         <div>
-          <h1 className="text-2xl font-bold text-white/90">Transactions</h1>
+          <h1 className="text-2xl font-bold text-white/90 glow-text">Transactions</h1>
           <p className="mt-1" style={{ color: 'rgba(255,255,255,0.3)' }}>Gérez vos achats de crypto-actifs</p>
         </div>
         <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
@@ -2118,7 +2297,7 @@ function TransactionsView({ user, onUpgrade }: { user: any; onUpgrade: () => voi
       {/* FAB Button on Mobile */}
       <button
         onClick={openNew}
-        className="fab-button fixed bottom-20 right-4 sm:hidden w-14 h-14 rounded-2xl flex items-center justify-center text-white z-40 active:scale-95"
+        className="fab-button glow-pulse-border fixed bottom-20 right-4 sm:hidden w-14 h-14 rounded-2xl flex items-center justify-center text-white z-40 active:scale-95"
         style={{ background: 'linear-gradient(135deg, #7c5cfc, #06b6d4)' }}
       >
         <Plus className="w-6 h-6" />
@@ -2581,9 +2760,9 @@ function ProfileView({ user, onUpgrade }: { user: any; onUpgrade: () => void }) 
   const [showUpgrade, setShowUpgrade] = useState(false)
 
   return (
-    <div className="space-y-6 max-w-2xl page-transition">
+    <div className="space-y-6 max-w-2xl view-enter">
       <div className="fade-in-up">
-        <h1 className="text-2xl font-bold text-white/90">Profil & Abonnement</h1>
+        <h1 className="text-2xl font-bold text-white/90 glow-text">Profil & Abonnement</h1>
         <p className="mt-1" style={{ color: 'rgba(255,255,255,0.3)' }}>Gérez votre compte et votre abonnement</p>
       </div>
 
@@ -3399,11 +3578,28 @@ export default function Home() {
   if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center relative" style={{ background: '#000000' }}>
-        <div className="flex flex-col items-center gap-3">
-          <div className="w-10 h-10 rounded-xl border flex items-center justify-center float-animation" style={{ background: 'rgba(124,92,252,0.15)', borderColor: 'rgba(124,92,252,0.3)' }}>
-            <Wallet className="w-5 h-5 text-violet-400" />
+        <ParticleField />
+        <div className="flex flex-col items-center gap-5">
+          {/* Orbit animation around wallet icon */}
+          <div className="relative w-20 h-20">
+            <div className="absolute inset-0 flex items-center justify-center">
+              <div className="w-12 h-12 rounded-xl border flex items-center justify-center float-animation" style={{ background: 'rgba(124,92,252,0.15)', borderColor: 'rgba(124,92,252,0.3)' }}>
+                <Wallet className="w-6 h-6 text-violet-400" />
+              </div>
+            </div>
+            {/* Orbiting dot */}
+            <div className="absolute inset-0 orbit" style={{ animationDuration: '3s' }}>
+              <div className="absolute top-0 left-1/2 -translate-x-1/2 w-2 h-2 rounded-full bg-violet-400 glow-dot" />
+            </div>
+            {/* Second orbiting dot */}
+            <div className="absolute inset-0 orbit-reverse" style={{ animationDuration: '4s' }}>
+              <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-1.5 h-1.5 rounded-full bg-cyan-400" style={{ boxShadow: '0 0 8px rgba(6,182,212,0.5)' }} />
+            </div>
           </div>
-          <RefreshCw className="w-5 h-5 animate-spin text-violet-400/50" />
+          <div className="flex items-center gap-2">
+            <RefreshCw className="w-4 h-4 animate-spin text-violet-400/50" />
+            <span className="text-sm text-white/30 font-medium">Chargement...</span>
+          </div>
         </div>
       </div>
     )
@@ -3454,8 +3650,10 @@ export default function Home() {
   }
 
   return (
-    <div className="flex min-h-screen relative" style={{ background: '#000000' }}>
+    <div className="flex min-h-screen relative noise-overlay mesh-gradient" style={{ background: '#000000' }}>
       <AmbientBackground />
+      <ParticleField />
+      <MouseGlow />
       <Sidebar
         currentView={currentView}
         setView={setCurrentView}
@@ -3463,7 +3661,7 @@ export default function Home() {
         onLogout={logout}
       />
       <main className="flex-1 p-4 md:p-8 overflow-auto pb-20 md:pb-8">
-        <div className="max-w-7xl mx-auto">
+        <div className="max-w-7xl mx-auto" key={currentView}>
           {renderView()}
         </div>
       </main>
