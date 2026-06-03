@@ -126,7 +126,7 @@ const plColor = (v: number) => v >= 0 ? 'text-emerald-400' : 'text-red-400'
 const plBg = (v: number) => v >= 0 ? 'bg-emerald-400/10' : 'bg-red-400/10'
 
 const CHART_COLORS = [
-  '#7c3aed', '#06b6d4', '#f59e0b', '#10b981', '#ef4444',
+  '#7c5cfc', '#06b6d4', '#f59e0b', '#10b981', '#ef4444',
   '#3b82f6', '#ec4899', '#14b8a6', '#f97316', '#6366f1',
   '#84cc16', '#e11d48', '#0ea5e9', '#a855f7', '#f43f5e',
 ]
@@ -188,7 +188,7 @@ function TokenLogo({ ticker, size = 24, className = '' }: { ticker: string; size
 // EXCHANGE LOGO COMPONENT
 // ============================================================
 function ExchangeLogo({ name, size = 24, className = '' }: { name: string; size?: number; className?: string }) {
-  const style = EXCHANGE_STYLES[name.toUpperCase()] || { bg: '#7c3aed', text: '#FFFFFF', icon: name.slice(0, 2) }
+  const style = EXCHANGE_STYLES[name.toUpperCase()] || { bg: '#7c5cfc', text: '#FFFFFF', icon: name.slice(0, 2) }
   return (
     <div
       className={`flex items-center justify-center font-bold shrink-0 ${className}`}
@@ -282,11 +282,11 @@ function LoginScreen({ onLogin, onRegister }: {
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center p-4" style={{ background: 'linear-gradient(135deg, #0f1117 0%, #1a1d2e 50%, #0f1117 100%)' }}>
+    <div className="min-h-screen flex items-center justify-center p-4" style={{ background: 'radial-gradient(ellipse at 50% 0%, rgba(124,92,252,0.08) 0%, #080b12 60%)' }}>
       <div className="w-full max-w-md space-y-8 fade-in-up">
         {/* Logo */}
         <div className="text-center space-y-3">
-          <div className="float-animation inline-flex items-center justify-center w-20 h-20 rounded-2xl border shadow-lg" style={{ background: 'rgba(124, 58, 237, 0.15)', borderColor: 'rgba(124, 58, 237, 0.3)', boxShadow: '0 0 40px rgba(124, 58, 237, 0.1)' }}>
+          <div className="float-animation inline-flex items-center justify-center w-20 h-20 rounded-2xl border shadow-lg" style={{ background: 'rgba(124, 92, 252, 0.1)', borderColor: 'rgba(124, 92, 252, 0.2)', boxShadow: '0 0 30px rgba(124, 92, 252, 0.08)' }}>
             <Wallet className="w-10 h-10 text-violet-400" />
           </div>
           <h1 className="text-4xl font-bold gradient-text">
@@ -295,7 +295,7 @@ function LoginScreen({ onLogin, onRegister }: {
           <p className="text-sm" style={{ color: 'rgba(255,255,255,0.4)' }}>Suivez votre portefeuille crypto en temps réel</p>
         </div>
 
-        <div className="rounded-2xl p-6 sm:p-8 shadow-2xl" style={{ background: 'rgba(26, 29, 46, 0.8)', backdropFilter: 'blur(30px)', border: '1px solid rgba(255,255,255,0.08)', boxShadow: '0 0 60px rgba(0,0,0,0.3)' }}>
+        <div className="rounded-2xl p-6 sm:p-8 shadow-2xl" style={{ background: 'rgba(14, 18, 25, 0.85)', backdropFilter: 'blur(30px)', border: '1px solid rgba(255,255,255,0.06)', boxShadow: '0 8px 40px rgba(0,0,0,0.3)' }}>
           <div className="mb-6">
             <h2 className="text-xl font-semibold text-white">
               {isRegister ? 'Créer un compte' : 'Connexion'}
@@ -317,7 +317,7 @@ function LoginScreen({ onLogin, onRegister }: {
                   onChange={(e) => setName(e.target.value)}
                   placeholder="Votre nom"
                   className="border text-white placeholder:text-white/20 rounded-xl h-11"
-                  style={{ background: 'rgba(255,255,255,0.04)', borderColor: 'rgba(255,255,255,0.08)' }}
+                  style={{ background: 'rgba(255,255,255,0.03)', borderColor: 'rgba(255,255,255,0.06)' }}
                 />
               </div>
             )}
@@ -331,7 +331,7 @@ function LoginScreen({ onLogin, onRegister }: {
                 placeholder="votre@email.com"
                 required
                 className="border text-white placeholder:text-white/20 rounded-xl h-11"
-                style={{ background: 'rgba(255,255,255,0.04)', borderColor: 'rgba(255,255,255,0.08)' }}
+                style={{ background: 'rgba(255,255,255,0.03)', borderColor: 'rgba(255,255,255,0.06)' }}
               />
             </div>
             <div className="space-y-2 fade-in-up stagger-3">
@@ -344,7 +344,7 @@ function LoginScreen({ onLogin, onRegister }: {
                 placeholder="••••••••"
                 required
                 className="border text-white placeholder:text-white/20 rounded-xl h-11"
-                style={{ background: 'rgba(255,255,255,0.04)', borderColor: 'rgba(255,255,255,0.08)' }}
+                style={{ background: 'rgba(255,255,255,0.03)', borderColor: 'rgba(255,255,255,0.06)' }}
               />
             </div>
             {error && (
@@ -356,7 +356,7 @@ function LoginScreen({ onLogin, onRegister }: {
             <Button
               type="submit"
               className="w-full text-white rounded-xl h-11 font-medium shadow-lg transition-all active:scale-[0.98]"
-              style={{ background: 'linear-gradient(135deg, #7c3aed, #06b6d4)', boxShadow: '0 4px 20px rgba(124,58,237,0.25)' }}
+              style={{ background: 'linear-gradient(135deg, #7c5cfc, #06b6d4)', boxShadow: '0 4px 20px rgba(124,92,252,0.25)' }}
               disabled={loading}
             >
               {loading ? <RefreshCw className="w-4 h-4 animate-spin mr-2" /> : null}
@@ -388,9 +388,9 @@ function LoginScreen({ onLogin, onRegister }: {
                   type="button"
                   onClick={() => fillDemo('admin@cryptotracker.com', 'admin123')}
                   className="w-full flex items-center gap-3 p-3 rounded-xl border transition-colors text-left group"
-                  style={{ background: 'rgba(124,58,237,0.08)', borderColor: 'rgba(124,58,237,0.2)' }}
+                  style={{ background: 'rgba(124,92,252,0.08)', borderColor: 'rgba(124,92,252,0.2)' }}
                 >
-                  <div className="w-8 h-8 rounded-lg flex items-center justify-center shrink-0" style={{ background: 'rgba(124,58,237,0.15)' }}>
+                  <div className="w-8 h-8 rounded-lg flex items-center justify-center shrink-0" style={{ background: 'rgba(124,92,252,0.15)' }}>
                     <Shield className="w-4 h-4 text-violet-400" />
                   </div>
                   <div className="flex-1 min-w-0">
@@ -514,7 +514,7 @@ function Sidebar({ currentView, setView, user, onLogout }: {
             ? 'text-violet-300'
             : 'text-white/40 hover:text-white/70'
         }`}
-        style={active ? { background: 'rgba(124,58,237,0.12)', borderLeft: '3px solid #7c3aed' } : { borderLeft: '3px solid transparent' }}
+        style={active ? { background: 'rgba(124,92,252,0.12)', borderLeft: '3px solid #7c5cfc' } : { borderLeft: '3px solid transparent' }}
       >
         <item.icon className={`w-5 h-5 shrink-0 transition-colors ${active ? 'text-violet-400' : ''}`} />
         {!collapsed && <span>{item.label}</span>}
@@ -536,7 +536,7 @@ function Sidebar({ currentView, setView, user, onLogout }: {
     <>
       {/* Logo */}
       <div className={`flex items-center gap-3 px-5 py-5 border-b ${collapsed ? 'justify-center' : ''}`} style={{ borderColor: 'rgba(255,255,255,0.05)' }}>
-        <div className="w-10 h-10 rounded-xl flex items-center justify-center shrink-0 shadow-lg" style={{ background: 'linear-gradient(135deg, rgba(124,58,237,0.3), rgba(6,182,212,0.3))', border: '1px solid rgba(124,58,237,0.2)', boxShadow: '0 0 20px rgba(124,58,237,0.1)' }}>
+        <div className="w-10 h-10 rounded-xl flex items-center justify-center shrink-0 shadow-lg" style={{ background: 'linear-gradient(135deg, rgba(124,92,252,0.3), rgba(6,182,212,0.3))', border: '1px solid rgba(124,92,252,0.2)', boxShadow: '0 0 20px rgba(124,92,252,0.1)' }}>
           <Wallet className="w-5 h-5 text-violet-400" />
         </div>
         {!collapsed && (
@@ -564,7 +564,7 @@ function Sidebar({ currentView, setView, user, onLogout }: {
       <div className={`border-t p-4 ${collapsed ? 'flex flex-col items-center' : ''}`} style={{ borderColor: 'rgba(255,255,255,0.05)' }}>
         <div className={`flex items-center gap-3 ${collapsed ? '' : 'w-full'}`}>
           <div className="avatar-ring shrink-0">
-            <div className="w-9 h-9 flex items-center justify-center text-white text-sm font-bold" style={{ background: 'linear-gradient(135deg, #7c3aed, #06b6d4)' }}>
+            <div className="w-9 h-9 flex items-center justify-center text-white text-sm font-bold" style={{ background: 'linear-gradient(135deg, #7c5cfc, #06b6d4)' }}>
               {user?.name?.[0] || user?.email?.[0]?.toUpperCase() || '?'}
             </div>
           </div>
@@ -1067,7 +1067,7 @@ function TokenSignals() {
     <Card className="glass-card rounded-2xl card-hover fade-in-up">
       <CardContent className="p-5 sm:p-6 space-y-4">
         <div className="flex items-center gap-3">
-          <div className="w-9 h-9 rounded-xl flex items-center justify-center" style={{ background: 'rgba(124,58,237,0.12)' }}>
+          <div className="w-9 h-9 rounded-xl flex items-center justify-center" style={{ background: 'rgba(124,92,252,0.12)' }}>
             <Activity className="w-4 h-4 text-violet-400" />
           </div>
           <div>
@@ -1213,7 +1213,7 @@ function DashboardView({ user, onUpgrade }: { user: any; onUpgrade: () => void }
       value: `${fmt(data.valeurActuelle)} $`,
       icon: Wallet,
       barClass: 'kpi-bar-violet',
-      iconBg: 'rgba(124,58,237,0.12)',
+      iconBg: 'rgba(124,92,252,0.12)',
       iconColor: 'text-violet-400',
       colorClass: '',
     },
@@ -1296,8 +1296,8 @@ function DashboardView({ user, onUpgrade }: { user: any; onUpgrade: () => void }
               <p style={{ color: 'rgba(255,255,255,0.35)' }}>Plan Gratuit limité à 3 tokens et 10 transactions. Passez en Premium pour profiter de toutes les fonctionnalités.</p>
             </div>
             <Button
-              className="rounded-xl text-black font-semibold shadow-lg transition-all active:scale-[0.98] shrink-0"
-              style={{ background: 'linear-gradient(135deg, #f59e0b, #f97316)', boxShadow: '0 4px 15px rgba(245,158,11,0.25)' }}
+              className="rounded-xl text-black font-semibold shadow-lg transition-all active:scale-[0.98] shrink-0 upgrade-btn-glow"
+              style={{ background: 'linear-gradient(135deg, #f59e0b, #f97316)' }}
               onClick={onUpgrade}
             >
               <Crown className="w-4 h-4 mr-2" /> Passer en Premium
@@ -1318,7 +1318,7 @@ function DashboardView({ user, onUpgrade }: { user: any; onUpgrade: () => void }
                     <card.icon className={`w-4 h-4 ${card.iconColor}`} />
                   </div>
                 </div>
-                <p className={`text-xl sm:text-2xl font-bold ${card.colorClass || 'text-white/90'}`}>
+                <p className={`text-xl sm:text-2xl font-bold kpi-value-animate ${card.colorClass || 'text-white/90'}`}>
                   {card.value}
                 </p>
               </CardContent>
@@ -1380,7 +1380,7 @@ function DashboardView({ user, onUpgrade }: { user: any; onUpgrade: () => void }
                 <Tooltip content={<CustomTooltip />} />
                 <Legend wrapperStyle={{ fontSize: '12px', color: 'rgba(255,255,255,0.4)' }} />
                 <Bar dataKey="investissement" name="Investissement" fill="#06b6d4" radius={[6, 6, 0, 0]} />
-                <Bar dataKey="valeur" name="Valeur Actuelle" fill="#7c3aed" radius={[6, 6, 0, 0]} />
+                <Bar dataKey="valeur" name="Valeur Actuelle" fill="#7c5cfc" radius={[6, 6, 0, 0]} />
               </BarChart>
             </ResponsiveContainer>
           </CardContent>
@@ -1595,7 +1595,7 @@ function TransactionsView({ user, onUpgrade }: { user: any; onUpgrade: () => voi
           const err = await res.json()
           throw new Error(err.detail || err.error || 'Erreur')
         }
-        toast.success('Transaction ajoutée')
+        toast.success('Transaction ajoutée !', { className: 'toast-success-bar' })
       }
 
       setDialogOpen(false)
@@ -1609,7 +1609,7 @@ function TransactionsView({ user, onUpgrade }: { user: any; onUpgrade: () => voi
     try {
       const res = await fetch(`/api/transactions?id=${id}`, { method: 'DELETE' })
       if (res.ok) {
-        toast.success('Transaction supprimée')
+        toast.success('Transaction supprimée', { className: 'toast-success-bar' })
         fetchData()
       }
     } catch (err: any) {
@@ -1661,7 +1661,7 @@ function TransactionsView({ user, onUpgrade }: { user: any; onUpgrade: () => voi
         </div>
         <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
           <DialogTrigger asChild>
-            <Button onClick={openNew} className="gap-2 rounded-xl h-10 shadow-lg transition-all active:scale-[0.98] hidden sm:flex text-white" style={{ background: 'linear-gradient(135deg, #7c3aed, #06b6d4)', boxShadow: '0 4px 20px rgba(124,58,237,0.25)' }}>
+            <Button onClick={openNew} className="gap-2 rounded-xl h-10 shadow-lg transition-all active:scale-[0.98] hidden sm:flex text-white" style={{ background: 'linear-gradient(135deg, #7c5cfc, #06b6d4)', boxShadow: '0 4px 20px rgba(124,92,252,0.25)' }}>
               <Plus className="w-4 h-4" /> Nouvelle Transaction
             </Button>
           </DialogTrigger>
@@ -1721,7 +1721,7 @@ function TransactionsView({ user, onUpgrade }: { user: any; onUpgrade: () => voi
                 <DialogClose asChild>
                   <Button variant="outline" className="rounded-xl text-white/50 hover:text-white/70 hover:bg-white/5" style={{ borderColor: 'rgba(255,255,255,0.08)' }}>Annuler</Button>
                 </DialogClose>
-                <Button type="submit" className="rounded-xl shadow-lg text-white transition-all active:scale-[0.98]" style={{ background: 'linear-gradient(135deg, #7c3aed, #06b6d4)', boxShadow: '0 4px 20px rgba(124,58,237,0.25)' }}>
+                <Button type="submit" className="rounded-xl shadow-lg text-white transition-all active:scale-[0.98]" style={{ background: 'linear-gradient(135deg, #7c5cfc, #06b6d4)', boxShadow: '0 4px 20px rgba(124,92,252,0.25)' }}>
                   {editingTx ? 'Modifier' : 'Ajouter'}
                 </Button>
               </DialogFooter>
@@ -1781,7 +1781,7 @@ function TransactionsView({ user, onUpgrade }: { user: any; onUpgrade: () => voi
             </div>
             <h3 className="text-lg font-semibold text-white/70 mb-2">Aucune transaction</h3>
             <p className="mb-6" style={{ color: 'rgba(255,255,255,0.25)' }}>Ajoutez votre première transaction pour commencer le suivi.</p>
-            <Button onClick={openNew} className="gap-2 rounded-xl shadow-lg text-white" style={{ background: 'linear-gradient(135deg, #7c3aed, #06b6d4)', boxShadow: '0 4px 20px rgba(124,58,237,0.25)' }}>
+            <Button onClick={openNew} className="gap-2 rounded-xl shadow-lg text-white" style={{ background: 'linear-gradient(135deg, #7c5cfc, #06b6d4)', boxShadow: '0 4px 20px rgba(124,92,252,0.25)' }}>
               <Plus className="w-4 h-4" /> Ajouter une transaction
             </Button>
           </CardContent>
@@ -1933,7 +1933,7 @@ function TransactionsView({ user, onUpgrade }: { user: any; onUpgrade: () => voi
       <button
         onClick={openNew}
         className="fab-button fixed bottom-20 right-4 sm:hidden w-14 h-14 rounded-2xl flex items-center justify-center text-white z-40 active:scale-95"
-        style={{ background: 'linear-gradient(135deg, #7c3aed, #06b6d4)' }}
+        style={{ background: 'linear-gradient(135deg, #7c5cfc, #06b6d4)' }}
       >
         <Plus className="w-6 h-6" />
       </button>
@@ -1976,6 +1976,7 @@ function UpgradePremiumModal({ open, onOpenChange, onSuccess }: {
   const [step, setStep] = useState<'select' | 'paypal' | 'processing' | 'success'>('select')
   const [selectedPlan, setSelectedPlan] = useState(1)
   const [error, setError] = useState('')
+  const [celebrating, setCelebrating] = useState(false)
   const [paypalLoaded, setPaypalLoaded] = useState(false)
   const [paypalLoading, setPaypalLoading] = useState(false)
   const paypalContainerRef = useRef<HTMLDivElement>(null)
@@ -2053,11 +2054,12 @@ function UpgradePremiumModal({ open, onOpenChange, onSuccess }: {
               if (res.ok && result.success) {
                 setStep('success')
                 toast.success('Bienvenue en Premium !')
+                setCelebrating(true)
                 setTimeout(() => {
-                  onSuccess()
+                  setCelebrating(false)
                   onOpenChange(false)
                   setStep('select')
-                }, 2000)
+                }, 2500)
               } else {
                 setError(result.error || 'Le paiement a échoué')
                 setStep('paypal')
@@ -2116,6 +2118,17 @@ function UpgradePremiumModal({ open, onOpenChange, onSuccess }: {
   return (
     <Dialog open={open} onOpenChange={handleOpenChange}>
       <DialogContent className="glass-card border-0 max-w-md" style={{ background: 'rgba(20,22,35,0.98)', backdropFilter: 'blur(30px)' }}>
+        {celebrating && (
+          <div className="upgrade-celebration fixed inset-0 z-[100] flex items-center justify-center pointer-events-none">
+            <div className="flex flex-col items-center gap-4">
+              <div className="upgrade-crown-bounce">
+                <Crown className="w-20 h-20 text-amber-400" style={{ filter: 'drop-shadow(0 0 20px rgba(245,158,11,0.5))' }} />
+              </div>
+              <h2 className="text-2xl font-bold text-white">Bienvenue en Premium !</h2>
+              <p className="text-sm text-white/50">Accès illimité débloqué</p>
+            </div>
+          </div>
+        )}
         {step === 'select' && (
           <>
             <DialogHeader>
@@ -2355,7 +2368,7 @@ function ProfileView({ user, onUpgrade }: { user: any; onUpgrade: () => void }) 
         <CardContent className="space-y-4">
           <div className="flex items-center gap-4">
             <div className="avatar-ring">
-              <div className="w-16 h-16 flex items-center justify-center text-white text-2xl font-bold" style={{ background: 'linear-gradient(135deg, #7c3aed, #06b6d4)' }}>
+              <div className="w-16 h-16 flex items-center justify-center text-white text-2xl font-bold" style={{ background: 'linear-gradient(135deg, #7c5cfc, #06b6d4)' }}>
                 {user?.name?.[0] || user?.email?.[0]?.toUpperCase() || '?'}
               </div>
             </div>
@@ -2386,7 +2399,7 @@ function ProfileView({ user, onUpgrade }: { user: any; onUpgrade: () => void }) 
               !isPremium && !isAdmin
                 ? 'border-violet-500/30 glass-card'
                 : ''
-            }`} style={!isPremium && !isAdmin ? { background: 'rgba(124,58,237,0.05)' } : { background: 'rgba(255,255,255,0.02)', borderColor: 'rgba(255,255,255,0.05)' }}>
+            }`} style={!isPremium && !isAdmin ? { background: 'rgba(124,92,252,0.05)' } : { background: 'rgba(255,255,255,0.02)', borderColor: 'rgba(255,255,255,0.05)' }}>
               <div className="flex items-center gap-2 mb-3">
                 <div className="w-8 h-8 rounded-lg flex items-center justify-center" style={{ background: 'rgba(255,255,255,0.05)' }}>
                   <User className="w-4 h-4 text-white/40" />
@@ -2402,7 +2415,7 @@ function ProfileView({ user, onUpgrade }: { user: any; onUpgrade: () => void }) 
                 <li className="flex items-center gap-2.5"><X className="w-4 h-4 text-red-400/60 shrink-0" /> <span style={{ color: 'rgba(255,255,255,0.2)' }}>Pas de métriques avancées</span></li>
               </ul>
               {!isPremium && !isAdmin && (
-                <Badge className="mt-4 text-white border-0" style={{ background: 'linear-gradient(135deg, #7c3aed, #06b6d4)' }}>Plan actuel</Badge>
+                <Badge className="mt-4 text-white border-0" style={{ background: 'linear-gradient(135deg, #7c5cfc, #06b6d4)' }}>Plan actuel</Badge>
               )}
             </div>
 
@@ -2559,7 +2572,7 @@ function AdminUsersView() {
                   <TableRow key={u.id} className="transition-colors" style={{ borderBottomColor: 'rgba(255,255,255,0.04)' }}>
                     <TableCell>
                       <div className="flex items-center gap-3">
-                        <div className="w-9 h-9 rounded-xl flex items-center justify-center text-white text-xs font-bold" style={{ background: 'linear-gradient(135deg, rgba(124,58,237,0.25), rgba(6,182,212,0.25))' }}>
+                        <div className="w-9 h-9 rounded-xl flex items-center justify-center text-white text-xs font-bold" style={{ background: 'linear-gradient(135deg, rgba(124,92,252,0.25), rgba(6,182,212,0.25))' }}>
                           {u.name?.[0] || u.email?.[0]?.toUpperCase() || '?'}
                         </div>
                         <div>
@@ -2628,7 +2641,7 @@ function AdminUsersView() {
           <div key={u.id} className="glass-card rounded-2xl p-4 space-y-3 card-hover">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-xl flex items-center justify-center text-white text-sm font-bold" style={{ background: 'linear-gradient(135deg, rgba(124,58,237,0.25), rgba(6,182,212,0.25))' }}>
+                <div className="w-10 h-10 rounded-xl flex items-center justify-center text-white text-sm font-bold" style={{ background: 'linear-gradient(135deg, rgba(124,92,252,0.25), rgba(6,182,212,0.25))' }}>
                   {u.name?.[0] || u.email?.[0]?.toUpperCase() || '?'}
                 </div>
                 <div>
@@ -2760,7 +2773,7 @@ function AdminTokensView() {
         </div>
         <Dialog open={addOpen} onOpenChange={setAddOpen}>
           <DialogTrigger asChild>
-            <Button className="gap-2 rounded-xl h-10 shadow-lg text-white transition-all active:scale-[0.98]" style={{ background: 'linear-gradient(135deg, #7c3aed, #06b6d4)', boxShadow: '0 4px 20px rgba(124,58,237,0.25)' }}>
+            <Button className="gap-2 rounded-xl h-10 shadow-lg text-white transition-all active:scale-[0.98]" style={{ background: 'linear-gradient(135deg, #7c5cfc, #06b6d4)', boxShadow: '0 4px 20px rgba(124,92,252,0.25)' }}>
               <Plus className="w-4 h-4" /> Ajouter un Token
             </Button>
           </DialogTrigger>
@@ -2812,7 +2825,7 @@ function AdminTokensView() {
                   style={{ background: 'rgba(255,255,255,0.04)', borderColor: 'rgba(255,255,255,0.08)' }}
                 />
               </div>
-              <Button onClick={addToken} className="w-full rounded-xl shadow-lg text-white transition-all active:scale-[0.98]" style={{ background: 'linear-gradient(135deg, #7c3aed, #06b6d4)', boxShadow: '0 4px 20px rgba(124,58,237,0.25)' }}>Ajouter</Button>
+              <Button onClick={addToken} className="w-full rounded-xl shadow-lg text-white transition-all active:scale-[0.98]" style={{ background: 'linear-gradient(135deg, #7c5cfc, #06b6d4)', boxShadow: '0 4px 20px rgba(124,92,252,0.25)' }}>Ajouter</Button>
             </div>
           </DialogContent>
         </Dialog>
@@ -2996,7 +3009,7 @@ function AdminExchangesView() {
         </div>
         <Dialog open={addOpen} onOpenChange={setAddOpen}>
           <DialogTrigger asChild>
-            <Button className="gap-2 rounded-xl h-10 shadow-lg text-white transition-all active:scale-[0.98]" style={{ background: 'linear-gradient(135deg, #7c3aed, #06b6d4)', boxShadow: '0 4px 20px rgba(124,58,237,0.25)' }}>
+            <Button className="gap-2 rounded-xl h-10 shadow-lg text-white transition-all active:scale-[0.98]" style={{ background: 'linear-gradient(135deg, #7c5cfc, #06b6d4)', boxShadow: '0 4px 20px rgba(124,92,252,0.25)' }}>
               <Plus className="w-4 h-4" /> Ajouter un Exchange
             </Button>
           </DialogTrigger>
@@ -3016,7 +3029,7 @@ function AdminExchangesView() {
                   style={{ background: 'rgba(255,255,255,0.04)', borderColor: 'rgba(255,255,255,0.08)' }}
                 />
               </div>
-              <Button onClick={addExchange} className="w-full rounded-xl shadow-lg text-white transition-all active:scale-[0.98]" style={{ background: 'linear-gradient(135deg, #7c3aed, #06b6d4)', boxShadow: '0 4px 20px rgba(124,58,237,0.25)' }}>Ajouter</Button>
+              <Button onClick={addExchange} className="w-full rounded-xl shadow-lg text-white transition-all active:scale-[0.98]" style={{ background: 'linear-gradient(135deg, #7c5cfc, #06b6d4)', boxShadow: '0 4px 20px rgba(124,92,252,0.25)' }}>Ajouter</Button>
             </div>
           </DialogContent>
         </Dialog>
@@ -3160,7 +3173,7 @@ export default function Home() {
     return (
       <div className="min-h-screen flex items-center justify-center" style={{ background: '#0f1117' }}>
         <div className="flex flex-col items-center gap-3">
-          <div className="w-10 h-10 rounded-xl border flex items-center justify-center float-animation" style={{ background: 'rgba(124,58,237,0.15)', borderColor: 'rgba(124,58,237,0.3)' }}>
+          <div className="w-10 h-10 rounded-xl border flex items-center justify-center float-animation" style={{ background: 'rgba(124,92,252,0.15)', borderColor: 'rgba(124,92,252,0.3)' }}>
             <Wallet className="w-5 h-5 text-violet-400" />
           </div>
           <RefreshCw className="w-5 h-5 animate-spin text-violet-400/50" />

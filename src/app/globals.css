@@ -43,73 +43,77 @@
   --radius-xl: calc(var(--radius) + 4px);
 }
 
+/* ============================================================
+   DESIGN TOKENS — MODERN SaaS / DATA-JOURNALISM
+   Palette: Deep navy base, vivid violet accent, clean whites
+   ============================================================ */
 :root {
-  --radius: 0.625rem;
-  --background: #0f1117;
-  --foreground: #ffffff;
-  --card: #1a1d2e;
-  --card-foreground: #ffffff;
-  --popover: #1a1d2e;
-  --popover-foreground: #ffffff;
-  --primary: #7c3aed;
+  --radius: 0.75rem;
+  --background: #080b12;
+  --foreground: #f1f5f9;
+  --card: #0e1219;
+  --card-foreground: #f1f5f9;
+  --popover: #0e1219;
+  --popover-foreground: #f1f5f9;
+  --primary: #7c5cfc;
   --primary-foreground: #ffffff;
-  --secondary: #252840;
-  --secondary-foreground: #ffffff;
-  --muted: #252840;
-  --muted-foreground: #9ca3af;
-  --accent: #252840;
-  --accent-foreground: #ffffff;
+  --secondary: #161c2a;
+  --secondary-foreground: #f1f5f9;
+  --muted: #161c2a;
+  --muted-foreground: #64748b;
+  --accent: #161c2a;
+  --accent-foreground: #f1f5f9;
   --destructive: #ef4444;
-  --border: rgba(255,255,255,0.06);
-  --input: rgba(255,255,255,0.08);
-  --ring: #7c3aed;
-  --chart-1: #7c3aed;
+  --border: rgba(255,255,255,0.05);
+  --input: rgba(255,255,255,0.07);
+  --ring: #7c5cfc;
+  --chart-1: #7c5cfc;
   --chart-2: #06b6d4;
   --chart-3: #10b981;
   --chart-4: #f59e0b;
   --chart-5: #ef4444;
-  --sidebar: #0f1117;
-  --sidebar-foreground: #ffffff;
-  --sidebar-primary: #7c3aed;
+  --sidebar: #080b12;
+  --sidebar-foreground: #f1f5f9;
+  --sidebar-primary: #7c5cfc;
   --sidebar-primary-foreground: #ffffff;
-  --sidebar-accent: #252840;
-  --sidebar-accent-foreground: #ffffff;
-  --sidebar-border: rgba(255,255,255,0.06);
-  --sidebar-ring: #7c3aed;
+  --sidebar-accent: #161c2a;
+  --sidebar-accent-foreground: #f1f5f9;
+  --sidebar-border: rgba(255,255,255,0.04);
+  --sidebar-ring: #7c5cfc;
 }
 
 .dark {
-  --background: #0f1117;
-  --foreground: #ffffff;
-  --card: #1a1d2e;
-  --card-foreground: #ffffff;
-  --popover: #1a1d2e;
-  --popover-foreground: #ffffff;
-  --primary: #7c3aed;
+  --background: #080b12;
+  --foreground: #f1f5f9;
+  --card: #0e1219;
+  --card-foreground: #f1f5f9;
+  --popover: #0e1219;
+  --popover-foreground: #f1f5f9;
+  --primary: #7c5cfc;
   --primary-foreground: #ffffff;
-  --secondary: #252840;
-  --secondary-foreground: #ffffff;
-  --muted: #252840;
-  --muted-foreground: #9ca3af;
-  --accent: #252840;
-  --accent-foreground: #ffffff;
+  --secondary: #161c2a;
+  --secondary-foreground: #f1f5f9;
+  --muted: #161c2a;
+  --muted-foreground: #64748b;
+  --accent: #161c2a;
+  --accent-foreground: #f1f5f9;
   --destructive: #ef4444;
-  --border: rgba(255,255,255,0.06);
-  --input: rgba(255,255,255,0.08);
-  --ring: #7c3aed;
-  --chart-1: #7c3aed;
+  --border: rgba(255,255,255,0.05);
+  --input: rgba(255,255,255,0.07);
+  --ring: #7c5cfc;
+  --chart-1: #7c5cfc;
   --chart-2: #06b6d4;
   --chart-3: #10b981;
   --chart-4: #f59e0b;
   --chart-5: #ef4444;
-  --sidebar: #0f1117;
-  --sidebar-foreground: #ffffff;
-  --sidebar-primary: #7c3aed;
+  --sidebar: #080b12;
+  --sidebar-foreground: #f1f5f9;
+  --sidebar-primary: #7c5cfc;
   --sidebar-primary-foreground: #ffffff;
-  --sidebar-accent: #252840;
-  --sidebar-accent-foreground: #ffffff;
-  --sidebar-border: rgba(255,255,255,0.06);
-  --sidebar-ring: #7c3aed;
+  --sidebar-accent: #161c2a;
+  --sidebar-accent-foreground: #f1f5f9;
+  --sidebar-border: rgba(255,255,255,0.04);
+  --sidebar-ring: #7c5cfc;
 }
 
 @layer base {
@@ -118,62 +122,58 @@
   }
   body {
     @apply bg-background text-foreground;
+    font-feature-settings: "rlig" 1, "calt" 1;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
   }
 }
 
 /* ============================================================
-   ANIMATED GRADIENT BACKGROUND FOR LOGIN
-   ============================================================ */
-.login-gradient-bg {
-  background: #0f1117;
-}
-
-/* ============================================================
-   FLOATING ANIMATION FOR LOGO
+   FLOATING ANIMATION
    ============================================================ */
 .float-animation {
-  animation: float 3s ease-in-out infinite;
+  animation: float 4s ease-in-out infinite;
 }
 
 @keyframes float {
   0%, 100% { transform: translateY(0px); }
-  50% { transform: translateY(-10px); }
+  50% { transform: translateY(-8px); }
 }
 
 /* ============================================================
-   GLASSMORPHISM UTILITIES
+   GLASSMORPHISM — REFINED FOR SaaS
    ============================================================ */
 .glass {
-  background: rgba(26, 29, 46, 0.8);
+  background: rgba(14, 18, 25, 0.85);
   backdrop-filter: blur(20px);
   -webkit-backdrop-filter: blur(20px);
-  border: 1px solid rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.05);
 }
 
 .glass-strong {
-  background: rgba(26, 29, 46, 0.95);
+  background: rgba(14, 18, 25, 0.96);
   backdrop-filter: blur(30px);
   -webkit-backdrop-filter: blur(30px);
-  border: 1px solid rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.08);
 }
 
 .glass-card {
-  background: rgba(26, 29, 46, 0.6);
+  background: rgba(14, 18, 25, 0.7);
   backdrop-filter: blur(16px);
   -webkit-backdrop-filter: blur(16px);
-  border: 1px solid rgba(255, 255, 255, 0.06);
-  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.12), inset 0 1px 0 rgba(255,255,255,0.03);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3), 0 8px 32px rgba(0, 0, 0, 0.12);
 }
 
 .glass-sidebar {
-  background: rgba(15, 17, 23, 0.97);
+  background: rgba(8, 11, 18, 0.98);
   backdrop-filter: blur(24px);
   -webkit-backdrop-filter: blur(24px);
-  border-right: 1px solid rgba(255, 255, 255, 0.06);
+  border-right: 1px solid rgba(255, 255, 255, 0.04);
 }
 
 /* ============================================================
-   GRADIENT BORDER ANIMATION
+   GRADIENT BORDER — ANIMATED ON HOVER
    ============================================================ */
 .gradient-border {
   position: relative;
@@ -185,16 +185,16 @@
   position: absolute;
   inset: 0;
   border-radius: inherit;
-  padding: 1px;
-  background: linear-gradient(135deg, #7c3aed, #06b6d4, #7c3aed);
+  padding: 1.5px;
+  background: linear-gradient(135deg, #7c5cfc, #06b6d4, #a78bfa);
   background-size: 200% 200%;
-  animation: borderGlow 3s ease infinite;
+  animation: borderGlow 4s ease infinite;
   -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
   -webkit-mask-composite: xor;
   mask-composite: exclude;
   pointer-events: none;
   opacity: 0;
-  transition: opacity 0.3s ease;
+  transition: opacity 0.4s ease;
 }
 
 .gradient-border:hover::before {
@@ -208,14 +208,14 @@
 }
 
 /* ============================================================
-   FADE-IN ANIMATION
+   ENTRANCE ANIMATIONS — SMOOTH & DELIBERATE
    ============================================================ */
 .fade-in {
-  animation: fadeIn 0.5s ease forwards;
+  animation: fadeIn 0.4s ease forwards;
 }
 
 .fade-in-up {
-  animation: fadeInUp 0.5s ease forwards;
+  animation: fadeInUp 0.5s cubic-bezier(0.16, 1, 0.3, 1) forwards;
 }
 
 @keyframes fadeIn {
@@ -224,7 +224,7 @@
 }
 
 @keyframes fadeInUp {
-  from { opacity: 0; transform: translateY(12px); }
+  from { opacity: 0; transform: translateY(16px); }
   to { opacity: 1; transform: translateY(0); }
 }
 
@@ -235,12 +235,14 @@
 .stagger-4 { animation-delay: 0.2s; opacity: 0; }
 .stagger-5 { animation-delay: 0.25s; opacity: 0; }
 .stagger-6 { animation-delay: 0.3s; opacity: 0; }
+.stagger-7 { animation-delay: 0.35s; opacity: 0; }
+.stagger-8 { animation-delay: 0.4s; opacity: 0; }
 
 /* ============================================================
-   SLIDE-IN SIDEBAR ANIMATION
+   SLIDE-IN SIDEBAR
    ============================================================ */
 .slide-in-left {
-  animation: slideInLeft 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  animation: slideInLeft 0.35s cubic-bezier(0.16, 1, 0.3, 1) forwards;
 }
 
 @keyframes slideInLeft {
@@ -249,11 +251,11 @@
 }
 
 /* ============================================================
-   CUSTOM SCROLLBAR
+   CUSTOM SCROLLBAR — MINIMAL
    ============================================================ */
 .custom-scrollbar::-webkit-scrollbar {
-  width: 6px;
-  height: 6px;
+  width: 5px;
+  height: 5px;
 }
 
 .custom-scrollbar::-webkit-scrollbar-track {
@@ -261,31 +263,31 @@
 }
 
 .custom-scrollbar::-webkit-scrollbar-thumb {
-  background: rgba(124, 58, 237, 0.2);
+  background: rgba(124, 92, 252, 0.15);
   border-radius: 3px;
 }
 
 .custom-scrollbar::-webkit-scrollbar-thumb:hover {
-  background: rgba(124, 58, 237, 0.4);
+  background: rgba(124, 92, 252, 0.3);
 }
 
 /* ============================================================
-   MOBILE BOTTOM NAV
+   MOBILE BOTTOM NAV — REFINED
    ============================================================ */
 .bottom-nav {
-  background: rgba(15, 17, 23, 0.95);
+  background: rgba(8, 11, 18, 0.96);
   backdrop-filter: blur(24px);
   -webkit-backdrop-filter: blur(24px);
-  border-top: 1px solid rgba(255, 255, 255, 0.06);
+  border-top: 1px solid rgba(255, 255, 255, 0.04);
 }
 
 .bottom-nav-item {
-  transition: all 0.2s ease;
+  transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
   position: relative;
 }
 
 .bottom-nav-item.active {
-  color: #7c3aed;
+  color: #7c5cfc;
 }
 
 .bottom-nav-item.active::before {
@@ -294,22 +296,23 @@
   top: -1px;
   left: 50%;
   transform: translateX(-50%);
-  width: 24px;
+  width: 20px;
   height: 2px;
-  background: linear-gradient(90deg, #7c3aed, #06b6d4);
+  background: linear-gradient(90deg, #7c5cfc, #a78bfa);
   border-radius: 1px;
+  box-shadow: 0 0 8px rgba(124, 92, 252, 0.4);
 }
 
 /* ============================================================
-   PULSE GLOW FOR ACTIVE INDICATOR
+   PULSE GLOW
    ============================================================ */
 .pulse-glow {
-  animation: pulseGlow 2s ease-in-out infinite;
+  animation: pulseGlow 2.5s ease-in-out infinite;
 }
 
 @keyframes pulseGlow {
-  0%, 100% { box-shadow: 0 0 0 0 rgba(124, 58, 237, 0.3); }
-  50% { box-shadow: 0 0 12px 2px rgba(124, 58, 237, 0.15); }
+  0%, 100% { box-shadow: 0 0 0 0 rgba(124, 92, 252, 0.25); }
+  50% { box-shadow: 0 0 16px 3px rgba(124, 92, 252, 0.1); }
 }
 
 /* ============================================================
@@ -321,7 +324,7 @@
 
 @keyframes livePulse {
   0%, 100% { opacity: 1; transform: scale(1); }
-  50% { opacity: 0.5; transform: scale(1.3); }
+  50% { opacity: 0.4; transform: scale(1.4); }
 }
 
 /* ============================================================
@@ -339,16 +342,16 @@
    FAB BUTTON
    ============================================================ */
 .fab-button {
-  box-shadow: 0 4px 20px rgba(124, 58, 237, 0.4);
-  transition: all 0.2s ease;
+  box-shadow: 0 4px 24px rgba(124, 92, 252, 0.35);
+  transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 .fab-button:active {
-  transform: scale(0.95);
+  transform: scale(0.94);
 }
 
 /* ============================================================
-   CARD HOVER TRANSFORM
+   CARD HOVER — SUBTLE ELEVATION
    ============================================================ */
 .card-hover {
   transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
@@ -356,7 +359,8 @@
 
 .card-hover:hover {
   transform: translateY(-2px);
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2), inset 0 1px 0 rgba(255,255,255,0.04);
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.25), 0 0 0 1px rgba(124, 92, 252, 0.08);
+  border-color: rgba(124, 92, 252, 0.1);
 }
 
 /* ============================================================
@@ -371,7 +375,7 @@
   content: '';
   position: absolute;
   inset: 0;
-  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.03), transparent);
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.025), transparent);
   animation: shimmer 2s infinite;
 }
 
@@ -381,11 +385,11 @@
 }
 
 /* ============================================================
-   KPI CARD GRADIENT TOP BAR
+   KPI CARD TOP ACCENT BARS — VIVID
    ============================================================ */
 .kpi-bar-violet {
   border-top: 2px solid transparent;
-  border-image: linear-gradient(90deg, #7c3aed, #a78bfa) 1;
+  border-image: linear-gradient(90deg, #7c5cfc, #a78bfa) 1;
 }
 .kpi-bar-cyan {
   border-top: 2px solid transparent;
@@ -431,19 +435,19 @@
    SMOOTH PAGE TRANSITION
    ============================================================ */
 .page-transition {
-  animation: pageEnter 0.3s ease forwards;
+  animation: pageEnter 0.35s cubic-bezier(0.16, 1, 0.3, 1) forwards;
 }
 
 @keyframes pageEnter {
-  from { opacity: 0; transform: translateY(8px); }
+  from { opacity: 0; transform: translateY(10px); }
   to { opacity: 1; transform: translateY(0); }
 }
 
 /* ============================================================
-   GRADIENT TEXT
+   GRADIENT TEXT — BRAND IDENTITY
    ============================================================ */
 .gradient-text {
-  background: linear-gradient(135deg, #7c3aed, #06b6d4);
+  background: linear-gradient(135deg, #7c5cfc, #06b6d4);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
@@ -454,7 +458,7 @@
    ============================================================ */
 .avatar-ring {
   padding: 2px;
-  background: linear-gradient(135deg, #7c3aed, #06b6d4);
+  background: linear-gradient(135deg, #7c5cfc, #06b6d4);
   border-radius: 9999px;
 }
 
@@ -477,7 +481,7 @@
   transform: translateY(-50%);
   width: 3px;
   height: 60%;
-  background: linear-gradient(180deg, #7c3aed, #06b6d4);
+  background: linear-gradient(180deg, #7c5cfc, #06b6d4);
   border-radius: 0 3px 3px 0;
 }
 
@@ -487,7 +491,7 @@
 .token-gradient-btc { background: linear-gradient(135deg, #f59e0b, #d97706); }
 .token-gradient-eth { background: linear-gradient(135deg, #627eea, #3c3c3d); }
 .token-gradient-sol { background: linear-gradient(135deg, #9945ff, #14f195); }
-.token-gradient-default { background: linear-gradient(135deg, #7c3aed, #06b6d4); }
+.token-gradient-default { background: linear-gradient(135deg, #7c5cfc, #06b6d4); }
 
 /* ============================================================
    HORIZONTAL BAR CHART ANIMATION
@@ -501,4 +505,243 @@
    ============================================================ */
 .safe-area-bottom {
   padding-bottom: env(safe-area-inset-bottom, 0px);
+}
+
+/* ============================================================
+   ✨ NEW: TRANSACTION MICRO-ANIMATIONS
+   ============================================================ */
+
+/* Success flash on transaction creation */
+.tx-success-flash {
+  animation: txFlash 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+@keyframes txFlash {
+  0% { background-color: rgba(16, 185, 129, 0); }
+  30% { background-color: rgba(16, 185, 129, 0.12); }
+  100% { background-color: rgba(16, 185, 129, 0); }
+}
+
+/* Delete shake animation */
+.tx-delete-shake {
+  animation: txShake 0.4s ease;
+}
+
+@keyframes txShake {
+  0%, 100% { transform: translateX(0); }
+  20% { transform: translateX(-4px); }
+  40% { transform: translateX(4px); }
+  60% { transform: translateX(-3px); }
+  80% { transform: translateX(2px); }
+}
+
+/* Number counter animation */
+.tx-value-update {
+  animation: valuePop 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+@keyframes valuePop {
+  0% { transform: scale(1); }
+  30% { transform: scale(1.08); }
+  100% { transform: scale(1); }
+}
+
+/* Row slide-in for new transactions */
+.tx-row-enter {
+  animation: txRowSlide 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+@keyframes txRowSlide {
+  from { opacity: 0; transform: translateX(-20px); }
+  to { opacity: 1; transform: translateX(0); }
+}
+
+/* ============================================================
+   ✨ NEW: PREMIUM UPGRADE CELEBRATION
+   ============================================================ */
+
+/* Full-screen celebration overlay */
+.upgrade-celebration {
+  animation: celebFade 2.5s ease forwards;
+}
+
+@keyframes celebFade {
+  0% { opacity: 0; }
+  15% { opacity: 1; }
+  80% { opacity: 1; }
+  100% { opacity: 0; pointer-events: none; }
+}
+
+/* Crown bounce on upgrade */
+.upgrade-crown-bounce {
+  animation: crownBounce 0.8s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+}
+
+@keyframes crownBounce {
+  0% { transform: scale(0) rotate(-15deg); opacity: 0; }
+  60% { transform: scale(1.2) rotate(5deg); opacity: 1; }
+  100% { transform: scale(1) rotate(0deg); opacity: 1; }
+}
+
+/* Sparkle particles */
+.sparkle {
+  animation: sparkle 1s ease-out forwards;
+}
+
+@keyframes sparkle {
+  0% { transform: scale(0) rotate(0deg); opacity: 1; }
+  50% { transform: scale(1) rotate(180deg); opacity: 0.8; }
+  100% { transform: scale(0) rotate(360deg); opacity: 0; }
+}
+
+/* Premium badge shimmer */
+.premium-shimmer {
+  background: linear-gradient(
+    90deg,
+    rgba(245, 158, 11, 0) 0%,
+    rgba(245, 158, 11, 0.15) 50%,
+    rgba(245, 158, 11, 0) 100%
+  );
+  background-size: 200% 100%;
+  animation: premiumShimmer 2s ease-in-out infinite;
+}
+
+@keyframes premiumShimmer {
+  0% { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+}
+
+/* Upgrade button glow pulse */
+.upgrade-btn-glow {
+  animation: upgradeGlow 2s ease-in-out infinite;
+}
+
+@keyframes upgradeGlow {
+  0%, 100% { box-shadow: 0 4px 15px rgba(245, 158, 11, 0.25); }
+  50% { box-shadow: 0 4px 30px rgba(245, 158, 11, 0.45), 0 0 60px rgba(245, 158, 11, 0.1); }
+}
+
+/* ============================================================
+   ✨ NEW: CHART TRANSITIONS
+   ============================================================ */
+
+/* Smooth chart data transition */
+.chart-enter {
+  animation: chartReveal 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+@keyframes chartReveal {
+  from { opacity: 0; transform: scaleY(0.8); transform-origin: bottom; }
+  to { opacity: 1; transform: scaleY(1); transform-origin: bottom; }
+}
+
+/* KPI value counter effect */
+.kpi-value-animate {
+  animation: kpiCountUp 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+@keyframes kpiCountUp {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* ============================================================
+   ✨ NEW: BUTTON INTERACTIONS
+   ============================================================ */
+
+/* Primary action button — transaction accent */
+.btn-primary-glow {
+  position: relative;
+  overflow: hidden;
+  transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.btn-primary-glow::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(135deg, rgba(255,255,255,0.15), transparent);
+  opacity: 0;
+  transition: opacity 0.25s ease;
+}
+
+.btn-primary-glow:hover::after {
+  opacity: 1;
+}
+
+.btn-primary-glow:active {
+  transform: scale(0.97);
+}
+
+/* Ripple effect on click */
+.btn-ripple {
+  position: relative;
+  overflow: hidden;
+}
+
+.btn-ripple::after {
+  content: '';
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  top: 0;
+  left: 0;
+  pointer-events: none;
+  background-image: radial-gradient(circle, rgba(255,255,255,0.2) 10%, transparent 10%);
+  background-repeat: no-repeat;
+  background-position: 50%;
+  transform: scale(10);
+  opacity: 0;
+  transition: transform 0.5s, opacity 0.5s;
+}
+
+.btn-ripple:active::after {
+  transform: scale(0);
+  opacity: 1;
+  transition: 0s;
+}
+
+/* ============================================================
+   ✨ NEW: NOTIFICATION TOAST ENHANCEMENTS
+   ============================================================ */
+
+.toast-success-bar {
+  border-left: 3px solid #10b981;
+}
+
+.toast-premium-bar {
+  border-left: 3px solid #f59e0b;
+}
+
+/* ============================================================
+   ✨ NEW: FOCUS & ACCESSIBILITY
+   ============================================================ */
+
+/* Focus ring for inputs — violet accent */
+input:focus, select:focus, textarea:focus {
+  outline: none;
+  box-shadow: 0 0 0 2px rgba(124, 92, 252, 0.3);
+  border-color: rgba(124, 92, 252, 0.5);
+  transition: box-shadow 0.2s ease, border-color 0.2s ease;
+}
+
+/* ============================================================
+   ✨ NEW: SMOOTH DATA TABLE ROWS
+   ============================================================ */
+
+.data-row-hover {
+  transition: all 0.2s ease;
+}
+
+.data-row-hover:hover {
+  background: rgba(124, 92, 252, 0.04);
+}
+
+/* ============================================================
+   ✨ NEW: TOOLTIP & POPOVER REFINEMENTS
+   ============================================================ */
+
+/* Recharts tooltip override */
+.recharts-tooltip-wrapper {
+  filter: drop-shadow(0 4px 16px rgba(0,0,0,0.3));
 }
