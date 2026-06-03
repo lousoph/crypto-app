@@ -185,9 +185,9 @@ function ParticleField() {
       'rgba(167, 139, 250, 0.3)',
       'rgba(16, 185, 129, 0.25)',
     ]
-    return Array.from({ length: 25 }, (_, i) => ({
+    return Array.from({ length: 40 }, (_, i) => ({
       id: i,
-      size: Math.random() * 3 + 1,
+      size: Math.random() * 4 + 1,
       x: Math.random() * 100,
       duration: Math.random() * 20 + 15,
       delay: Math.random() * 15,
@@ -839,13 +839,13 @@ function Sidebar({ currentView, setView, user, onLogout }: {
     <>
       {/* Logo */}
       <div className={`flex items-center gap-3 px-5 py-5 border-b ${collapsed ? 'justify-center' : ''}`} style={{ borderColor: 'rgba(255,255,255,0.05)' }}>
-        <div className="w-10 h-10 rounded-xl flex items-center justify-center shrink-0 shadow-lg relative" style={{ background: 'linear-gradient(135deg, rgba(124,92,252,0.3), rgba(6,182,212,0.3))', border: '1px solid rgba(124,92,252,0.2)', boxShadow: '0 0 20px rgba(124,92,252,0.1)' }}>
+        <div className="w-10 h-10 rounded-xl flex items-center justify-center shrink-0 shadow-lg relative breathe" style={{ background: 'linear-gradient(135deg, rgba(124,92,252,0.3), rgba(6,182,212,0.3))', border: '1px solid rgba(124,92,252,0.2)', boxShadow: '0 0 20px rgba(124,92,252,0.1)' }}>
           <Wallet className="w-5 h-5 text-violet-400" />
           {/* Animated ring around logo */}
           <div className="absolute inset-[-3px] rounded-xl orbit" style={{ animationDuration: '8s', border: '1px solid transparent', borderTopColor: 'rgba(124,92,252,0.3)', borderRightColor: 'rgba(6,182,212,0.2)' }} />
         </div>
         {!collapsed && (
-          <span className="text-lg font-bold gradient-text">CryptoFolio</span>
+          <span className="text-lg font-bold gradient-text neon-glow">CryptoFolio</span>
         )}
       </div>
 
@@ -876,7 +876,7 @@ function Sidebar({ currentView, setView, user, onLogout }: {
           {!collapsed && (
             <div className="flex-1 min-w-0">
               <p className="text-sm font-medium text-white/80 truncate">{user?.name || user?.email}</p>
-              <Badge variant="outline" className={`text-[10px] mt-0.5 px-1.5 py-0 ${
+              <Badge variant="outline" className={`text-[10px] mt-0.5 px-1.5 py-0 floating-badge ${
                 user?.role === 'admin' ? 'border-violet-500/30 text-violet-400 bg-violet-500/10' :
                 user?.role === 'user_premium' ? 'border-amber-500/30 text-amber-400 bg-amber-500/10' :
                 'border-white/10 text-white/30 bg-white/5'
@@ -1014,7 +1014,7 @@ function LivePriceTicker() {
           const change = prev && prev !== price ? ((price - prev) / prev) * 100 : 0
           const isUp = change >= 0
           return (
-            <div key={ticker} className="flex items-center gap-2 px-3 py-1.5 rounded-lg shrink-0 mr-1 hover-lift" style={{ background: 'rgba(255,255,255,0.03)' }}>
+            <div key={ticker} className={`flex items-center gap-2 px-3 py-1.5 rounded-lg shrink-0 mr-1 hover-scale-glow ${change !== 0 ? (isUp ? 'price-flash-up' : 'price-flash-down') : ''}`} style={{ background: 'rgba(255,255,255,0.03)' }}>
               <TokenLogo ticker={ticker} size={24} />
               <div className="flex flex-col">
                 <span className="text-[10px] font-semibold text-white/60">{ticker}</span>
@@ -1576,7 +1576,7 @@ function DashboardView({ user, onUpgrade }: { user: any; onUpgrade: () => void }
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 fade-in-up">
         <div>
-          <h1 className="text-2xl font-bold text-white/90 glow-text">Tableau de Bord</h1>
+          <h1 className="text-2xl font-bold gradient-shimmer-text">Tableau de Bord</h1>
           <div className="flex items-center gap-2 text-sm mt-1" style={{ color: 'rgba(255,255,255,0.3)' }}>
             <span>Vue d&apos;ensemble de votre portefeuille</span>
             {lastUpdated && (
@@ -1771,7 +1771,7 @@ function DashboardView({ user, onUpgrade }: { user: any; onUpgrade: () => void }
               </TableHeader>
               <TableBody>
                 {sortedTokens.map((t) => (
-                  <TableRow key={t.ticker} className="data-row-hover transition-colors" style={{ borderBottomColor: 'rgba(255,255,255,0.04)' }}>
+                  <TableRow key={t.ticker} className="data-row-hover hover-scale-glow transition-colors" style={{ borderBottomColor: 'rgba(255,255,255,0.04)' }}>
                     <TableCell>
                       <div className="flex items-center gap-3">
                         <TokenLogo ticker={t.ticker} size={36} />
@@ -1801,7 +1801,7 @@ function DashboardView({ user, onUpgrade }: { user: any; onUpgrade: () => void }
           </div>
 
           {/* Mobile Cards */}
-          <div className="md:hidden space-y-3">
+          <div className="md:hidden space-y-3 list-stagger">
             {sortedTokens.map((t) => (
               <div key={t.ticker} className="glass-card rounded-2xl p-4 space-y-3 card-hover-3d gradient-border">
                 <div className="flex items-center justify-between">
@@ -2021,7 +2021,7 @@ function TransactionsView({ user, onUpgrade }: { user: any; onUpgrade: () => voi
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 fade-in-up">
         <div>
-          <h1 className="text-2xl font-bold text-white/90 glow-text">Transactions</h1>
+          <h1 className="text-2xl font-bold gradient-shimmer-text">Transactions</h1>
           <p className="mt-1" style={{ color: 'rgba(255,255,255,0.3)' }}>Gérez vos achats de crypto-actifs</p>
         </div>
         <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
@@ -2030,7 +2030,7 @@ function TransactionsView({ user, onUpgrade }: { user: any; onUpgrade: () => voi
               <Plus className="w-4 h-4" /> Nouvelle Transaction
             </Button>
           </DialogTrigger>
-          <DialogContent className="rounded-2xl max-w-lg dialog-mobile-fullscreen text-white" style={{ background: 'rgba(26,29,46,0.95)', backdropFilter: 'blur(30px)', border: '1px solid rgba(255,255,255,0.1)' }}>
+          <DialogContent className="dialog-enter rounded-2xl max-w-lg dialog-mobile-fullscreen text-white" style={{ background: 'rgba(26,29,46,0.95)', backdropFilter: 'blur(30px)', border: '1px solid rgba(255,255,255,0.1)' }}>
             <DialogHeader>
               <DialogTitle className="text-white/90">{editingTx ? 'Modifier la transaction' : 'Nouvelle transaction'}</DialogTitle>
               <DialogDescription className="sr-only">{editingTx ? 'Formulaire de modification de transaction' : 'Formulaire d\'ajout de transaction'}</DialogDescription>
@@ -2297,7 +2297,7 @@ function TransactionsView({ user, onUpgrade }: { user: any; onUpgrade: () => voi
       {/* FAB Button on Mobile */}
       <button
         onClick={openNew}
-        className="fab-button glow-pulse-border fixed bottom-20 right-4 sm:hidden w-14 h-14 rounded-2xl flex items-center justify-center text-white z-40 active:scale-95"
+        className="fab-button fab-pulse-ring fixed bottom-20 right-4 sm:hidden w-14 h-14 rounded-2xl flex items-center justify-center text-white z-40 active:scale-95"
         style={{ background: 'linear-gradient(135deg, #7c5cfc, #06b6d4)' }}
       >
         <Plus className="w-6 h-6" />
@@ -2762,7 +2762,7 @@ function ProfileView({ user, onUpgrade }: { user: any; onUpgrade: () => void }) 
   return (
     <div className="space-y-6 max-w-2xl view-enter">
       <div className="fade-in-up">
-        <h1 className="text-2xl font-bold text-white/90 glow-text">Profil & Abonnement</h1>
+        <h1 className="text-2xl font-bold gradient-shimmer-text">Profil & Abonnement</h1>
         <p className="mt-1" style={{ color: 'rgba(255,255,255,0.3)' }}>Gérez votre compte et votre abonnement</p>
       </div>
 
@@ -3618,7 +3618,7 @@ export default function Home() {
       return (
         <div className="space-y-6 page-transition">
           <div className="fade-in-up">
-            <h1 className="text-2xl font-bold text-white/90">Administration</h1>
+            <h1 className="text-2xl font-bold gradient-shimmer-text">Administration</h1>
             <p className="mt-1" style={{ color: 'rgba(255,255,255,0.3)' }}>Gérez les utilisateurs, tokens et exchanges</p>
           </div>
           <Tabs value={currentView} onValueChange={(v) => setCurrentView(v as View)} className="fade-in-up stagger-1">
