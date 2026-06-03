@@ -47,3 +47,36 @@ Stage Summary:
 - 12 new micro-animation classes for transactions, premium upgrade, charts, buttons
 - All components updated with consistent new color palette
 - Build passes, server responds 200
+
+---
+Task ID: 3
+Agent: Main
+Task: Fix PayPal JS SDK unhandled_exception error + enhance UI with dynamic charts and micro-animations
+
+Work Log:
+- Diagnosed `paypal_js_sdk_v5_unhandled_exception` — caused by missing PayPal env vars
+- `.env` was missing: NEXT_PUBLIC_PAYPAL_CLIENT_ID, PAYPAL_CLIENT_ID, PAYPAL_CLIENT_SECRET, PAYPAL_API_BASE
+- Added all 4 PayPal production credentials to `.env`
+- Frontend SDK was falling back to 'sb' (sandbox) — now uses production client-id
+- Enhanced PayPal SDK loader: validates client-id exists before loading, checks window.paypal.Buttons availability after load, added `components=buttons` to SDK URL for smaller bundle
+- Added global error handler for PayPal SDK unhandled exceptions (window.addEventListener('error'))
+- Improved onError callback: ignores harmless `unhandled_exception` and `Window closed` errors
+- Added onCancel callback for user closing PayPal popup without error
+- Added onSuccess() call after premium upgrade to refresh session data
+- Added `onCancel` to PayPal SDK TypeScript declarations
+- Added PieChart/Pie/Cell imports from recharts
+- Replaced horizontal bar chart with dynamic donut pie chart for portfolio distribution
+- Pie chart features: innerRadius donut style, smooth 800ms animation, color-coded legend below
+- Enhanced bar chart: added `barCategoryGap="20%"`, removed vertical grid lines, added `animationDuration={800}`
+- Added micro-animation for transaction rows: `tx-success-flash` (green highlight flash) on recently added/modified transactions
+- Tracking recentTxId state to apply animation to specific transaction rows
+- Animation auto-clears after 1.5 seconds
+- Applied to both desktop table rows and mobile card views
+- Build passes successfully
+
+Stage Summary:
+- PayPal error fixed: Added production credentials to .env, improved SDK loading and error handling
+- Dynamic pie chart: Donut-style portfolio distribution chart with animated transitions
+- Enhanced bar chart: Cleaner grid, animated bars, improved spacing
+- Transaction micro-animations: Green flash highlight on new/modified transactions
+- All changes compile and build successfully

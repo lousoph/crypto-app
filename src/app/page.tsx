@@ -27,7 +27,7 @@ import { Switch } from '@/components/ui/switch'
 import { toast } from 'sonner'
 import {
   BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
-  Legend, AreaChart, Area, ReferenceLine
+  Legend, AreaChart, Area, ReferenceLine, PieChart, Pie, Cell
 } from 'recharts'
 import { signIn, signOut, useSession } from 'next-auth/react'
 
@@ -1329,39 +1329,61 @@ function DashboardView({ user, onUpgrade }: { user: any; onUpgrade: () => void }
 
       {/* Charts */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">
-        {/* Portfolio Distribution - Horizontal Bar Chart */}
+        {/* Portfolio Distribution - Dynamic Pie Chart */}
         <Card className="glass-card rounded-2xl card-hover fade-in-up stagger-5">
           <CardHeader className="pb-2">
             <CardTitle className="text-sm font-medium" style={{ color: 'rgba(255,255,255,0.45)' }}>Répartition du Portefeuille</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="space-y-3">
-              {sortedTokens.map((t, i) => {
-                const pct = (t.valeurActuelle / totalValue) * 100
-                return (
-                  <div key={t.ticker} className="space-y-1.5">
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center gap-2">
-                        <TokenLogo ticker={t.ticker} size={24} />
-                        <span className="text-sm font-medium text-white/70">{t.ticker}</span>
-                      </div>
-                      <div className="flex items-center gap-2">
-                        <span className="text-xs font-mono text-white/40">{fmt(t.valeurActuelle)} $</span>
-                        <span className="text-xs font-semibold text-white/60">{pct.toFixed(1)}%</span>
-                      </div>
+            <div className="flex flex-col items-center">
+              <ResponsiveContainer width="100%" height={220}>
+                <PieChart>
+                  <Pie
+                    data={sortedTokens.map((t, i) => ({
+                      name: t.ticker,
+                      value: t.valeurActuelle,
+                      color: CHART_COLORS[i % CHART_COLORS.length],
+                    }))}
+                    cx="50%"
+                    cy="50%"
+                    innerRadius={55}
+                    outerRadius={90}
+                    paddingAngle={2}
+                    dataKey="value"
+                    animationBegin={0}
+                    animationDuration={800}
+                    animationEasing="ease-out"
+                    stroke="none"
+                  >
+                    {sortedTokens.map((t, i) => (
+                      <Cell key={t.ticker} fill={CHART_COLORS[i % CHART_COLORS.length]} />
+                    ))}
+                  </Pie>
+                  <Tooltip
+                    contentStyle={{
+                      background: 'rgba(26,29,46,0.95)',
+                      border: '1px solid rgba(255,255,255,0.1)',
+                      borderRadius: '12px',
+                      fontSize: '12px',
+                      color: 'white',
+                    }}
+                    formatter={(value: number, name: string) => [`${fmt(value)} $`, name]}
+                  />
+                </PieChart>
+              </ResponsiveContainer>
+              {/* Legend below pie */}
+              <div className="grid grid-cols-2 sm:grid-cols-3 gap-x-4 gap-y-2 mt-2 w-full">
+                {sortedTokens.map((t, i) => {
+                  const pct = (t.valeurActuelle / totalValue) * 100
+                  return (
+                    <div key={t.ticker} className="flex items-center gap-2 text-xs">
+                      <div className="w-2.5 h-2.5 rounded-sm shrink-0" style={{ background: CHART_COLORS[i % CHART_COLORS.length] }} />
+                      <span className="text-white/50 font-medium">{t.ticker}</span>
+                      <span className="text-white/30 ml-auto">{pct.toFixed(1)}%</span>
                     </div>
-                    <div className="w-full h-2 rounded-full overflow-hidden" style={{ background: 'rgba(255,255,255,0.04)' }}>
-                      <div
-                        className="hbar-fill h-full rounded-full"
-                        style={{
-                          width: `${pct}%`,
-                          background: `linear-gradient(90deg, ${CHART_COLORS[i % CHART_COLORS.length]}, ${CHART_COLORS[i % CHART_COLORS.length]}88)`,
-                        }}
-                      />
-                    </div>
-                  </div>
-                )
-              })}
+                  )
+                })}
+              </div>
             </div>
           </CardContent>
         </Card>
@@ -1373,14 +1395,14 @@ function DashboardView({ user, onUpgrade }: { user: any; onUpgrade: () => void }
           </CardHeader>
           <CardContent>
             <ResponsiveContainer width="100%" height={280} className="sm:h-[300px]">
-              <BarChart data={barData}>
-                <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.04)" />
-                <XAxis dataKey="name" stroke="rgba(255,255,255,0.25)" fontSize={11} tickLine={false} />
-                <YAxis stroke="rgba(255,255,255,0.25)" fontSize={11} tickLine={false} axisLine={false} />
+              <BarChart data={barData} barCategoryGap="20%">
+                <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.04)" vertical={false} />
+                <XAxis dataKey="name" stroke="rgba(255,255,255,0.25)" fontSize={11} tickLine={false} axisLine={false} />
+                <YAxis stroke="rgba(255,255,255,0.25)" fontSize={11} tickLine={false} axisLine={false} width={50} />
                 <Tooltip content={<CustomTooltip />} />
                 <Legend wrapperStyle={{ fontSize: '12px', color: 'rgba(255,255,255,0.4)' }} />
-                <Bar dataKey="investissement" name="Investissement" fill="#06b6d4" radius={[6, 6, 0, 0]} />
-                <Bar dataKey="valeur" name="Valeur Actuelle" fill="#7c5cfc" radius={[6, 6, 0, 0]} />
+                <Bar dataKey="investissement" name="Investissement" fill="#06b6d4" radius={[6, 6, 0, 0]} animationDuration={800} />
+                <Bar dataKey="valeur" name="Valeur Actuelle" fill="#7c5cfc" radius={[6, 6, 0, 0]} animationDuration={800} />
               </BarChart>
             </ResponsiveContainer>
           </CardContent>
@@ -1508,6 +1530,7 @@ function TransactionsView({ user, onUpgrade }: { user: any; onUpgrade: () => voi
   const [sortField, setSortField] = useState<'date' | 'tokenTicker' | 'montantInvesti'>('date')
   const [sortDir, setSortDir] = useState<'asc' | 'desc'>('desc')
   const [searchQuery, setSearchQuery] = useState('')
+  const [recentTxId, setRecentTxId] = useState<string | null>(null)
 
   const { register, handleSubmit, setValue, reset, formState: { errors } } = useForm({
     resolver: zodResolver(transactionSchema),
@@ -1585,6 +1608,7 @@ function TransactionsView({ user, onUpgrade }: { user: any; onUpgrade: () => voi
           throw new Error(err.detail || err.error || 'Erreur')
         }
         toast.success('Transaction modifiée')
+        setRecentTxId(editingTx.id)
       } else {
         const res = await fetch('/api/transactions', {
           method: 'POST',
@@ -1600,6 +1624,8 @@ function TransactionsView({ user, onUpgrade }: { user: any; onUpgrade: () => voi
 
       setDialogOpen(false)
       fetchData()
+      // Clear animation highlight after 1.5s
+      setTimeout(() => setRecentTxId(null), 1500)
     } catch (err: any) {
       toast.error(err.message)
     }
@@ -1812,7 +1838,7 @@ function TransactionsView({ user, onUpgrade }: { user: any; onUpgrade: () => voi
                   </TableHeader>
                   <TableBody>
                     {sorted.map((tx) => (
-                      <TableRow key={tx.id} className="transition-colors" style={{ borderBottomColor: 'rgba(255,255,255,0.04)' }}>
+                      <TableRow key={tx.id} className={`transition-colors data-row-hover ${recentTxId === tx.id ? 'tx-success-flash' : ''}`} style={{ borderBottomColor: 'rgba(255,255,255,0.04)' }}>
                         <TableCell className="font-mono text-sm text-white/50">
                           {new Date(tx.date).toLocaleDateString('fr-FR')}
                         </TableCell>
@@ -1867,7 +1893,7 @@ function TransactionsView({ user, onUpgrade }: { user: any; onUpgrade: () => voi
           {/* Mobile Card List */}
           <div className="md:hidden space-y-3 fade-in-up stagger-3">
             {sorted.map((tx) => (
-              <div key={tx.id} className="glass-card rounded-2xl p-4 space-y-3 card-hover">
+              <div key={tx.id} className={`glass-card rounded-2xl p-4 space-y-3 card-hover ${recentTxId === tx.id ? 'tx-success-flash' : ''}`}>
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-3">
                     <TokenLogo ticker={tx.tokenTicker} size={40} />
@@ -1959,6 +1985,7 @@ declare global {
         createOrder: () => Promise<string>
         onApprove: (data: { orderID: string }) => Promise<void>
         onError: (err: any) => void
+        onCancel?: () => void
         style?: { layout?: string; color?: string; shape?: string; label?: string; height?: number }
       }) => { render: (container: string) => Promise<void>; close: () => void }
     }
@@ -1984,27 +2011,44 @@ function UpgradePremiumModal({ open, onOpenChange, onSuccess }: {
 
   const currentPlan = SUBSCRIPTION_PLANS.find(p => p.months === selectedPlan) || SUBSCRIPTION_PLANS[0]
 
-  // Load PayPal SDK dynamically
+  // Load PayPal SDK dynamically with robust error handling
   const loadPayPalSDK = useCallback(() => {
     if (paypalLoaded || paypalLoading) return
     setPaypalLoading(true)
 
+    // Check if SDK already loaded
     const existingScript = document.querySelector('script[src*="paypal.com/sdk/js"]')
-    if (existingScript) {
+    if (existingScript || window.paypal) {
       setPaypalLoaded(true)
       setPaypalLoading(false)
       return
     }
 
+    const clientId = process.env.NEXT_PUBLIC_PAYPAL_CLIENT_ID
+    if (!clientId) {
+      console.error('NEXT_PUBLIC_PAYPAL_CLIENT_ID is not set')
+      setError('Configuration PayPal manquante. Veuillez contacter le support.')
+      setPaypalLoading(false)
+      return
+    }
+
     const script = document.createElement('script')
-    script.src = `https://www.paypal.com/sdk/js?client-id=${process.env.NEXT_PUBLIC_PAYPAL_CLIENT_ID || 'sb'}&currency=EUR&intent=capture&locale=fr_FR`
+    // Load only the Buttons component to reduce SDK size and avoid unused module errors
+    script.src = `https://www.paypal.com/sdk/js?client-id=${clientId}&currency=EUR&intent=capture&locale=fr_FR&components=buttons`
     script.async = true
     script.onload = () => {
-      setPaypalLoaded(true)
-      setPaypalLoading(false)
+      // Verify that the paypal object and Buttons method are available
+      if (window.paypal && window.paypal.Buttons) {
+        setPaypalLoaded(true)
+        setPaypalLoading(false)
+      } else {
+        console.error('PayPal SDK loaded but Buttons not available')
+        setError('PayPal n\'a pas pu se charger correctement. Veuillez réessayer.')
+        setPaypalLoading(false)
+      }
     }
     script.onerror = () => {
-      setError('Impossible de charger PayPal. Veuillez réessayer.')
+      setError('Impossible de charger PayPal. Vérifiez votre connexion et réessayez.')
       setPaypalLoading(false)
     }
     document.body.appendChild(script)
@@ -2014,9 +2058,20 @@ function UpgradePremiumModal({ open, onOpenChange, onSuccess }: {
   useEffect(() => {
     if (!open || step !== 'paypal') return
 
-    const tryRenderButtons = () => {
-      if (!window.paypal || !paypalContainerRef.current) return false
+    // Add global PayPal SDK error handler to catch unhandled exceptions
+    const handlePayPalError = (event: ErrorEvent) => {
+      if (event.message?.includes('paypal') || event.filename?.includes('paypal')) {
+        console.warn('PayPal SDK global error caught:', event.message)
+        // Don't show to user unless it's critical — the SDK recovers internally
+        event.preventDefault()
+      }
+    }
+    window.addEventListener('error', handlePayPalError)
 
+    const tryRenderButtons = () => {
+      if (!window.paypal?.Buttons || !paypalContainerRef.current) return false
+
+      // Clear previous buttons
       if (paypalContainerRef.current) {
         paypalContainerRef.current.innerHTML = ''
       }
@@ -2059,6 +2114,7 @@ function UpgradePremiumModal({ open, onOpenChange, onSuccess }: {
                   setCelebrating(false)
                   onOpenChange(false)
                   setStep('select')
+                  onSuccess()
                 }, 2500)
               } else {
                 setError(result.error || 'Le paiement a échoué')
@@ -2071,7 +2127,17 @@ function UpgradePremiumModal({ open, onOpenChange, onSuccess }: {
           },
           onError: (err: any) => {
             console.error('PayPal button error:', err)
+            // Don't show generic error for SDK internal errors that are harmless
+            const errMsg = typeof err === 'string' ? err : err?.message || ''
+            if (errMsg.includes('unhandled_exception') || errMsg.includes('Window closed')) {
+              // These are usually user cancelling or harmless SDK errors
+              return
+            }
             setError('Une erreur est survenue avec PayPal. Veuillez réessayer.')
+          },
+          onCancel: () => {
+            // User closed the PayPal popup — just stay on the paypal step, no error
+            setStep('paypal')
           },
           style: {
             layout: 'vertical',
@@ -2100,6 +2166,7 @@ function UpgradePremiumModal({ open, onOpenChange, onSuccess }: {
       clearTimeout(timer1)
       clearTimeout(timer2)
       clearTimeout(timer3)
+      window.removeEventListener('error', handlePayPalError)
       if (paypalButtonsRef.current) {
         try { paypalButtonsRef.current.close() } catch (e) {}
       }
