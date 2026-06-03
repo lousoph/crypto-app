@@ -127,3 +127,39 @@ Stage Summary:
 - Gradient text and avatar ring now animate
 - Glassmorphism cards gain violet glow border on hover
 - Consistent immersive black aesthetic across login, dashboard, and all views
+---
+Task ID: 1
+Agent: Main Agent
+Task: Implement registration/login system with Email+Password and OAuth providers (Google, Apple)
+
+Work Log:
+- Read and analyzed current auth.ts, Prisma schema, page.tsx, globals.css, and .env
+- Updated src/lib/auth.ts to add GoogleProvider and AppleProvider with conditional loading (only if env vars are set)
+- Added signIn callback to automatically create User records for OAuth users on first login
+- Updated JWT callback to handle OAuth sign-in (lookup user by email in DB)
+- Added allowDangerousEmailAccountLinking for account linking between credentials and OAuth
+- Updated .env with placeholder Google/Apple OAuth env vars and NEXTAUTH_URL/SECRET
+- Redesigned LoginScreen component with:
+  - Google and Apple social login buttons (with proper SVG icons)
+  - "ou" separator between social and email/password sections
+  - Third ambient gradient orb (ambientDrift3) for deeper immersion
+  - Particle grid background pattern
+  - Card inner gradient accent line at top
+  - Enhanced focus states with violet glow
+  - Demo account buttons with immersive hover slide effect
+  - Bottom security note (RGPD compliance)
+  - OAuth loading state management
+  - Conditional rendering based on NEXT_PUBLIC_HAS_GOOGLE/APPLE env vars
+- Updated globals.css with:
+  - ambientDrift3 keyframe animation
+  - .social-btn styles (hover glow, border highlight, transform)
+  - .demo-account-btn styles (hover slide effect)
+- Build succeeded, server running on port 3000
+
+Stage Summary:
+- Auth system now supports Email+Password (credentials) + Google OAuth + Apple OAuth
+- OAuth providers are conditionally loaded — no crash if credentials not configured
+- LoginScreen redesigned with immersive dark theme, social buttons, smooth animations
+- NEXT_PUBLIC_HAS_GOOGLE and NEXT_PUBLIC_HAS_APPLE env vars control social button visibility
+- To activate Google: set GOOGLE_CLIENT_ID, GOOGLE_CLIENT_SECRET, NEXT_PUBLIC_HAS_GOOGLE=true in .env
+- To activate Apple: set APPLE_ID, APPLE_TEAM_ID, APPLE_PRIVATE_KEY, APPLE_KEY_ID, NEXT_PUBLIC_HAS_APPLE=true in .env
