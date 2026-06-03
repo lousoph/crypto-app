@@ -104,6 +104,56 @@ interface AdminExchange extends ExchangeData {
 }
 
 // ============================================================
+// SCROLL REVEAL HOOK — IntersectionObserver
+// ============================================================
+function useScrollReveal() {
+  const ref = useRef<HTMLDivElement>(null)
+  const [visible, setVisible] = useState(false)
+
+  useEffect(() => {
+    const el = ref.current
+    if (!el) return
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          setVisible(true)
+          observer.unobserve(el)
+        }
+      },
+      { threshold: 0.1, rootMargin: '0px 0px -40px 0px' }
+    )
+    observer.observe(el)
+    return () => observer.disconnect()
+  }, [])
+
+  return { ref, visible }
+}
+
+// ============================================================
+// SCROLL REVEAL WRAPPER COMPONENT
+// ============================================================
+function ScrollReveal({ children, className = '', direction = 'up' }: {
+  children: React.ReactNode
+  className?: string
+  direction?: 'up' | 'left' | 'scale'
+}) {
+  const { ref, visible } = useScrollReveal()
+  const dirClass = direction === 'left' ? 'scroll-reveal-left' : direction === 'scale' ? 'scroll-reveal-scale' : 'scroll-reveal'
+  return (
+    <div ref={ref} className={`${dirClass} ${visible ? 'visible' : ''} ${className}`}>
+      {children}
+    </div>
+  )
+}
+
+// ============================================================
+// AMBIENT BACKGROUND — IMMERSIVE GRADIENT GLOW
+// ============================================================
+function AmbientBackground() {
+  return <div className="ambient-bg" />
+}
+
+// ============================================================
 // UTILITY FUNCTIONS
 // ============================================================
 const fmt = (n: number) =>
@@ -282,7 +332,12 @@ function LoginScreen({ onLogin, onRegister }: {
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center p-4" style={{ background: 'radial-gradient(ellipse at 50% 0%, rgba(124,92,252,0.08) 0%, #080b12 60%)' }}>
+    <div className="min-h-screen flex items-center justify-center p-4 relative overflow-hidden" style={{ background: '#000000' }}>
+      {/* Ambient gradient orbs */}
+      <div className="absolute inset-0 overflow-hidden pointer-events-none">
+        <div className="absolute top-[-20%] left-[15%] w-[60%] h-[60%] rounded-full" style={{ background: 'radial-gradient(ellipse, rgba(124,92,252,0.12) 0%, transparent 70%)', animation: 'ambientDrift1 20s ease-in-out infinite' }} />
+        <div className="absolute bottom-[-20%] right-[10%] w-[50%] h-[50%] rounded-full" style={{ background: 'radial-gradient(ellipse, rgba(6,182,212,0.08) 0%, transparent 70%)', animation: 'ambientDrift2 25s ease-in-out infinite' }} />
+      </div>
       <div className="w-full max-w-md space-y-8 fade-in-up">
         {/* Logo */}
         <div className="text-center space-y-3">
@@ -295,7 +350,7 @@ function LoginScreen({ onLogin, onRegister }: {
           <p className="text-sm" style={{ color: 'rgba(255,255,255,0.4)' }}>Suivez votre portefeuille crypto en temps réel</p>
         </div>
 
-        <div className="rounded-2xl p-6 sm:p-8 shadow-2xl" style={{ background: 'rgba(14, 18, 25, 0.85)', backdropFilter: 'blur(30px)', border: '1px solid rgba(255,255,255,0.06)', boxShadow: '0 8px 40px rgba(0,0,0,0.3)' }}>
+        <div className="rounded-2xl p-6 sm:p-8 shadow-2xl relative" style={{ background: 'rgba(6, 6, 10, 0.8)', backdropFilter: 'blur(40px)', border: '1px solid rgba(255,255,255,0.04)', boxShadow: '0 8px 60px rgba(0,0,0,0.5), 0 0 40px rgba(124,92,252,0.04)' }}>
           <div className="mb-6">
             <h2 className="text-xl font-semibold text-white">
               {isRegister ? 'Créer un compte' : 'Connexion'}
@@ -367,13 +422,13 @@ function LoginScreen({ onLogin, onRegister }: {
           <div className="mt-5 text-center text-sm" style={{ color: 'rgba(255,255,255,0.35)' }}>
             {isRegister ? (
               <>Déjà un compte ?{' '}
-                <button onClick={() => { setIsRegister(false); setError('') }} className="text-violet-400 hover:text-violet-300 transition-colors font-medium">
+                <button onClick={() => { setIsRegister(false); setError('') }} className="text-violet-400 hover:text-violet-300 transition-colors font-medium glow-underline">
                   Se connecter
                 </button>
               </>
             ) : (
               <>Pas encore de compte ?{' '}
-                <button onClick={() => { setIsRegister(true); setError('') }} className="text-violet-400 hover:text-violet-300 transition-colors font-medium">
+                <button onClick={() => { setIsRegister(true); setError('') }} className="text-violet-400 hover:text-violet-300 transition-colors font-medium glow-underline">
                   Créer un compte
                 </button>
               </>
@@ -509,7 +564,7 @@ function Sidebar({ currentView, setView, user, onLogout }: {
     return (
       <button
         onClick={() => { setView(item.id); setMobileOpen(false) }}
-        className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all duration-200 relative ${
+        className={`nav-item-hover w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all duration-200 relative ${
           active
             ? 'text-violet-300'
             : 'text-white/40 hover:text-white/70'
@@ -649,7 +704,7 @@ function Sidebar({ currentView, setView, user, onLogout }: {
 function CustomTooltip({ active, payload, label }: any) {
   if (!active || !payload?.length) return null
   return (
-    <div className="rounded-xl px-4 py-3 shadow-xl" style={{ background: 'rgba(26,29,46,0.95)', backdropFilter: 'blur(20px)', border: '1px solid rgba(255,255,255,0.1)' }}>
+    <div className="rounded-xl px-4 py-3 shadow-xl" style={{ background: 'rgba(6,6,10,0.96)', backdropFilter: 'blur(20px)', border: '1px solid rgba(124,92,252,0.1)', boxShadow: '0 4px 20px rgba(0,0,0,0.5)' }}>
       {label && <p className="text-xs mb-1.5 font-medium" style={{ color: 'rgba(255,255,255,0.5)' }}>{label}</p>}
       {payload.map((entry: any, i: number) => (
         <div key={i} className="flex items-center gap-2 text-sm">
@@ -1307,7 +1362,8 @@ function DashboardView({ user, onUpgrade }: { user: any; onUpgrade: () => void }
       )}
 
       {/* KPI Cards */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-5">
+      <ScrollReveal>
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-5">
         {kpiCards.map((card, i) => (
           <div key={card.label} className={`fade-in-up stagger-${i + 1}`}>
             <Card className={`glass-card rounded-2xl card-hover ${card.barClass}`}>
@@ -1326,8 +1382,10 @@ function DashboardView({ user, onUpgrade }: { user: any; onUpgrade: () => void }
           </div>
         ))}
       </div>
+      </ScrollReveal>
 
       {/* Charts */}
+      <ScrollReveal direction="scale">
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">
         {/* Portfolio Distribution - Dynamic Pie Chart */}
         <Card className="glass-card rounded-2xl card-hover fade-in-up stagger-5">
@@ -1408,8 +1466,10 @@ function DashboardView({ user, onUpgrade }: { user: any; onUpgrade: () => void }
           </CardContent>
         </Card>
       </div>
+      </ScrollReveal>
 
       {/* Detailed Table - Desktop / Cards - Mobile */}
+      <ScrollReveal direction="left">
       <Card className="glass-card rounded-2xl fade-in-up">
         <CardHeader className="pb-3">
           <CardTitle className="text-base font-medium text-white/70">Détail par Token</CardTitle>
@@ -1503,6 +1563,7 @@ function DashboardView({ user, onUpgrade }: { user: any; onUpgrade: () => void }
           </div>
         </CardContent>
       </Card>
+      </ScrollReveal>
     </div>
   )
 }
@@ -1687,7 +1748,7 @@ function TransactionsView({ user, onUpgrade }: { user: any; onUpgrade: () => voi
         </div>
         <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
           <DialogTrigger asChild>
-            <Button onClick={openNew} className="gap-2 rounded-xl h-10 shadow-lg transition-all active:scale-[0.98] hidden sm:flex text-white" style={{ background: 'linear-gradient(135deg, #7c5cfc, #06b6d4)', boxShadow: '0 4px 20px rgba(124,92,252,0.25)' }}>
+            <Button onClick={openNew} className="gap-2 rounded-xl h-10 shadow-lg transition-all active:scale-[0.98] hidden sm:flex text-white btn-primary-glow" style={{ background: 'linear-gradient(135deg, #7c5cfc, #06b6d4)', boxShadow: '0 4px 20px rgba(124,92,252,0.25)' }}>
               <Plus className="w-4 h-4" /> Nouvelle Transaction
             </Button>
           </DialogTrigger>
@@ -1747,7 +1808,7 @@ function TransactionsView({ user, onUpgrade }: { user: any; onUpgrade: () => voi
                 <DialogClose asChild>
                   <Button variant="outline" className="rounded-xl text-white/50 hover:text-white/70 hover:bg-white/5" style={{ borderColor: 'rgba(255,255,255,0.08)' }}>Annuler</Button>
                 </DialogClose>
-                <Button type="submit" className="rounded-xl shadow-lg text-white transition-all active:scale-[0.98]" style={{ background: 'linear-gradient(135deg, #7c5cfc, #06b6d4)', boxShadow: '0 4px 20px rgba(124,92,252,0.25)' }}>
+                <Button type="submit" className="rounded-xl shadow-lg text-white transition-all active:scale-[0.98] btn-primary-glow" style={{ background: 'linear-gradient(135deg, #7c5cfc, #06b6d4)', boxShadow: '0 4px 20px rgba(124,92,252,0.25)' }}>
                   {editingTx ? 'Modifier' : 'Ajouter'}
                 </Button>
               </DialogFooter>
@@ -1807,7 +1868,7 @@ function TransactionsView({ user, onUpgrade }: { user: any; onUpgrade: () => voi
             </div>
             <h3 className="text-lg font-semibold text-white/70 mb-2">Aucune transaction</h3>
             <p className="mb-6" style={{ color: 'rgba(255,255,255,0.25)' }}>Ajoutez votre première transaction pour commencer le suivi.</p>
-            <Button onClick={openNew} className="gap-2 rounded-xl shadow-lg text-white" style={{ background: 'linear-gradient(135deg, #7c5cfc, #06b6d4)', boxShadow: '0 4px 20px rgba(124,92,252,0.25)' }}>
+            <Button onClick={openNew} className="gap-2 rounded-xl shadow-lg text-white btn-primary-glow" style={{ background: 'linear-gradient(135deg, #7c5cfc, #06b6d4)', boxShadow: '0 4px 20px rgba(124,92,252,0.25)' }}>
               <Plus className="w-4 h-4" /> Ajouter une transaction
             </Button>
           </CardContent>
@@ -3238,7 +3299,7 @@ export default function Home() {
 
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center" style={{ background: '#0f1117' }}>
+      <div className="min-h-screen flex items-center justify-center relative" style={{ background: '#000000' }}>
         <div className="flex flex-col items-center gap-3">
           <div className="w-10 h-10 rounded-xl border flex items-center justify-center float-animation" style={{ background: 'rgba(124,92,252,0.15)', borderColor: 'rgba(124,92,252,0.3)' }}>
             <Wallet className="w-5 h-5 text-violet-400" />
@@ -3294,7 +3355,8 @@ export default function Home() {
   }
 
   return (
-    <div className="flex min-h-screen" style={{ background: '#0f1117' }}>
+    <div className="flex min-h-screen relative" style={{ background: '#000000' }}>
+      <AmbientBackground />
       <Sidebar
         currentView={currentView}
         setView={setCurrentView}

@@ -80,3 +80,50 @@ Stage Summary:
 - Enhanced bar chart: Cleaner grid, animated bars, improved spacing
 - Transaction micro-animations: Green flash highlight on new/modified transactions
 - All changes compile and build successfully
+
+---
+Task ID: 4
+Agent: Main
+Task: Immersive black design with vivid gradients, animations on scroll/hover
+
+Work Log:
+- Completely rewrote globals.css with immersive black base (#000000) and pure black card backgrounds (#06060a)
+- Updated all design tokens: background #000000, card #06060a, secondary #0c0c14, borders rgba(255,255,255,0.04)
+- Added ambient background system with floating gradient orbs (ambientDrift1/ambientDrift2 animations)
+- Created AmbientBackground component with CSS-based animated gradient orbs
+- Added useScrollReveal hook using IntersectionObserver for scroll-triggered animations
+- Created ScrollReveal wrapper component with 3 directions: up, left, scale
+- Added scroll-reveal, scroll-reveal-left, scroll-reveal-scale CSS classes with smooth transitions
+- Enhanced glassmorphism: deeper black glass effects with violet glow on hover
+- Gradient text now animates with gradientShift keyframe (shifting gradient colors)
+- Avatar ring now has animated gradient that shifts colors
+- Custom scrollbar now uses gradient violet-to-cyan colors
+- Bottom nav active indicator has gradient glow with box-shadow
+- Card hover effect now includes violet glow border and shadow
+- Shimmer skeleton now uses violet gradient sweep instead of white
+- KPI icon hover has glow and scale effect (kpi-icon-glow class)
+- Button primary glow enhanced with hover elevation and violet shadow
+- Data table rows now have gradient hover (violet-to-cyan sweep)
+- Added gradient-overlay-violet and gradient-overlay-cyan utility classes
+- Added glow-underline for link hover animations (gradient underline that slides in)
+- Added nav-item-hover class for sidebar navigation gradient slide on hover
+- Enhanced transaction flash animation with inset green glow
+- Updated LoginScreen: pure black background with animated ambient gradient orbs, deeper glass card
+- Updated main app layout: #000000 background with AmbientBackground component
+- Updated loading screen: #000000 background
+- Wrapped Dashboard KPI cards, Charts, and Detail Table sections with ScrollReveal
+- Added btn-primary-glow class to transaction action buttons
+- Added glow-underline to login/register toggle links
+- Added nav-item-hover to sidebar navigation items
+- Updated CustomTooltip to match immersive black theme with violet border accent
+- Enhanced page transition with slight scale effect
+- Build passes successfully
+
+Stage Summary:
+- Complete immersive black redesign: pure #000000 base with deep #06060a cards
+- Animated ambient gradient orbs floating across the background
+- Scroll-triggered animations using IntersectionObserver (3 directions)
+- All interactive elements have vivid gradient hover effects
+- Gradient text and avatar ring now animate
+- Glassmorphism cards gain violet glow border on hover
+- Consistent immersive black aesthetic across login, dashboard, and all views
