@@ -44,43 +44,48 @@
 }
 
 /* ============================================================
-   DESIGN TOKENS — IMMERSIVE BLACK + VIVID GRADIENTS
-   Palette: Pure black base, electric violet/cyan gradients
+   DESIGN TOKENS — LIGHT THEME (default)
+   Clean white/gray with vivid violet/cyan gradient accents
    ============================================================ */
 :root {
   --radius: 0.75rem;
-  --background: #000000;
-  --foreground: #f1f5f9;
-  --card: #06060a;
-  --card-foreground: #f1f5f9;
-  --popover: #06060a;
-  --popover-foreground: #f1f5f9;
+  --background: #f0f0ff;
+  --foreground: #0f172a;
+  --card: #faf9ff;
+  --card-foreground: #0f172a;
+  --popover: #faf9ff;
+  --popover-foreground: #0f172a;
   --primary: #7c5cfc;
   --primary-foreground: #ffffff;
-  --secondary: #0c0c14;
-  --secondary-foreground: #f1f5f9;
-  --muted: #0c0c14;
+  --secondary: #f0eeff;
+  --secondary-foreground: #0f172a;
+  --muted: #f0eeff;
   --muted-foreground: #64748b;
-  --accent: #0c0c14;
-  --accent-foreground: #f1f5f9;
+  --accent: #ecfeff;
+  --accent-foreground: #0f172a;
   --destructive: #ef4444;
-  --border: rgba(255,255,255,0.04);
-  --input: rgba(255,255,255,0.06);
+  --border: rgba(124,92,252,0.08);
+  --input: rgba(124,92,252,0.04);
   --ring: #7c5cfc;
   --chart-1: #7c5cfc;
   --chart-2: #06b6d4;
   --chart-3: #10b981;
   --chart-4: #f59e0b;
   --chart-5: #ef4444;
-  --sidebar: #000000;
-  --sidebar-foreground: #f1f5f9;
+  --sidebar: #faf9ff;
+  --sidebar-foreground: #0f172a;
   --sidebar-primary: #7c5cfc;
   --sidebar-primary-foreground: #ffffff;
-  --sidebar-accent: #0c0c14;
-  --sidebar-accent-foreground: #f1f5f9;
-  --sidebar-border: rgba(255,255,255,0.03);
+  --sidebar-accent: #f0eeff;
+  --sidebar-accent-foreground: #0f172a;
+  --sidebar-border: rgba(124,92,252,0.06);
   --sidebar-ring: #7c5cfc;
 }
+
+/* ============================================================
+   DESIGN TOKENS — DARK THEME
+   Immersive black + vivid gradients (original theme)
+   ============================================================ */
 
 .dark {
   --background: #000000;
@@ -126,11 +131,12 @@
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
     scroll-behavior: smooth;
+    transition: background-color 0.3s ease, color 0.3s ease;
   }
 }
 
 /* ============================================================
-   AMBIENT BACKGROUND — IMMERSIVE GLOW
+   AMBIENT BACKGROUND — IMMERSIVE GLOW (adapts to theme)
    ============================================================ */
 .ambient-bg {
   position: fixed;
@@ -140,6 +146,7 @@
   pointer-events: none;
 }
 
+/* Light theme ambient — vivid aurora blobs */
 .ambient-bg::before {
   content: '';
   position: absolute;
@@ -147,7 +154,7 @@
   left: 20%;
   width: 60%;
   height: 60%;
-  background: radial-gradient(ellipse, rgba(124, 92, 252, 0.07) 0%, transparent 70%);
+  background: radial-gradient(ellipse, rgba(124, 92, 252, 0.1) 0%, transparent 70%);
   animation: ambientDrift1 20s ease-in-out infinite;
 }
 
@@ -158,8 +165,16 @@
   right: 10%;
   width: 50%;
   height: 50%;
-  background: radial-gradient(ellipse, rgba(6, 182, 212, 0.05) 0%, transparent 70%);
+  background: radial-gradient(ellipse, rgba(6, 182, 212, 0.08) 0%, transparent 70%);
   animation: ambientDrift2 25s ease-in-out infinite;
+}
+
+/* Dark theme ambient — stronger glow */
+.dark .ambient-bg::before {
+  background: radial-gradient(ellipse, rgba(124, 92, 252, 0.07) 0%, transparent 70%);
+}
+.dark .ambient-bg::after {
+  background: radial-gradient(ellipse, rgba(6, 182, 212, 0.05) 0%, transparent 70%);
 }
 
 @keyframes ambientDrift1 {
@@ -192,42 +207,67 @@
 }
 
 /* ============================================================
-   GLASSMORPHISM — DEEP IMMERSIVE BLACK
+   GLASSMORPHISM — Adapts to Light/Dark theme
    ============================================================ */
 .glass {
-  background: rgba(6, 6, 10, 0.85);
+  background: rgba(250, 249, 255, 0.85);
   backdrop-filter: blur(24px);
   -webkit-backdrop-filter: blur(24px);
+  border: 1px solid rgba(124, 92, 252, 0.08);
+}
+
+.dark .glass {
+  background: rgba(6, 6, 10, 0.85);
   border: 1px solid rgba(255, 255, 255, 0.04);
 }
 
 .glass-strong {
-  background: rgba(6, 6, 10, 0.96);
+  background: rgba(255, 255, 255, 0.96);
   backdrop-filter: blur(32px);
   -webkit-backdrop-filter: blur(32px);
+  border: 1px solid rgba(124, 92, 252, 0.1);
+}
+
+.dark .glass-strong {
+  background: rgba(6, 6, 10, 0.96);
   border: 1px solid rgba(255, 255, 255, 0.06);
 }
 
 .glass-card {
-  background: rgba(6, 6, 10, 0.6);
+  background: linear-gradient(135deg, rgba(250, 249, 255, 0.9), rgba(236, 254, 255, 0.7));
   backdrop-filter: blur(20px);
   -webkit-backdrop-filter: blur(20px);
-  border: 1px solid rgba(255, 255, 255, 0.04);
-  box-shadow: 0 0 0 0 rgba(124, 92, 252, 0),
-              0 4px 24px rgba(0, 0, 0, 0.4);
+  border: 1px solid rgba(124, 92, 252, 0.06);
+  box-shadow: 0 4px 24px rgba(124, 92, 252, 0.04);
   transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
+.dark .glass-card {
+  background: rgba(6, 6, 10, 0.6);
+  border: 1px solid rgba(255, 255, 255, 0.04);
+  box-shadow: 0 0 0 0 rgba(124, 92, 252, 0),
+              0 4px 24px rgba(0, 0, 0, 0.4);
+}
+
 .glass-card:hover {
-  border-color: rgba(124, 92, 252, 0.12);
+  border-color: rgba(124, 92, 252, 0.15);
+  box-shadow: 0 8px 40px rgba(124, 92, 252, 0.08), 0 0 20px rgba(124, 92, 252, 0.06);
+}
+
+.dark .glass-card:hover {
   box-shadow: 0 0 20px rgba(124, 92, 252, 0.06),
               0 8px 40px rgba(0, 0, 0, 0.5);
 }
 
 .glass-sidebar {
-  background: rgba(0, 0, 0, 0.98);
+  background: linear-gradient(180deg, rgba(250, 249, 255, 0.98), rgba(255, 255, 255, 0.98));
   backdrop-filter: blur(30px);
   -webkit-backdrop-filter: blur(30px);
+  border-right: 1px solid rgba(124, 92, 252, 0.08);
+}
+
+.dark .glass-sidebar {
+  background: rgba(0, 0, 0, 0.98);
   border-right: 1px solid rgba(255, 255, 255, 0.03);
 }
 
@@ -376,18 +416,31 @@
 }
 
 /* ============================================================
-   MOBILE BOTTOM NAV — GLASS WITH GRADIENT ACCENT
+   MOBILE BOTTOM NAV — GLASS WITH GRADIENT ACCENT (theme-aware)
    ============================================================ */
 .bottom-nav {
-  background: rgba(0, 0, 0, 0.96);
+  background: rgba(250, 249, 255, 0.96);
   backdrop-filter: blur(24px);
   -webkit-backdrop-filter: blur(24px);
+  border-top: 1px solid rgba(124, 92, 252, 0.08);
+}
+
+.dark .bottom-nav {
+  background: rgba(0, 0, 0, 0.96);
   border-top: 1px solid rgba(255, 255, 255, 0.03);
 }
 
 .bottom-nav-item {
   transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
   position: relative;
+}
+
+.bottom-nav-item {
+  color: rgba(0, 0, 0, 0.35);
+}
+
+.dark .bottom-nav-item {
+  color: rgba(255, 255, 255, 0.4);
 }
 
 .bottom-nav-item.active {
@@ -462,7 +515,7 @@
 }
 
 /* ============================================================
-   CARD HOVER — IMMERSIVE ELEVATION WITH GRADIENT GLOW
+   CARD HOVER — IMMERSIVE ELEVATION WITH GRADIENT GLOW (theme-aware)
    ============================================================ */
 .card-hover {
   transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
@@ -471,10 +524,16 @@
 
 .card-hover:hover {
   transform: translateY(-4px);
+  box-shadow: 0 16px 48px rgba(124, 92, 252, 0.1),
+              0 0 0 1px rgba(124, 92, 252, 0.1),
+              0 0 30px rgba(124, 92, 252, 0.05);
+  border-color: rgba(124, 92, 252, 0.15);
+}
+
+.dark .card-hover:hover {
   box-shadow: 0 16px 48px rgba(0, 0, 0, 0.5),
               0 0 0 1px rgba(124, 92, 252, 0.1),
               0 0 30px rgba(124, 92, 252, 0.04);
-  border-color: rgba(124, 92, 252, 0.15);
 }
 
 /* ============================================================
@@ -489,7 +548,7 @@
   content: '';
   position: absolute;
   inset: 0;
-  background: linear-gradient(90deg, transparent, rgba(124, 92, 252, 0.03), transparent);
+  background: linear-gradient(90deg, transparent, rgba(124, 92, 252, 0.06), transparent);
   animation: shimmer 2.5s infinite;
 }
 
@@ -811,7 +870,7 @@
 }
 
 .btn-primary-glow:hover {
-  box-shadow: 0 6px 30px rgba(124, 92, 252, 0.35);
+  box-shadow: 0 6px 30px rgba(124, 92, 252, 0.25);
   transform: translateY(-1px);
 }
 
@@ -865,13 +924,13 @@
 
 input:focus, select:focus, textarea:focus {
   outline: none;
-  box-shadow: 0 0 0 2px rgba(124, 92, 252, 0.25), 0 0 12px rgba(124, 92, 252, 0.1);
+  box-shadow: 0 0 0 2px rgba(124, 92, 252, 0.2), 0 0 12px rgba(124, 92, 252, 0.08);
   border-color: rgba(124, 92, 252, 0.4);
   transition: box-shadow 0.3s ease, border-color 0.3s ease;
 }
 
 /* ============================================================
-   SMOOTH DATA TABLE ROWS — HOVER WITH GRADIENT
+   SMOOTH DATA TABLE ROWS — HOVER WITH GRADIENT (theme-aware)
    ============================================================ */
 
 .data-row-hover {
@@ -879,6 +938,10 @@ input:focus, select:focus, textarea:focus {
 }
 
 .data-row-hover:hover {
+  background: linear-gradient(90deg, rgba(124, 92, 252, 0.06), rgba(6, 182, 212, 0.04), transparent);
+}
+
+.dark .data-row-hover:hover {
   background: linear-gradient(90deg, rgba(124, 92, 252, 0.06), rgba(6, 182, 212, 0.03), transparent);
 }
 
@@ -938,7 +1001,7 @@ input:focus, select:focus, textarea:focus {
   content: '';
   position: absolute;
   inset: 0;
-  background: linear-gradient(90deg, rgba(124, 92, 252, 0.08), transparent);
+  background: linear-gradient(90deg, rgba(124, 92, 252, 0.06), transparent);
   opacity: 0;
   transition: opacity 0.3s ease;
   border-radius: inherit;
@@ -949,7 +1012,7 @@ input:focus, select:focus, textarea:focus {
 }
 
 /* ============================================================
-   SOCIAL LOGIN BUTTONS — IMMERSIVE DARK
+   SOCIAL LOGIN BUTTONS — theme-aware
    ============================================================ */
 
 .social-btn {
@@ -961,15 +1024,25 @@ input:focus, select:focus, textarea:focus {
   content: '';
   position: absolute;
   inset: 0;
-  background: linear-gradient(135deg, rgba(255,255,255,0.06), transparent);
+  background: linear-gradient(135deg, rgba(0,0,0,0.03), transparent);
   opacity: 0;
   transition: opacity 0.3s ease;
 }
 
+.dark .social-btn::before {
+  background: linear-gradient(135deg, rgba(255,255,255,0.06), transparent);
+}
+
 .social-btn:hover {
+  border-color: rgba(0,0,0,0.15) !important;
+  background: rgba(0,0,0,0.04) !important;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 20px rgba(0,0,0,0.08), 0 0 0 1px rgba(0,0,0,0.06);
+}
+
+.dark .social-btn:hover {
   border-color: rgba(255,255,255,0.15) !important;
   background: rgba(255,255,255,0.06) !important;
-  transform: translateY(-1px);
   box-shadow: 0 4px 20px rgba(0,0,0,0.3), 0 0 0 1px rgba(255,255,255,0.06);
 }
 
@@ -1045,7 +1118,7 @@ input:focus, select:focus, textarea:focus {
 }
 
 /* ============================================================
-   MOUSE GLOW — CURSOR FOLLOWING RADIAL GRADIENT
+   MOUSE GLOW — CURSOR FOLLOWING RADIAL GRADIENT (theme-aware)
    ============================================================ */
 .mouse-glow {
   position: fixed;
@@ -1054,11 +1127,15 @@ input:focus, select:focus, textarea:focus {
   border-radius: 50%;
   pointer-events: none;
   z-index: 0;
-  background: radial-gradient(circle, rgba(124, 92, 252, 0.06) 0%, rgba(6, 182, 212, 0.02) 40%, transparent 70%);
+  background: radial-gradient(circle, rgba(124, 92, 252, 0.08) 0%, rgba(6, 182, 212, 0.04) 40%, transparent 70%);
   transform: translate(-50%, -50%);
   transition: left 0.3s cubic-bezier(0.16, 1, 0.3, 1), top 0.3s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.5s ease;
   will-change: left, top;
   opacity: 0;
+}
+
+.dark .mouse-glow {
+  background: radial-gradient(circle, rgba(124, 92, 252, 0.06) 0%, rgba(6, 182, 212, 0.02) 40%, transparent 70%);
 }
 
 .mouse-glow.active {
@@ -1140,7 +1217,7 @@ input:focus, select:focus, textarea:focus {
 }
 
 /* ============================================================
-   ENHANCED CARD HOVER — 3D LIFT WITH GRADIENT EDGE GLOW
+   ENHANCED CARD HOVER — 3D LIFT WITH GRADIENT EDGE GLOW (theme-aware)
    ============================================================ */
 .card-hover-3d {
   transition: all 0.5s cubic-bezier(0.16, 1, 0.3, 1);
@@ -1152,11 +1229,19 @@ input:focus, select:focus, textarea:focus {
 .card-hover-3d:hover {
   transform: translateY(-6px) rotateX(2deg);
   box-shadow:
+    0 20px 60px rgba(124, 92, 252, 0.12),
+    0 0 0 1px rgba(124, 92, 252, 0.12),
+    0 0 40px rgba(124, 92, 252, 0.06),
+    inset 0 1px 0 rgba(255, 255, 255, 0.8);
+  border-color: rgba(124, 92, 252, 0.2);
+}
+
+.dark .card-hover-3d:hover {
+  box-shadow:
     0 20px 60px rgba(0, 0, 0, 0.6),
     0 0 0 1px rgba(124, 92, 252, 0.12),
     0 0 40px rgba(124, 92, 252, 0.06),
     inset 0 1px 0 rgba(255, 255, 255, 0.05);
-  border-color: rgba(124, 92, 252, 0.2);
 }
 
 .card-hover-3d::after {
@@ -2055,13 +2140,13 @@ input:focus, select:focus, textarea:focus {
   50% { opacity: 0.7; transform: scale(1.02); }
 }
 
-/* Intensify ambient background */
+/* Intensify ambient background — vivid aurora for light theme */
 .ambient-bg::before {
-  background: radial-gradient(ellipse, rgba(124, 92, 252, 0.1) 0%, transparent 70%) !important;
+  background: radial-gradient(ellipse, rgba(124, 92, 252, 0.12) 0%, transparent 70%) !important;
 }
 
 .ambient-bg::after {
-  background: radial-gradient(ellipse, rgba(6, 182, 212, 0.08) 0%, transparent 70%) !important;
+  background: radial-gradient(ellipse, rgba(6, 182, 212, 0.1) 0%, transparent 70%) !important;
 }
 
 /* Enhanced particle glow */
@@ -2069,9 +2154,9 @@ input:focus, select:focus, textarea:focus {
   box-shadow: 0 0 6px var(--particle-color, rgba(124, 92, 252, 0.5));
 }
 
-/* Mouse glow intensified */
+/* Mouse glow intensified — vivid for light theme */
 .mouse-glow.active {
-  background: radial-gradient(circle, rgba(124, 92, 252, 0.1) 0%, rgba(6, 182, 212, 0.05) 30%, transparent 70%);
+  background: radial-gradient(circle, rgba(124, 92, 252, 0.12) 0%, rgba(6, 182, 212, 0.06) 30%, transparent 70%);
 }
 
 /* Progress bar animated gradient */
@@ -2282,4 +2367,24 @@ input:focus, select:focus, textarea:focus {
 @keyframes progressGradient {
   0% { background-position: 0% 0%; }
   100% { background-position: 200% 0%; }
+}
+
+/* ============================================================
+   GRADIENT CARD ACCENT — ANIMATED TOP BAR FOR LIGHT THEME
+   ============================================================ */
+.gradient-card-accent {
+  position: relative;
+  overflow: hidden;
+}
+
+.gradient-card-accent::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 3px;
+  background: linear-gradient(90deg, #7c5cfc, #06b6d4, #a78bfa);
+  background-size: 200% 100%;
+  animation: gradientShift 4s ease infinite;
 }

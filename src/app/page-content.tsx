@@ -9,7 +9,8 @@ import {
   LogOut, LogIn, TrendingUp, TrendingDown, DollarSign, Wallet,
   Plus, Trash2, Edit3, ChevronDown, ChevronUp, RefreshCw,
   BarChart3, Crown, AlertTriangle, Check, X, Menu,
-  Search, Activity, Zap, Eye, Gauge, ShoppingCart, Tag, ArrowUpCircle, ArrowDownCircle, Sparkles, Brain, MessageSquare
+  Search, Activity, Zap, Eye, Gauge, ShoppingCart, Tag, ArrowUpCircle, ArrowDownCircle, Sparkles, Brain, MessageSquare,
+  Sun, Moon, Monitor, Mail
 } from 'lucide-react'
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
@@ -30,11 +31,12 @@ import {
   Legend, AreaChart, Area, ReferenceLine, PieChart, Pie, Cell
 } from 'recharts'
 import { signIn, signOut, useSession } from 'next-auth/react'
+import { useTheme } from '@/components/theme-provider'
 
 // ============================================================
 // TYPES
 // ============================================================
-type View = 'dashboard' | 'transactions' | 'ai-analysis' | 'profile' | 'admin-users' | 'admin-tokens' | 'admin-exchanges'
+type View = 'dashboard' | 'transactions' | 'ai-analysis' | 'profile' | 'admin-users' | 'admin-tokens' | 'admin-exchanges' | 'admin-pricing'
 
 interface TokenData {
   id: string
@@ -325,8 +327,8 @@ const fmtPrice = (n: number) =>
     : n >= 0.01 ? n.toLocaleString('fr-FR', { minimumFractionDigits: 4, maximumFractionDigits: 4 })
     : n.toLocaleString('fr-FR', { minimumFractionDigits: 6, maximumFractionDigits: 8 })
 
-const plColor = (v: number) => v >= 0 ? 'text-emerald-400' : 'text-red-400'
-const plBg = (v: number) => v >= 0 ? 'bg-emerald-400/10' : 'bg-red-400/10'
+const plColor = (v: number) => v >= 0 ? 'text-emerald-500 dark:text-emerald-400' : 'text-red-500 dark:text-red-400'
+const plBg = (v: number) => v >= 0 ? 'bg-emerald-500/10 dark:bg-emerald-400/10' : 'bg-red-500/10 dark:bg-red-400/10'
 
 const CHART_COLORS = [
   '#7c5cfc', '#06b6d4', '#f59e0b', '#10b981', '#ef4444',
@@ -506,7 +508,7 @@ function LoginScreen({ onLogin, onRegister }: {
   const hasAnyOAuth = hasGoogle || hasApple
 
   return (
-    <div className="min-h-screen flex items-center justify-center p-4 relative overflow-hidden" style={{ background: '#000000' }}>
+    <div className="min-h-screen flex items-center justify-center p-4 relative overflow-hidden bg-background">
       {/* Animated ambient gradient orbs */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
         <div className="absolute top-[-20%] left-[15%] w-[60%] h-[60%] rounded-full parallax-orb" style={{ background: 'radial-gradient(ellipse, rgba(124,92,252,0.12) 0%, transparent 70%)', animation: 'ambientDrift1 20s ease-in-out infinite' }} />
@@ -540,19 +542,19 @@ function LoginScreen({ onLogin, onRegister }: {
           <h1 className="text-4xl font-bold gradient-text">
             CryptoFolio
           </h1>
-          <p className="text-sm typewriter" style={{ color: 'rgba(255,255,255,0.35)' }}>Suivez votre portefeuille crypto en temps réel</p>
+          <p className="text-sm typewriter text-muted-foreground">Suivez votre portefeuille crypto en temps réel</p>
         </div>
 
         {/* Main auth card */}
-        <div className="rounded-2xl p-6 sm:p-8 shadow-2xl relative overflow-hidden" style={{ background: 'rgba(6, 6, 10, 0.85)', backdropFilter: 'blur(40px)', border: '1px solid rgba(255,255,255,0.04)', boxShadow: '0 8px 60px rgba(0,0,0,0.5), 0 0 40px rgba(124,92,252,0.04)' }}>
+        <div className="rounded-2xl p-6 sm:p-8 shadow-2xl relative overflow-hidden glass-strong" style={{ boxShadow: '0 8px 60px rgba(0,0,0,0.12), 0 0 40px rgba(124,92,252,0.04)' }}>
           {/* Card inner gradient accent */}
           <div className="absolute top-0 left-0 right-0 h-px" style={{ background: 'linear-gradient(90deg, transparent, rgba(124,92,252,0.3), rgba(6,182,212,0.2), transparent)' }} />
 
           <div className="mb-6">
-            <h2 className="text-xl font-semibold text-white">
+            <h2 className="text-xl font-semibold text-foreground">
               {isRegister ? 'Créer un compte' : 'Bienvenue'}
             </h2>
-            <p className="text-sm mt-1" style={{ color: 'rgba(255,255,255,0.35)' }}>
+            <p className="text-sm mt-1 text-muted-foreground">
               {isRegister
                 ? 'Créez votre compte pour commencer à suivre vos investissements'
                 : 'Connectez-vous pour accéder à votre portefeuille'}
@@ -568,7 +570,7 @@ function LoginScreen({ onLogin, onRegister }: {
                   onClick={() => handleOAuthSignIn('google')}
                   disabled={oauthLoading !== null}
                   className="social-btn w-full flex items-center justify-center gap-3 h-11 rounded-xl font-medium text-sm transition-all duration-300 active:scale-[0.98] disabled:opacity-50"
-                  style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.08)', color: 'rgba(255,255,255,0.8)' }}
+                  style={{ background: 'rgba(0,0,0,0.03)', border: '1px solid rgba(0,0,0,0.08)', color: 'rgba(0,0,0,0.7)' }}
                 >
                   {oauthLoading === 'google' ? (
                     <RefreshCw className="w-4 h-4 animate-spin" />
@@ -589,7 +591,7 @@ function LoginScreen({ onLogin, onRegister }: {
                   onClick={() => handleOAuthSignIn('apple')}
                   disabled={oauthLoading !== null}
                   className="social-btn w-full flex items-center justify-center gap-3 h-11 rounded-xl font-medium text-sm transition-all duration-300 active:scale-[0.98] disabled:opacity-50"
-                  style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.08)', color: 'rgba(255,255,255,0.8)' }}
+                  style={{ background: 'rgba(0,0,0,0.03)', border: '1px solid rgba(0,0,0,0.08)', color: 'rgba(0,0,0,0.7)' }}
                 >
                   {oauthLoading === 'apple' ? (
                     <RefreshCw className="w-4 h-4 animate-spin" />
@@ -608,10 +610,10 @@ function LoginScreen({ onLogin, onRegister }: {
           {hasAnyOAuth && (
             <div className="relative my-5 fade-in-up stagger-2">
               <div className="absolute inset-0 flex items-center">
-                <div className="w-full" style={{ borderTop: '1px solid rgba(255,255,255,0.06)' }} />
+                <div className="w-full border-t border-border" />
               </div>
               <div className="relative flex justify-center text-xs">
-                <span className="px-3 font-medium" style={{ background: 'rgba(6,6,10,0.85)', color: 'rgba(255,255,255,0.2)' }}>ou</span>
+                <span className="px-3 font-medium bg-background text-muted-foreground">ou</span>
               </div>
             </div>
           )}
@@ -620,19 +622,18 @@ function LoginScreen({ onLogin, onRegister }: {
           <form onSubmit={handleSubmit} className="space-y-4">
             {isRegister && (
               <div className="space-y-2 fade-in-up stagger-1">
-                <Label htmlFor="name" className="text-xs font-medium" style={{ color: 'rgba(255,255,255,0.5)' }}>Nom</Label>
+                <Label htmlFor="name" className="text-xs font-medium text-muted-foreground">Nom</Label>
                 <Input
                   id="name"
                   value={name}
                   onChange={(e) => setName(e.target.value)}
                   placeholder="Votre nom"
-                  className="border text-white placeholder:text-white/20 rounded-xl h-11 transition-all duration-300 focus:shadow-[0_0_0_2px_rgba(124,92,252,0.25),0_0_12px_rgba(124,92,252,0.1)]"
-                  style={{ background: 'rgba(255,255,255,0.03)', borderColor: 'rgba(255,255,255,0.06)' }}
+                  className="border text-foreground placeholder:text-muted-foreground/50 rounded-xl h-11 transition-all duration-300 focus:shadow-[0_0_0_2px_rgba(124,92,252,0.25),0_0_12px_rgba(124,92,252,0.1)] bg-input"
                 />
               </div>
             )}
             <div className={hasAnyOAuth ? 'space-y-2 fade-in-up stagger-3' : 'space-y-2 fade-in-up stagger-2'}>
-              <Label htmlFor="email" className="text-xs font-medium" style={{ color: 'rgba(255,255,255,0.5)' }}>Email</Label>
+              <Label htmlFor="email" className="text-xs font-medium text-muted-foreground">Email</Label>
               <Input
                 id="email"
                 type="email"
@@ -640,12 +641,12 @@ function LoginScreen({ onLogin, onRegister }: {
                 onChange={(e) => setEmail(e.target.value)}
                 placeholder="votre@email.com"
                 required
-                className="border text-white placeholder:text-white/20 rounded-xl h-11 transition-all duration-300 focus:shadow-[0_0_0_2px_rgba(124,92,252,0.25),0_0_12px_rgba(124,92,252,0.1)]"
-                style={{ background: 'rgba(255,255,255,0.03)', borderColor: 'rgba(255,255,255,0.06)' }}
+                className="border text-foreground placeholder:text-muted-foreground/50 rounded-xl h-11 transition-all duration-300 focus:shadow-[0_0_0_2px_rgba(124,92,252,0.25),0_0_12px_rgba(124,92,252,0.1)]"
+                style={{ background: 'var(--input)', borderColor: 'var(--border)' }}
               />
             </div>
             <div className={hasAnyOAuth ? 'space-y-2 fade-in-up stagger-4' : 'space-y-2 fade-in-up stagger-3'}>
-              <Label htmlFor="password" className="text-xs font-medium" style={{ color: 'rgba(255,255,255,0.5)' }}>Mot de passe</Label>
+              <Label htmlFor="password" className="text-xs font-medium text-muted-foreground">Mot de passe</Label>
               <Input
                 id="password"
                 type="password"
@@ -653,8 +654,8 @@ function LoginScreen({ onLogin, onRegister }: {
                 onChange={(e) => setPassword(e.target.value)}
                 placeholder="••••••••"
                 required
-                className="border text-white placeholder:text-white/20 rounded-xl h-11 transition-all duration-300 focus:shadow-[0_0_0_2px_rgba(124,92,252,0.25),0_0_12px_rgba(124,92,252,0.1)]"
-                style={{ background: 'rgba(255,255,255,0.03)', borderColor: 'rgba(255,255,255,0.06)' }}
+                className="border text-foreground placeholder:text-muted-foreground/50 rounded-xl h-11 transition-all duration-300 focus:shadow-[0_0_0_2px_rgba(124,92,252,0.25),0_0_12px_rgba(124,92,252,0.1)]"
+                style={{ background: 'var(--input)', borderColor: 'var(--border)' }}
               />
             </div>
             {error && (
@@ -665,7 +666,7 @@ function LoginScreen({ onLogin, onRegister }: {
             )}
             <Button
               type="submit"
-              className="btn-primary-glow btn-ripple w-full text-white rounded-xl h-11 font-medium shadow-lg transition-all active:scale-[0.98]"
+              className="btn-primary-glow btn-ripple w-full text-foreground rounded-xl h-11 font-medium shadow-lg transition-all active:scale-[0.98]"
               style={{ background: 'linear-gradient(135deg, #7c5cfc, #06b6d4)', boxShadow: '0 4px 20px rgba(124,92,252,0.25)' }}
               disabled={loading}
             >
@@ -674,7 +675,7 @@ function LoginScreen({ onLogin, onRegister }: {
             </Button>
           </form>
 
-          <div className="mt-5 text-center text-sm" style={{ color: 'rgba(255,255,255,0.35)' }}>
+          <div className="mt-5 text-center text-sm text-muted-foreground">
             {isRegister ? (
               <>Déjà un compte ?{' '}
                 <button onClick={() => { setIsRegister(false); setError('') }} className="text-violet-400 hover:text-violet-300 transition-colors font-medium glow-underline">
@@ -693,7 +694,7 @@ function LoginScreen({ onLogin, onRegister }: {
           {/* Demo accounts — login only */}
           {!isRegister && (
             <div className="mt-5 space-y-2">
-              <p className="text-xs font-medium text-center mb-3" style={{ color: 'rgba(255,255,255,0.25)' }}>Comptes de démonstration</p>
+              <p className="text-xs font-medium text-center mb-3 text-muted-foreground">Comptes de démonstration</p>
               <div className="space-y-2 wave-stagger">
                 <button
                   type="button"
@@ -701,14 +702,14 @@ function LoginScreen({ onLogin, onRegister }: {
                   className="demo-account-btn fade-in-up w-full flex items-center gap-3 p-3 rounded-xl border transition-all duration-300 text-left group"
                   style={{ background: 'rgba(124,92,252,0.06)', borderColor: 'rgba(124,92,252,0.15)' }}
                 >
-                  <div className="w-8 h-8 rounded-lg flex items-center justify-center shrink-0" style={{ background: 'rgba(124,92,252,0.12)' }}>
+                  <div className="w-8 h-8 rounded-lg flex items-center justify-center shrink-0" style={{ background: 'rgba(124,92,252,0.1)' }}>
                     <Shield className="w-4 h-4 text-violet-400" />
                   </div>
                   <div className="flex-1 min-w-0">
-                    <p className="text-sm font-medium text-white/70 group-hover:text-white transition-colors">Admin</p>
-                    <p className="text-xs text-white/25 truncate">unibus93@gmail.com</p>
+                    <p className="text-sm font-medium text-foreground/70 group-hover:text-foreground transition-colors">Admin</p>
+                    <p className="text-xs text-foreground/25 truncate">unibus93@gmail.com</p>
                   </div>
-                  <LogIn className="w-4 h-4 text-white/15 group-hover:text-violet-400 transition-colors" />
+                  <LogIn className="w-4 h-4 text-foreground/15 group-hover:text-violet-400 transition-colors" />
                 </button>
                 <button
                   type="button"
@@ -716,29 +717,29 @@ function LoginScreen({ onLogin, onRegister }: {
                   className="demo-account-btn w-full flex items-center gap-3 p-3 rounded-xl border transition-all duration-300 text-left group"
                   style={{ background: 'rgba(245,158,11,0.06)', borderColor: 'rgba(245,158,11,0.15)' }}
                 >
-                  <div className="w-8 h-8 rounded-lg flex items-center justify-center shrink-0" style={{ background: 'rgba(245,158,11,0.12)' }}>
+                  <div className="w-8 h-8 rounded-lg flex items-center justify-center shrink-0" style={{ background: 'rgba(245,158,11,0.1)' }}>
                     <Crown className="w-4 h-4 text-amber-400" />
                   </div>
                   <div className="flex-1 min-w-0">
-                    <p className="text-sm font-medium text-white/70 group-hover:text-white transition-colors">Premium</p>
-                    <p className="text-xs text-white/25 truncate">premium@cryptotracker.com</p>
+                    <p className="text-sm font-medium text-foreground/70 group-hover:text-foreground transition-colors">Premium</p>
+                    <p className="text-xs text-foreground/25 truncate">premium@cryptotracker.com</p>
                   </div>
-                  <LogIn className="w-4 h-4 text-white/15 group-hover:text-amber-400 transition-colors" />
+                  <LogIn className="w-4 h-4 text-foreground/15 group-hover:text-amber-400 transition-colors" />
                 </button>
                 <button
                   type="button"
                   onClick={() => fillDemo('demo@cryptotracker.com', 'demo123')}
                   className="demo-account-btn w-full flex items-center gap-3 p-3 rounded-xl border transition-all duration-300 text-left group"
-                  style={{ background: 'rgba(255,255,255,0.02)', borderColor: 'rgba(255,255,255,0.06)' }}
+                  style={{ background: 'var(--input)', borderColor: 'var(--border)' }}
                 >
-                  <div className="w-8 h-8 rounded-lg flex items-center justify-center shrink-0" style={{ background: 'rgba(255,255,255,0.05)' }}>
-                    <User className="w-4 h-4 text-white/35" />
+                  <div className="w-8 h-8 rounded-lg flex items-center justify-center shrink-0" style={{ background: 'var(--muted)' }}>
+                    <User className="w-4 h-4 text-foreground/35" />
                   </div>
                   <div className="flex-1 min-w-0">
-                    <p className="text-sm font-medium text-white/70 group-hover:text-white transition-colors">Gratuit</p>
-                    <p className="text-xs text-white/25 truncate">demo@cryptotracker.com</p>
+                    <p className="text-sm font-medium text-foreground/70 group-hover:text-foreground transition-colors">Gratuit</p>
+                    <p className="text-xs text-foreground/25 truncate">demo@cryptotracker.com</p>
                   </div>
-                  <LogIn className="w-4 h-4 text-white/15 group-hover:text-white/50 transition-colors" />
+                  <LogIn className="w-4 h-4 text-foreground/15 group-hover:text-foreground/50 transition-colors" />
                 </button>
               </div>
             </div>
@@ -746,7 +747,7 @@ function LoginScreen({ onLogin, onRegister }: {
         </div>
 
         {/* Bottom security note */}
-        <p className="text-center text-[11px]" style={{ color: 'rgba(255,255,255,0.15)' }}>
+        <p className="text-center text-[11px] text-muted-foreground/40">
           Données sécurisées · Chiffrement de bout en bout · Conformité RGPD
         </p>
       </div>
@@ -763,10 +764,12 @@ function BottomNav({ currentView, setView, user }: {
   user: any
 }) {
   const isAdmin = user?.role === 'admin'
-  const items: { id: View; label: string; icon: any }[] = [
+  const isPremium = user?.role === 'user_premium'
+  const { theme, setTheme, resolvedTheme } = useTheme()
+  const items: { id: View; label: string; icon: any; premium?: boolean }[] = [
     { id: 'dashboard', label: 'Accueil', icon: LayoutDashboard },
     { id: 'transactions', label: 'Transactions', icon: ArrowLeftRight },
-    { id: 'ai-analysis', label: 'IA', icon: Sparkles },
+    { id: 'ai-analysis', label: 'IA', icon: Sparkles, premium: true },
     { id: 'profile', label: 'Profil', icon: User },
     ...(isAdmin ? [{ id: 'admin-users' as View, label: 'Admin', icon: Shield }] : []),
   ]
@@ -777,19 +780,28 @@ function BottomNav({ currentView, setView, user }: {
         {items.map(item => {
           const active = currentView === item.id ||
             (item.id === 'admin-users' && (currentView === 'admin-tokens' || currentView === 'admin-exchanges'))
+          const locked = item.premium && !isPremium && !isAdmin
           return (
             <button
               key={item.id}
               onClick={() => setView(item.id)}
-              className={`bottom-nav-item flex flex-col items-center justify-center gap-1 px-3 py-2 rounded-xl min-w-[64px] ${
-                active ? 'active' : 'text-white/40'
+              className={`bottom-nav-item flex flex-col items-center justify-center gap-1 px-3 py-2 rounded-xl min-w-[56px] relative ${
+                active ? 'active' : locked ? 'text-foreground/20' : 'text-foreground/40'
               }`}
             >
+              {locked && <Crown className="w-2.5 h-2.5 text-amber-400 absolute -top-0.5 right-1" />}
               <item.icon className="w-5 h-5" />
               <span className="text-[10px] font-medium">{item.label}</span>
             </button>
           )
         })}
+        <button
+          onClick={() => setTheme(resolvedTheme === 'dark' ? 'light' : 'dark')}
+          className="bottom-nav-item flex flex-col items-center justify-center gap-1 px-2 py-2 rounded-xl min-w-[44px] text-foreground/40"
+          title={resolvedTheme === 'dark' ? 'Mode clair' : 'Mode sombre'}
+        >
+          {resolvedTheme === 'dark' ? <Sun className="w-5 h-5" /> : <Moon className="w-5 h-5" />}
+        </button>
       </div>
     </nav>
   )
@@ -805,37 +817,43 @@ function Sidebar({ currentView, setView, user, onLogout }: {
   onLogout: () => void
 }) {
   const isAdmin = user?.role === 'admin'
+  const isPremium = user?.role === 'user_premium'
   const [collapsed, setCollapsed] = useState(false)
   const [mobileOpen, setMobileOpen] = useState(false)
   const [showLogoutConfirm, setShowLogoutConfirm] = useState(false)
+  const { theme, setTheme, resolvedTheme } = useTheme()
 
   const userItems = [
-    { id: 'dashboard' as View, label: 'Tableau de bord', icon: LayoutDashboard },
-    { id: 'transactions' as View, label: 'Transactions', icon: ArrowLeftRight },
-    { id: 'ai-analysis' as View, label: 'Analyse IA', icon: Sparkles },
-    { id: 'profile' as View, label: 'Profil & Abonnement', icon: User },
+    { id: 'dashboard' as View, label: 'Tableau de bord', icon: LayoutDashboard, premium: false },
+    { id: 'transactions' as View, label: 'Transactions', icon: ArrowLeftRight, premium: false },
+    { id: 'ai-analysis' as View, label: 'Analyse IA', icon: Sparkles, premium: true },
+    { id: 'profile' as View, label: 'Profil & Abonnement', icon: User, premium: false },
   ]
 
   const adminItems = [
     { id: 'admin-users' as View, label: 'Gestion Utilisateurs', icon: Shield },
     { id: 'admin-tokens' as View, label: 'Gestion Tokens', icon: Coins },
     { id: 'admin-exchanges' as View, label: 'Gestion Exchanges', icon: Building2 },
+    { id: 'admin-pricing' as View, label: 'Tarifs Premium', icon: Tag },
   ]
 
-  const NavItem = ({ item }: { item: { id: View; label: string; icon: any } }) => {
+  const NavItem = ({ item }: { item: { id: View; label: string; icon: any; premium?: boolean } }) => {
     const active = currentView === item.id
+    const locked = item.premium && !isPremium && !isAdmin
     return (
       <button
         onClick={() => { setView(item.id); setMobileOpen(false) }}
         className={`nav-item-hover magnetic-btn w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all duration-200 relative ${
           active
             ? 'text-violet-300 nav-active-sweep'
-            : 'text-white/40 hover:text-white/70'
+            : locked ? 'text-foreground/25'
+            : 'text-foreground/40 hover:text-foreground/70'
         }`}
         style={active ? { background: 'rgba(124,92,252,0.12)', borderLeft: '3px solid #7c5cfc' } : { borderLeft: '3px solid transparent' }}
       >
         <item.icon className={`w-5 h-5 shrink-0 transition-colors ${active ? 'text-violet-400' : ''}`} />
-        {!collapsed && <span>{item.label}</span>}
+        {!collapsed && <span className="flex-1 text-left">{item.label}</span>}
+        {!collapsed && locked && <Crown className="w-3 h-3 text-amber-400/70 shrink-0" />}
       </button>
     )
   }
@@ -853,7 +871,7 @@ function Sidebar({ currentView, setView, user, onLogout }: {
   const sidebarContent = (
     <>
       {/* Logo */}
-      <div className={`flex items-center gap-3 px-5 py-5 border-b ${collapsed ? 'justify-center' : ''}`} style={{ borderColor: 'rgba(255,255,255,0.05)' }}>
+      <div className={`flex items-center gap-3 px-5 py-5 border-b ${collapsed ? 'justify-center' : ''}`} style={{ borderColor: 'var(--border)' }}>
         <div className="w-10 h-10 rounded-xl flex items-center justify-center shrink-0 shadow-lg relative breathe" style={{ background: 'linear-gradient(135deg, rgba(124,92,252,0.3), rgba(6,182,212,0.3))', border: '1px solid rgba(124,92,252,0.2)', boxShadow: '0 0 20px rgba(124,92,252,0.1), 0 0 40px rgba(124,92,252,0.05)' }}>
           <Wallet className="w-5 h-5 text-violet-400" />
           {/* Animated ring around logo */}
@@ -871,9 +889,9 @@ function Sidebar({ currentView, setView, user, onLogout }: {
 
         {isAdmin && (
           <>
-            <Separator className="my-4" style={{ background: 'rgba(255,255,255,0.05)' }} />
+            <Separator className="my-4" style={{ background: 'var(--muted)' }} />
             <div className="space-y-1">
-              {!collapsed && <p className="px-3 text-[10px] font-semibold uppercase tracking-widest mb-2" style={{ color: 'rgba(255,255,255,0.2)' }}>Administration</p>}
+              {!collapsed && <p className="px-3 text-[10px] font-semibold uppercase tracking-widest mb-2 text-muted-foreground/50">Administration</p>}
               {adminItems.map(item => <NavItem key={item.id} item={item} />)}
             </div>
           </>
@@ -881,20 +899,20 @@ function Sidebar({ currentView, setView, user, onLogout }: {
       </ScrollArea>
 
       {/* User info */}
-      <div className={`border-t p-4 ${collapsed ? 'flex flex-col items-center' : ''}`} style={{ borderColor: 'rgba(255,255,255,0.05)' }}>
+      <div className={`border-t p-4 ${collapsed ? 'flex flex-col items-center' : ''}`} style={{ borderColor: 'var(--border)' }}>
         <div className={`flex items-center gap-3 ${collapsed ? '' : 'w-full'}`}>
           <div className="avatar-ring shrink-0">
-            <div className="w-9 h-9 flex items-center justify-center text-white text-sm font-bold" style={{ background: 'linear-gradient(135deg, #7c5cfc, #06b6d4)' }}>
+            <div className="w-9 h-9 flex items-center justify-center text-foreground text-sm font-bold" style={{ background: 'linear-gradient(135deg, #7c5cfc, #06b6d4)' }}>
               {user?.name?.[0] || user?.email?.[0]?.toUpperCase() || '?'}
             </div>
           </div>
           {!collapsed && (
             <div className="flex-1 min-w-0">
-              <p className="text-sm font-medium text-white/80 truncate">{user?.name || user?.email}</p>
+              <p className="text-sm font-medium text-foreground/80 truncate">{user?.name || user?.email}</p>
               <Badge variant="outline" className={`text-[10px] mt-0.5 px-1.5 py-0 floating-badge ${
                 user?.role === 'admin' ? 'border-violet-500/30 text-violet-400 bg-violet-500/10' :
                 user?.role === 'user_premium' ? 'border-amber-500/30 text-amber-400 bg-amber-500/10' :
-                'border-white/10 text-white/30 bg-white/5'
+                'border-foreground/10 text-foreground/30 bg-foreground/5'
               }`}>
                 {user?.role === 'admin' ? 'Admin' :
                  user?.role === 'user_premium' ? 'Premium' : 'Gratuit'}
@@ -903,19 +921,33 @@ function Sidebar({ currentView, setView, user, onLogout }: {
           )}
         </div>
         {!collapsed && (
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={handleLogout}
-            className={`mt-3 w-full transition-all duration-200 rounded-xl btn-ripple ${
-              showLogoutConfirm
-                ? 'bg-red-500/20 text-red-400 border border-red-500/30 hover:bg-red-500/30'
-                : 'text-white/30 hover:text-white/60 hover:bg-white/5'
-            }`}
-          >
-            <LogOut className="w-4 h-4 mr-2" />
-            {showLogoutConfirm ? 'Confirmer ?' : 'Déconnexion'}
-          </Button>
+          <div className="flex items-center gap-2 mt-3">
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={() => {
+                if (resolvedTheme === 'dark') setTheme('light')
+                else setTheme('dark')
+              }}
+              className="h-9 w-9 rounded-xl text-foreground/40 hover:text-foreground/70 hover:bg-foreground/5 transition-all"
+              title={resolvedTheme === 'dark' ? 'Passer en mode clair' : 'Passer en mode sombre'}
+            >
+              {resolvedTheme === 'dark' ? <Sun className="w-4 h-4" /> : <Moon className="w-4 h-4" />}
+            </Button>
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={handleLogout}
+              className={`flex-1 transition-all duration-200 rounded-xl btn-ripple ${
+                showLogoutConfirm
+                  ? 'bg-red-500/20 text-red-400 border border-red-500/30 hover:bg-red-500/30'
+                  : 'text-foreground/30 hover:text-foreground/60 hover:bg-foreground/5'
+              }`}
+            >
+              <LogOut className="w-4 h-4 mr-2" />
+              {showLogoutConfirm ? 'Confirmer ?' : 'Déconnexion'}
+            </Button>
+          </div>
         )}
       </div>
     </>
@@ -930,12 +962,12 @@ function Sidebar({ currentView, setView, user, onLogout }: {
         className="fixed top-4 left-4 z-50 md:hidden glass rounded-xl h-10 w-10"
         onClick={() => setMobileOpen(!mobileOpen)}
       >
-        <Menu className="w-5 h-5 text-white/60" />
+        <Menu className="w-5 h-5 text-foreground/60" />
       </Button>
 
       {/* Mobile overlay */}
       {mobileOpen && (
-        <div className="fixed inset-0 z-40 md:hidden fade-in" style={{ background: 'rgba(0,0,0,0.7)', backdropFilter: 'blur(4px)' }} onClick={() => setMobileOpen(false)} />
+        <div className="fixed inset-0 z-40 md:hidden fade-in bg-foreground/50 backdrop-blur-[4px]" onClick={() => setMobileOpen(false)} />
       )}
 
       {/* Mobile sidebar */}
@@ -956,7 +988,7 @@ function Sidebar({ currentView, setView, user, onLogout }: {
           className="absolute -right-3 top-8 w-6 h-6 rounded-full glass shadow-lg hidden md:flex items-center justify-center"
           onClick={() => setCollapsed(!collapsed)}
         >
-          <ChevronDown className={`w-3 h-3 text-white/40 transition-transform duration-200 ${collapsed ? 'rotate-90' : '-rotate-90'}`} />
+          <ChevronDown className={`w-3 h-3 text-foreground/40 transition-transform duration-200 ${collapsed ? 'rotate-90' : '-rotate-90'}`} />
         </Button>
       </aside>
     </>
@@ -969,13 +1001,13 @@ function Sidebar({ currentView, setView, user, onLogout }: {
 function CustomTooltip({ active, payload, label }: any) {
   if (!active || !payload?.length) return null
   return (
-    <div className="rounded-xl px-4 py-3 shadow-xl chart-tooltip-glass" style={{ background: 'rgba(6,6,10,0.92)', backdropFilter: 'blur(20px)', border: '1px solid rgba(124,92,252,0.15)', boxShadow: '0 8px 32px rgba(0,0,0,0.5), 0 0 20px rgba(124,92,252,0.08)' }}>
-      {label && <p className="text-xs mb-1.5 font-medium" style={{ color: 'rgba(255,255,255,0.5)' }}>{label}</p>}
+    <div className="rounded-xl px-4 py-3 shadow-xl chart-tooltip-glass glass-strong">
+      {label && <p className="text-xs mb-1.5 font-medium text-muted-foreground">{label}</p>}
       {payload.map((entry: any, i: number) => (
         <div key={i} className="flex items-center gap-2 text-sm">
           <div className="w-2 h-2 rounded-full" style={{ backgroundColor: entry.color }} />
-          <span style={{ color: 'rgba(255,255,255,0.4)' }}>{entry.name}:</span>
-          <span className="text-white font-semibold">{fmt(entry.value)} $</span>
+          <span className="text-muted-foreground">{entry.name}:</span>
+          <span className="text-foreground font-semibold">{fmt(entry.value)} $</span>
         </div>
       ))}
     </div>
@@ -1013,7 +1045,7 @@ function LivePriceTicker() {
 
   return (
     <div className="glass-card rounded-2xl overflow-hidden fade-in-up gradient-border">
-      <div className="flex items-center gap-3 px-4 py-2.5 border-b" style={{ borderColor: 'rgba(255,255,255,0.04)' }}>
+      <div className="flex items-center gap-3 px-4 py-2.5 border-b" style={{ borderColor: 'var(--border)' }}>
         <div className="flex items-center gap-1.5">
           <span className="relative flex h-2 w-2">
             <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
@@ -1021,7 +1053,7 @@ function LivePriceTicker() {
           </span>
           <span className="text-xs font-semibold text-emerald-400">LIVE</span>
         </div>
-        <span className="text-xs" style={{ color: 'rgba(255,255,255,0.25)' }}>Cours en temps réel</span>
+        <span className="text-xs" className="text-muted-foreground">Cours en temps réel</span>
       </div>
       <div ref={tickerRef} className="flex items-center gap-1 px-4 py-3 overflow-x-auto ticker-scroll">
         {entries.map(([ticker, price]) => {
@@ -1029,11 +1061,11 @@ function LivePriceTicker() {
           const change = prev && prev !== price ? ((price - prev) / prev) * 100 : 0
           const isUp = change >= 0
           return (
-            <div key={ticker} className={`flex items-center gap-2 px-3 py-1.5 rounded-lg shrink-0 mr-1 hover-scale-glow ${change !== 0 ? (isUp ? 'price-flash-up' : 'price-flash-down') : ''}`} style={{ background: 'rgba(255,255,255,0.03)' }}>
+            <div key={ticker} className={`flex items-center gap-2 px-3 py-1.5 rounded-lg shrink-0 mr-1 hover-scale-glow ${change !== 0 ? (isUp ? 'price-flash-up' : 'price-flash-down') : ''}`} style={{ background: 'var(--input)' }}>
               <TokenLogo ticker={ticker} size={24} />
               <div className="flex flex-col">
-                <span className="text-[10px] font-semibold text-white/60">{ticker}</span>
-                <span className="text-xs font-semibold text-white/90">{fmtPrice(price)} $</span>
+                <span className="text-[10px] font-semibold text-foreground/60">{ticker}</span>
+                <span className="text-xs font-semibold text-foreground/90">{fmtPrice(price)} $</span>
               </div>
               {change !== 0 && (
                 <span className={`text-[10px] font-semibold ${isUp ? 'text-emerald-400' : 'text-red-400'}`}>
@@ -1113,7 +1145,7 @@ function FearGreedWidget() {
     return (
       <Card className="glass-card rounded-2xl skeleton-wave fade-in-up">
         <CardContent className="p-6">
-          <div className="h-48 rounded-xl" style={{ background: 'rgba(255,255,255,0.03)' }} />
+          <div className="h-48 rounded-xl" style={{ background: 'var(--input)' }} />
         </CardContent>
       </Card>
     )
@@ -1141,8 +1173,8 @@ function FearGreedWidget() {
               <Gauge className="w-4 h-4" style={{ color: fgColor }} />
             </div>
             <div>
-              <h3 className="text-sm font-semibold text-white/80">Indice de Peur & Cupidité</h3>
-              <p className="text-xs" style={{ color: 'rgba(255,255,255,0.3)' }}>Marché crypto global</p>
+              <h3 className="text-sm font-semibold text-foreground/80">Indice de Peur & Cupidité</h3>
+              <p className="text-xs text-muted-foreground">Marché crypto global</p>
             </div>
           </div>
           <div className="text-right">
@@ -1169,7 +1201,7 @@ function FearGreedWidget() {
               <path
                 d="M 20 110 A 90 90 0 0 1 200 110"
                 fill="none"
-                stroke="rgba(255,255,255,0.06)"
+                stroke="var(--border)"
                 strokeWidth="14"
                 strokeLinecap="round"
               />
@@ -1195,9 +1227,9 @@ function FearGreedWidget() {
               {/* Center dot */}
               <circle cx="110" cy="110" r="6" fill="white" />
               {/* Labels */}
-              <text x="20" y="108" fill="rgba(255,255,255,0.3)" fontSize="9" textAnchor="middle">0</text>
-              <text x="110" y="15" fill="rgba(255,255,255,0.3)" fontSize="9" textAnchor="middle">50</text>
-              <text x="200" y="108" fill="rgba(255,255,255,0.3)" fontSize="9" textAnchor="middle">100</text>
+              <text x="20" y="108" fill="var(--muted-foreground)" fontSize="9" textAnchor="middle">0</text>
+              <text x="110" y="15" fill="var(--muted-foreground)" fontSize="9" textAnchor="middle">50</text>
+              <text x="200" y="108" fill="var(--muted-foreground)" fontSize="9" textAnchor="middle">100</text>
             </svg>
           </div>
         </div>
@@ -1210,7 +1242,7 @@ function FearGreedWidget() {
           <signal.icon className="w-5 h-5 shrink-0" style={{ color: signal.color }} />
           <div className="flex-1">
             <p className="text-sm font-semibold" style={{ color: signal.color }}>{signal.label}</p>
-            <p className="text-xs" style={{ color: 'rgba(255,255,255,0.35)' }}>
+            <p className="text-xs" className="text-muted-foreground">
               {data.value <= 25 ? 'Le marché est dans un état de peur extrême – c\'est souvent le meilleur moment pour acheter à bas prix.' :
                data.value <= 45 ? 'Le marché est craintif – les prix peuvent être sous-évalués, c\'est une fenêtre d\'achat potentielle.' :
                data.value <= 55 ? 'Le marché est neutre – ni peur ni cupidité excessive. Restez prudent et surveillez les tendances.' :
@@ -1223,7 +1255,7 @@ function FearGreedWidget() {
         {/* 30-Day History Chart */}
         {chartData.length > 1 && (
           <div>
-            <p className="text-xs font-medium mb-2" style={{ color: 'rgba(255,255,255,0.35)' }}>Historique 30 jours</p>
+            <p className="text-xs font-medium mb-2" className="text-muted-foreground">Historique 30 jours</p>
             <ResponsiveContainer width="100%" height={100}>
               <AreaChart data={chartData}>
                 <defs>
@@ -1232,16 +1264,16 @@ function FearGreedWidget() {
                     <stop offset="100%" stopColor={fgColor} stopOpacity={0} />
                   </linearGradient>
                 </defs>
-                <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.03)" />
-                <XAxis dataKey="date" stroke="rgba(255,255,255,0.2)" fontSize={9} tickLine={false} interval="preserveStartEnd" />
-                <YAxis domain={[0, 100]} stroke="rgba(255,255,255,0.2)" fontSize={9} tickLine={false} axisLine={false} width={25} />
+                <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
+                <XAxis dataKey="date" stroke="var(--muted-foreground)" fontSize={9} tickLine={false} interval="preserveStartEnd" />
+                <YAxis domain={[0, 100]} stroke="var(--muted-foreground)" fontSize={9} tickLine={false} axisLine={false} width={25} />
                 <Tooltip
                   contentStyle={{
-                    background: 'rgba(26,29,46,0.95)',
-                    border: '1px solid rgba(255,255,255,0.1)',
+                    background: 'var(--popover)',
+                    border: '1px solid var(--border)',
                     borderRadius: '12px',
                     fontSize: '12px',
-                    color: 'white',
+                    color: 'var(--foreground)',
                   }}
                 />
                 <ReferenceLine y={25} stroke="rgba(34,197,94,0.3)" strokeDasharray="4 4" />
@@ -1253,7 +1285,7 @@ function FearGreedWidget() {
         )}
 
         {/* Legend */}
-        <div className="flex items-center justify-between text-[10px]" style={{ color: 'rgba(255,255,255,0.25)' }}>
+        <div className="flex items-center justify-between text-[10px]" className="text-muted-foreground">
           <span className="flex items-center gap-1"><span className="w-2 h-2 rounded-full bg-red-500" /> Peur Extrême</span>
           <span className="flex items-center gap-1"><span className="w-2 h-2 rounded-full bg-orange-500" /> Peur</span>
           <span className="flex items-center gap-1"><span className="w-2 h-2 rounded-full bg-yellow-500" /> Neutre</span>
@@ -1300,7 +1332,7 @@ function TokenSignals() {
     return (
       <Card className="glass-card rounded-2xl skeleton-wave fade-in-up">
         <CardContent className="p-6">
-          <div className="h-48 rounded-xl" style={{ background: 'rgba(255,255,255,0.03)' }} />
+          <div className="h-48 rounded-xl" style={{ background: 'var(--input)' }} />
         </CardContent>
       </Card>
     )
@@ -1387,12 +1419,12 @@ function TokenSignals() {
     <Card className="glass-card rounded-2xl card-hover-3d gradient-border fade-in-up">
       <CardContent className="p-5 sm:p-6 space-y-4">
         <div className="flex items-center gap-3">
-          <div className="w-9 h-9 rounded-xl flex items-center justify-center" style={{ background: 'rgba(124,92,252,0.12)' }}>
+          <div className="w-9 h-9 rounded-xl flex items-center justify-center" style={{ background: 'rgba(124,92,252,0.1)' }}>
             <Activity className="w-4 h-4 text-violet-400" />
           </div>
           <div>
-            <h3 className="text-sm font-semibold text-white/80">Signaux d&apos;Achat & Vente</h3>
-            <p className="text-xs" style={{ color: 'rgba(255,255,255,0.3)' }}>Basé sur votre PRU et le contexte marché</p>
+            <h3 className="text-sm font-semibold text-foreground/80">Signaux d&apos;Achat & Vente</h3>
+            <p className="text-xs" className="text-muted-foreground">Basé sur votre PRU et le contexte marché</p>
           </div>
         </div>
 
@@ -1426,14 +1458,14 @@ function TokenSignals() {
                   <ts.icon className="w-3.5 h-3.5 shrink-0" style={{ color: ts.color }} />
                   <span className="text-xs font-semibold" style={{ color: ts.color }}>{ts.ticker}</span>
                 </div>
-                <p className="text-[11px] leading-relaxed" style={{ color: 'rgba(255,255,255,0.45)' }}>{ts.reason}</p>
+                <p className="text-[11px] leading-relaxed text-muted-foreground">{ts.reason}</p>
               </div>
             </div>
           ))}
         </div>
 
         {/* Info note */}
-        <p className="text-[10px] text-center" style={{ color: 'rgba(255,255,255,0.2)' }}>
+        <p className="text-[10px] text-center" className="text-muted-foreground/50">
           Ces signaux sont indicatifs et ne constituent pas un conseil financier. Faites vos propres recherches.
         </p>
       </CardContent>
@@ -1497,8 +1529,8 @@ function DashboardView({ user, onUpgrade }: { user: any; onUpgrade: () => void }
           {[1, 2, 3, 4].map(i => (
             <Card key={i} className="glass-card rounded-2xl skeleton-wave" style={{ height: '120px' }}>
               <CardContent className="p-6">
-                <div className="h-4 w-2/3 rounded-lg mb-4 skeleton-wave" style={{ background: 'rgba(255,255,255,0.04)' }} />
-                <div className="h-8 w-1/2 rounded-lg skeleton-wave" style={{ background: 'rgba(255,255,255,0.04)' }} />
+                <div className="h-4 w-2/3 rounded-lg mb-4 skeleton-wave" style={{ background: 'var(--input)' }} />
+                <div className="h-8 w-1/2 rounded-lg skeleton-wave" style={{ background: 'var(--input)' }} />
               </CardContent>
             </Card>
           ))}
@@ -1517,8 +1549,8 @@ function DashboardView({ user, onUpgrade }: { user: any; onUpgrade: () => void }
         <div className="w-20 h-20 rounded-2xl glass flex items-center justify-center">
           <BarChart3 className="w-10 h-10 text-violet-400/50" />
         </div>
-        <h2 className="text-xl font-semibold text-white/80">Aucune transaction</h2>
-        <p className="text-center max-w-md" style={{ color: 'rgba(255,255,255,0.35)' }}>
+        <h2 className="text-xl font-semibold text-foreground/80">Aucune transaction</h2>
+        <p className="text-center max-w-md" className="text-muted-foreground">
           Commencez par ajouter des transactions dans l&apos;onglet &quot;Transactions&quot; pour voir votre tableau de bord.
         </p>
       </div>
@@ -1592,12 +1624,12 @@ function DashboardView({ user, onUpgrade }: { user: any; onUpgrade: () => void }
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 fade-in-up">
         <div>
           <h1 className="text-2xl font-bold gradient-shimmer-text">Tableau de Bord</h1>
-          <div className="flex items-center gap-2 text-sm mt-1" style={{ color: 'rgba(255,255,255,0.3)' }}>
+          <div className="flex items-center gap-2 text-sm mt-1" className="text-muted-foreground">
             <span>Vue d&apos;ensemble de votre portefeuille</span>
             {lastUpdated && (
               <span className="hidden sm:flex items-center gap-1.5">
                 • <span className="inline-block w-1.5 h-1.5 rounded-full bg-emerald-400 pulse-glow live-breathe" />
-                <span style={{ color: 'rgba(255,255,255,0.2)' }}>Mis à jour {lastUpdated.toLocaleTimeString('fr-FR')} • {nextRefreshIn}s</span>
+                <span className="text-muted-foreground/50">Mis à jour {lastUpdated.toLocaleTimeString('fr-FR')} • {nextRefreshIn}s</span>
               </span>
             )}
           </div>
@@ -1606,8 +1638,8 @@ function DashboardView({ user, onUpgrade }: { user: any; onUpgrade: () => void }
           variant="outline"
           onClick={handleRefresh}
           disabled={refreshing}
-          className="gap-2 shrink-0 glass rounded-xl text-white/60 hover:text-white/80 hover:bg-white/5 h-10 btn-ripple"
-          style={{ borderColor: 'rgba(255,255,255,0.08)' }}
+          className="gap-2 shrink-0 glass rounded-xl text-foreground/60 hover:text-foreground/80 hover:bg-foreground/5 h-10 btn-ripple"
+          style={{ borderColor: 'var(--border)' }}
         >
           <RefreshCw className={`w-4 h-4 ${refreshing ? 'animate-spin' : ''}`} />
           {refreshing ? 'Actualisation...' : 'Actualiser'}
@@ -1628,12 +1660,12 @@ function DashboardView({ user, onUpgrade }: { user: any; onUpgrade: () => void }
       {user?.role === 'user_free' && (
         <Card className="glass-card rounded-2xl fade-in-up rainbow-border" style={{ borderColor: 'rgba(245,158,11,0.25)', background: 'rgba(245,158,11,0.04)' }}>
           <CardContent className="p-4 flex flex-col sm:flex-row items-start sm:items-center gap-3">
-            <div className="w-10 h-10 rounded-xl flex items-center justify-center shrink-0" style={{ background: 'rgba(245,158,11,0.12)' }}>
+            <div className="w-10 h-10 rounded-xl flex items-center justify-center shrink-0" style={{ background: 'rgba(245,158,11,0.1)' }}>
               <Crown className="w-5 h-5 text-amber-400" />
             </div>
             <div className="flex-1 text-sm">
               <p className="font-semibold text-amber-400">Débloquez l&apos;accès illimité</p>
-              <p style={{ color: 'rgba(255,255,255,0.35)' }}>Plan Gratuit limité à 3 tokens et 10 transactions. Passez en Premium pour profiter de toutes les fonctionnalités.</p>
+              <p className="text-muted-foreground">Plan Gratuit limité à 3 tokens et 10 transactions. Passez en Premium pour profiter de toutes les fonctionnalités.</p>
             </div>
             <Button
               className="rounded-xl text-black font-semibold shadow-lg transition-all active:scale-[0.98] shrink-0 upgrade-btn-glow btn-ripple"
@@ -1654,18 +1686,18 @@ function DashboardView({ user, onUpgrade }: { user: any; onUpgrade: () => void }
             <Card className={`glass-card rounded-2xl card-hover-3d tilt-card gradient-border shimmer-vivid ${card.barClass}`}>
               <CardContent className="p-5 sm:p-6 relative">
                 <div className="flex items-center justify-between mb-3">
-                  <span className="text-xs font-medium uppercase tracking-wider" style={{ color: 'rgba(255,255,255,0.35)' }}>{card.label}</span>
+                  <span className="text-xs font-medium uppercase tracking-wider" className="text-muted-foreground">{card.label}</span>
                   <div className="w-9 h-9 rounded-xl flex items-center justify-center kpi-icon-glow" style={{ background: card.iconBg }}>
                     <card.icon className={`w-4 h-4 ${card.iconColor}`} />
                   </div>
                 </div>
                 {card.isPercent ? (
-                  <p className={`text-xl sm:text-2xl font-bold kpi-value-animate ${card.colorClass || 'text-white/90'}`}>
-                    <AnimatedCounter value={card.value} prefix={card.prefix} suffix="%" className={card.colorClass || 'text-white/90'} />
+                  <p className={`text-xl sm:text-2xl font-bold kpi-value-animate ${card.colorClass || 'text-foreground/90'}`}>
+                    <AnimatedCounter value={card.value} prefix={card.prefix} suffix="%" className={card.colorClass || 'text-foreground/90'} />
                   </p>
                 ) : (
-                  <p className={`text-xl sm:text-2xl font-bold kpi-value-animate ${card.colorClass || 'text-white/90'}`}>
-                    <AnimatedCounter value={card.value} prefix={card.prefix} suffix={card.suffix} className={card.colorClass || 'text-white/90'} />
+                  <p className={`text-xl sm:text-2xl font-bold kpi-value-animate ${card.colorClass || 'text-foreground/90'}`}>
+                    <AnimatedCounter value={card.value} prefix={card.prefix} suffix={card.suffix} className={card.colorClass || 'text-foreground/90'} />
                   </p>
                 )}
                 {/* Subtle gradient glow behind value */}
@@ -1683,7 +1715,7 @@ function DashboardView({ user, onUpgrade }: { user: any; onUpgrade: () => void }
         {/* Portfolio Distribution - Dynamic Pie Chart */}
         <Card className="glass-card rounded-2xl card-hover-3d gradient-border spotlight-card fade-in-up stagger-5 chart-enter chart-bg-grad">
           <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium" style={{ color: 'rgba(255,255,255,0.45)' }}>Répartition du Portefeuille</CardTitle>
+            <CardTitle className="text-sm font-medium" className="text-muted-foreground">Répartition du Portefeuille</CardTitle>
           </CardHeader>
           <CardContent>
             <div className="flex flex-col items-center">
@@ -1718,7 +1750,7 @@ function DashboardView({ user, onUpgrade }: { user: any; onUpgrade: () => void }
                       border: '1px solid rgba(124, 92, 252, 0.15)',
                       borderRadius: '12px',
                       fontSize: '12px',
-                      color: 'white',
+                      color: 'var(--foreground)',
                       boxShadow: '0 8px 32px rgba(0,0,0,0.5), 0 0 20px rgba(124,92,252,0.08)',
                     }}
                     formatter={(value: number, name: string) => [`${fmt(value)} $`, name]}
@@ -1732,8 +1764,8 @@ function DashboardView({ user, onUpgrade }: { user: any; onUpgrade: () => void }
                   return (
                     <div key={t.ticker} className="flex items-center gap-2 text-xs">
                       <div className="w-2.5 h-2.5 rounded-sm shrink-0" style={{ background: CHART_COLORS[i % CHART_COLORS.length] }} />
-                      <span className="text-white/50 font-medium">{t.ticker}</span>
-                      <span className="text-white/30 ml-auto">{pct.toFixed(1)}%</span>
+                      <span className="text-foreground/50 font-medium">{t.ticker}</span>
+                      <span className="text-foreground/30 ml-auto">{pct.toFixed(1)}%</span>
                     </div>
                   )
                 })}
@@ -1745,16 +1777,16 @@ function DashboardView({ user, onUpgrade }: { user: any; onUpgrade: () => void }
         {/* Investment vs Value Bar Chart */}
         <Card className="glass-card rounded-2xl card-hover-3d gradient-border spotlight-card fade-in-up stagger-6 chart-enter chart-bg-grad">
           <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium" style={{ color: 'rgba(255,255,255,0.45)' }}>Investissement vs Valeur Actuelle</CardTitle>
+            <CardTitle className="text-sm font-medium" className="text-muted-foreground">Investissement vs Valeur Actuelle</CardTitle>
           </CardHeader>
           <CardContent>
             <ResponsiveContainer width="100%" height={280} className="sm:h-[300px]">
               <BarChart data={barData} barCategoryGap="20%">
-                <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.04)" vertical={false} />
-                <XAxis dataKey="name" stroke="rgba(255,255,255,0.25)" fontSize={11} tickLine={false} axisLine={false} />
-                <YAxis stroke="rgba(255,255,255,0.25)" fontSize={11} tickLine={false} axisLine={false} width={50} />
+                <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" vertical={false} />
+                <XAxis dataKey="name" stroke="var(--muted-foreground)" fontSize={11} tickLine={false} axisLine={false} />
+                <YAxis stroke="var(--muted-foreground)" fontSize={11} tickLine={false} axisLine={false} width={50} />
                 <Tooltip content={<CustomTooltip />} />
-                <Legend wrapperStyle={{ fontSize: '12px', color: 'rgba(255,255,255,0.4)' }} />
+                <Legend wrapperStyle={{ fontSize: '12px', color: 'var(--muted-foreground)' }} />
                 <Bar dataKey="investissement" name="Investissement" fill="#06b6d4" radius={[6, 6, 0, 0]} animationDuration={800} />
                 <Bar dataKey="valeur" name="Valeur Actuelle" fill="#7c5cfc" radius={[6, 6, 0, 0]} animationDuration={800} />
               </BarChart>
@@ -1768,42 +1800,42 @@ function DashboardView({ user, onUpgrade }: { user: any; onUpgrade: () => void }
       <ScrollReveal direction="left">
       <Card className="glass-card rounded-2xl fade-in-up gradient-border shimmer-vivid">
         <CardHeader className="pb-3">
-          <CardTitle className="text-base font-medium text-white/70">Détail par Token</CardTitle>
-          <CardDescription style={{ color: 'rgba(255,255,255,0.25)' }}>Analyse détaillée de chaque crypto-actif de votre portefeuille</CardDescription>
+          <CardTitle className="text-base font-medium text-foreground/70">Détail par Token</CardTitle>
+          <CardDescription className="text-muted-foreground">Analyse détaillée de chaque crypto-actif de votre portefeuille</CardDescription>
         </CardHeader>
         <CardContent>
           {/* Desktop Table */}
           <div className="hidden md:block overflow-x-auto custom-scrollbar">
             <Table>
               <TableHeader>
-                <TableRow className="hover:bg-transparent" style={{ borderBottomColor: 'rgba(255,255,255,0.05)' }}>
-                  <TableHead className="font-semibold" style={{ color: 'rgba(255,255,255,0.35)' }}>Token</TableHead>
-                  <TableHead className="text-right font-semibold" style={{ color: 'rgba(255,255,255,0.35)' }}>Montant Investi</TableHead>
-                  <TableHead className="text-right font-semibold" style={{ color: 'rgba(255,255,255,0.35)' }}>Quantité</TableHead>
-                  <TableHead className="text-right font-semibold" style={{ color: 'rgba(255,255,255,0.35)' }}>PRU</TableHead>
-                  <TableHead className="text-right font-semibold" style={{ color: 'rgba(255,255,255,0.35)' }}>Cours Actuel</TableHead>
-                  <TableHead className="text-right font-semibold" style={{ color: 'rgba(255,255,255,0.35)' }}>Valeur Actuelle</TableHead>
-                  <TableHead className="text-right font-semibold" style={{ color: 'rgba(255,255,255,0.35)' }}>P/L</TableHead>
-                  <TableHead className="text-right font-semibold" style={{ color: 'rgba(255,255,255,0.35)' }}>Rentabilité</TableHead>
+                <TableRow className="hover:bg-transparent" style={{ borderBottomColor: 'var(--border)' }}>
+                  <TableHead className="font-semibold" className="text-muted-foreground">Token</TableHead>
+                  <TableHead className="text-right font-semibold" className="text-muted-foreground">Montant Investi</TableHead>
+                  <TableHead className="text-right font-semibold" className="text-muted-foreground">Quantité</TableHead>
+                  <TableHead className="text-right font-semibold" className="text-muted-foreground">PRU</TableHead>
+                  <TableHead className="text-right font-semibold" className="text-muted-foreground">Cours Actuel</TableHead>
+                  <TableHead className="text-right font-semibold" className="text-muted-foreground">Valeur Actuelle</TableHead>
+                  <TableHead className="text-right font-semibold" className="text-muted-foreground">P/L</TableHead>
+                  <TableHead className="text-right font-semibold" className="text-muted-foreground">Rentabilité</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
                 {sortedTokens.map((t) => (
-                  <TableRow key={t.ticker} className="data-row-hover hover-scale-glow transition-colors" style={{ borderBottomColor: 'rgba(255,255,255,0.04)' }}>
+                  <TableRow key={t.ticker} className="data-row-hover hover-scale-glow transition-colors" style={{ borderBottomColor: 'var(--border)' }}>
                     <TableCell>
                       <div className="flex items-center gap-3">
                         <TokenLogo ticker={t.ticker} size={36} />
                         <div>
-                          <p className="font-semibold text-white/80">{t.ticker}</p>
-                          <p className="text-xs" style={{ color: 'rgba(255,255,255,0.25)' }}>{t.name}</p>
+                          <p className="font-semibold text-foreground/80">{t.ticker}</p>
+                          <p className="text-xs" className="text-muted-foreground">{t.name}</p>
                         </div>
                       </div>
                     </TableCell>
-                    <TableCell className="text-right font-mono text-white/60">{fmt(t.montantInvesti)} $</TableCell>
-                    <TableCell className="text-right font-mono text-white/40">{fmtSmall(t.quantite)}</TableCell>
-                    <TableCell className="text-right font-mono text-white/60">{fmt(t.pru)} $</TableCell>
-                    <TableCell className="text-right font-mono text-white/60">{fmt(t.currentPrice)} $</TableCell>
-                    <TableCell className="text-right font-mono text-white/60">{fmt(t.valeurActuelle)} $</TableCell>
+                    <TableCell className="text-right font-mono text-foreground/60">{fmt(t.montantInvesti)} $</TableCell>
+                    <TableCell className="text-right font-mono text-foreground/40">{fmtSmall(t.quantite)}</TableCell>
+                    <TableCell className="text-right font-mono text-foreground/60">{fmt(t.pru)} $</TableCell>
+                    <TableCell className="text-right font-mono text-foreground/60">{fmt(t.currentPrice)} $</TableCell>
+                    <TableCell className="text-right font-mono text-foreground/60">{fmt(t.valeurActuelle)} $</TableCell>
                     <TableCell className={`text-right font-mono font-semibold ${plColor(t.pl)}`}>
                       {t.pl >= 0 ? '+' : ''}{fmt(t.pl)} $
                     </TableCell>
@@ -1826,8 +1858,8 @@ function DashboardView({ user, onUpgrade }: { user: any; onUpgrade: () => void }
                   <div className="flex items-center gap-3">
                     <TokenLogo ticker={t.ticker} size={40} />
                     <div>
-                      <p className="font-semibold text-white/80">{t.ticker}</p>
-                      <p className="text-xs" style={{ color: 'rgba(255,255,255,0.25)' }}>{t.name}</p>
+                      <p className="font-semibold text-foreground/80">{t.ticker}</p>
+                      <p className="text-xs" className="text-muted-foreground">{t.name}</p>
                     </div>
                   </div>
                   <Badge className={`${t.rentabilite >= 0 ? 'bg-emerald-400/10 text-emerald-400 border-emerald-400/20' : 'bg-red-400/10 text-red-400 border-red-400/20'} border font-mono text-xs`}>
@@ -1836,19 +1868,19 @@ function DashboardView({ user, onUpgrade }: { user: any; onUpgrade: () => void }
                 </div>
                 <div className="grid grid-cols-2 gap-x-4 gap-y-2 text-sm">
                   <div>
-                    <p className="text-xs" style={{ color: 'rgba(255,255,255,0.25)' }}>Investi</p>
-                    <p className="text-white/60 font-mono">{fmt(t.montantInvesti)} $</p>
+                    <p className="text-xs" className="text-muted-foreground">Investi</p>
+                    <p className="text-foreground/60 font-mono">{fmt(t.montantInvesti)} $</p>
                   </div>
                   <div>
-                    <p className="text-xs" style={{ color: 'rgba(255,255,255,0.25)' }}>Valeur</p>
-                    <p className="text-white/60 font-mono">{fmt(t.valeurActuelle)} $</p>
+                    <p className="text-xs" className="text-muted-foreground">Valeur</p>
+                    <p className="text-foreground/60 font-mono">{fmt(t.valeurActuelle)} $</p>
                   </div>
                   <div>
-                    <p className="text-xs" style={{ color: 'rgba(255,255,255,0.25)' }}>Quantité</p>
-                    <p className="text-white/40 font-mono">{fmtSmall(t.quantite)}</p>
+                    <p className="text-xs" className="text-muted-foreground">Quantité</p>
+                    <p className="text-foreground/40 font-mono">{fmtSmall(t.quantite)}</p>
                   </div>
                   <div>
-                    <p className="text-xs" style={{ color: 'rgba(255,255,255,0.25)' }}>P/L</p>
+                    <p className="text-xs" className="text-muted-foreground">P/L</p>
                     <p className={`font-mono font-semibold ${plColor(t.pl)}`}>
                       {t.pl >= 0 ? '+' : ''}{fmt(t.pl)} $
                     </p>
@@ -2040,31 +2072,31 @@ function TransactionsView({ user, onUpgrade }: { user: any; onUpgrade: () => voi
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 fade-in-up">
         <div>
           <h1 className="text-2xl font-bold gradient-shimmer-text">Transactions</h1>
-          <p className="mt-1" style={{ color: 'rgba(255,255,255,0.3)' }}>Gérez vos achats de crypto-actifs</p>
+          <p className="mt-1" className="text-muted-foreground">Gérez vos achats de crypto-actifs</p>
         </div>
         <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
           <DialogTrigger asChild>
-            <Button onClick={openNew} className="gap-2 rounded-xl h-10 shadow-lg transition-all active:scale-[0.98] hidden sm:flex text-white btn-primary-glow btn-ripple" style={{ background: 'linear-gradient(135deg, #7c5cfc, #06b6d4)', boxShadow: '0 4px 20px rgba(124,92,252,0.25)' }}>
+            <Button onClick={openNew} className="gap-2 rounded-xl h-10 shadow-lg transition-all active:scale-[0.98] hidden sm:flex text-foreground btn-primary-glow btn-ripple" style={{ background: 'linear-gradient(135deg, #7c5cfc, #06b6d4)', boxShadow: '0 4px 20px rgba(124,92,252,0.25)' }}>
               <Plus className="w-4 h-4" /> Nouvelle Transaction
             </Button>
           </DialogTrigger>
-          <DialogContent className="dialog-enter rounded-2xl max-w-lg dialog-mobile-fullscreen text-white" style={{ background: 'rgba(26,29,46,0.95)', backdropFilter: 'blur(30px)', border: '1px solid rgba(255,255,255,0.1)' }}>
+          <DialogContent className="dialog-enter rounded-2xl max-w-lg dialog-mobile-fullscreen text-foreground" style={{ background: 'var(--popover)', backdropFilter: 'blur(30px)', border: '1px solid var(--border)' }}>
             <DialogHeader>
-              <DialogTitle className="text-white/90">{editingTx ? 'Modifier la transaction' : 'Nouvelle transaction'}</DialogTitle>
+              <DialogTitle className="text-foreground/90">{editingTx ? 'Modifier la transaction' : 'Nouvelle transaction'}</DialogTitle>
               <DialogDescription className="sr-only">{editingTx ? 'Formulaire de modification de transaction' : 'Formulaire d\'ajout de transaction'}</DialogDescription>
             </DialogHeader>
             <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div className="space-y-2">
-                  <Label className="text-xs" style={{ color: 'rgba(255,255,255,0.45)' }}>Date</Label>
-                  <Input type="date" {...register('date')} className="border text-white rounded-xl h-11" style={{ background: 'rgba(255,255,255,0.04)', borderColor: 'rgba(255,255,255,0.08)' }} />
+                  <Label className="text-xs" className="text-muted-foreground">Date</Label>
+                  <Input type="date" {...register('date')} className="border text-foreground rounded-xl h-11" style={{ background: 'var(--input)', borderColor: 'var(--border)' }} />
                   {errors.date && <p className="text-xs text-red-400">{errors.date.message}</p>}
                 </div>
                 <div className="space-y-2">
-                  <Label className="text-xs" style={{ color: 'rgba(255,255,255,0.45)' }}>Token</Label>
+                  <Label className="text-xs" className="text-muted-foreground">Token</Label>
                   <Select onValueChange={v => setValue('tokenTicker', v)} defaultValue={editingTx?.tokenTicker}>
-                    <SelectTrigger className="border text-white rounded-xl h-11" style={{ background: 'rgba(255,255,255,0.04)', borderColor: 'rgba(255,255,255,0.08)' }}><SelectValue placeholder="Sélectionner" /></SelectTrigger>
-                    <SelectContent style={{ background: 'rgba(26,29,46,0.95)', border: '1px solid rgba(255,255,255,0.1)' }}>
+                    <SelectTrigger className="border text-foreground rounded-xl h-11" style={{ background: 'var(--input)', borderColor: 'var(--border)' }}><SelectValue placeholder="Sélectionner" /></SelectTrigger>
+                    <SelectContent style={{ background: 'var(--popover)', border: '1px solid var(--border)' }}>
                       {tokens.map(t => (
                         <SelectItem key={t.ticker} value={t.ticker}>{t.ticker} - {t.name}</SelectItem>
                       ))}
@@ -2075,21 +2107,21 @@ function TransactionsView({ user, onUpgrade }: { user: any; onUpgrade: () => voi
               </div>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div className="space-y-2">
-                  <Label className="text-xs" style={{ color: 'rgba(255,255,255,0.45)' }}>Montant investi ($)</Label>
-                  <Input type="number" step="0.01" {...register('montantInvesti')} placeholder="15.70" className="border text-white placeholder:text-white/20 rounded-xl h-11" style={{ background: 'rgba(255,255,255,0.04)', borderColor: 'rgba(255,255,255,0.08)' }} />
+                  <Label className="text-xs" className="text-muted-foreground">Montant investi ($)</Label>
+                  <Input type="number" step="0.01" {...register('montantInvesti')} placeholder="15.70" className="border text-foreground placeholder:text-muted-foreground/50 rounded-xl h-11" style={{ background: 'var(--input)', borderColor: 'var(--border)' }} />
                   {errors.montantInvesti && <p className="text-xs text-red-400">{errors.montantInvesti.message}</p>}
                 </div>
                 <div className="space-y-2">
-                  <Label className="text-xs" style={{ color: 'rgba(255,255,255,0.45)' }}>Cours d&apos;achat ($)</Label>
-                  <Input type="number" step="0.0001" {...register('coursAchat')} placeholder="82603.9" className="border text-white placeholder:text-white/20 rounded-xl h-11" style={{ background: 'rgba(255,255,255,0.04)', borderColor: 'rgba(255,255,255,0.08)' }} />
+                  <Label className="text-xs" className="text-muted-foreground">Cours d&apos;achat ($)</Label>
+                  <Input type="number" step="0.0001" {...register('coursAchat')} placeholder="82603.9" className="border text-foreground placeholder:text-muted-foreground/50 rounded-xl h-11" style={{ background: 'var(--input)', borderColor: 'var(--border)' }} />
                   {errors.coursAchat && <p className="text-xs text-red-400">{errors.coursAchat.message}</p>}
                 </div>
               </div>
               <div className="space-y-2">
-                <Label className="text-xs" style={{ color: 'rgba(255,255,255,0.45)' }}>Exchange (optionnel)</Label>
+                <Label className="text-xs" className="text-muted-foreground">Exchange (optionnel)</Label>
                 <Select onValueChange={v => setValue('exchangeId', v)} defaultValue={editingTx?.exchangeId || ''}>
-                  <SelectTrigger className="border text-white rounded-xl h-11" style={{ background: 'rgba(255,255,255,0.04)', borderColor: 'rgba(255,255,255,0.08)' }}><SelectValue placeholder="Sélectionner" /></SelectTrigger>
-                  <SelectContent style={{ background: 'rgba(26,29,46,0.95)', border: '1px solid rgba(255,255,255,0.1)' }}>
+                  <SelectTrigger className="border text-foreground rounded-xl h-11" style={{ background: 'var(--input)', borderColor: 'var(--border)' }}><SelectValue placeholder="Sélectionner" /></SelectTrigger>
+                  <SelectContent style={{ background: 'var(--popover)', border: '1px solid var(--border)' }}>
                     {exchanges.map(e => (
                       <SelectItem key={e.id} value={e.id}>{e.name}</SelectItem>
                     ))}
@@ -2097,14 +2129,14 @@ function TransactionsView({ user, onUpgrade }: { user: any; onUpgrade: () => voi
                 </Select>
               </div>
               <div className="space-y-2">
-                <Label className="text-xs" style={{ color: 'rgba(255,255,255,0.45)' }}>Notes (optionnel)</Label>
-                <Input {...register('notes')} placeholder="Note facultative" className="border text-white placeholder:text-white/20 rounded-xl h-11" style={{ background: 'rgba(255,255,255,0.04)', borderColor: 'rgba(255,255,255,0.08)' }} />
+                <Label className="text-xs" className="text-muted-foreground">Notes (optionnel)</Label>
+                <Input {...register('notes')} placeholder="Note facultative" className="border text-foreground placeholder:text-muted-foreground/50 rounded-xl h-11" style={{ background: 'var(--input)', borderColor: 'var(--border)' }} />
               </div>
               <DialogFooter className="gap-2">
                 <DialogClose asChild>
-                  <Button variant="outline" className="rounded-xl text-white/50 hover:text-white/70 hover:bg-white/5" style={{ borderColor: 'rgba(255,255,255,0.08)' }}>Annuler</Button>
+                  <Button variant="outline" className="rounded-xl text-foreground/50 hover:text-foreground/70 hover:bg-foreground/5" style={{ borderColor: 'var(--border)' }}>Annuler</Button>
                 </DialogClose>
-                <Button type="submit" className="rounded-xl shadow-lg text-white transition-all active:scale-[0.98] btn-primary-glow btn-ripple" style={{ background: 'linear-gradient(135deg, #7c5cfc, #06b6d4)', boxShadow: '0 4px 20px rgba(124,92,252,0.25)' }}>
+                <Button type="submit" className="rounded-xl shadow-lg text-foreground transition-all active:scale-[0.98] btn-primary-glow btn-ripple" style={{ background: 'linear-gradient(135deg, #7c5cfc, #06b6d4)', boxShadow: '0 4px 20px rgba(124,92,252,0.25)' }}>
                   {editingTx ? 'Modifier' : 'Ajouter'}
                 </Button>
               </DialogFooter>
@@ -2117,12 +2149,12 @@ function TransactionsView({ user, onUpgrade }: { user: any; onUpgrade: () => voi
       {user?.role === 'user_free' && (
         <Card className="glass-card rounded-2xl fade-in-up stagger-1" style={{ borderColor: 'rgba(245,158,11,0.2)', background: 'rgba(245,158,11,0.04)' }}>
           <CardContent className="p-4 flex items-center gap-3">
-            <div className="w-9 h-9 rounded-xl flex items-center justify-center shrink-0" style={{ background: 'rgba(245,158,11,0.12)' }}>
+            <div className="w-9 h-9 rounded-xl flex items-center justify-center shrink-0" style={{ background: 'rgba(245,158,11,0.1)' }}>
               <AlertTriangle className="w-4 h-4 text-amber-400" />
             </div>
             <div className="flex-1 text-sm">
               <p className="font-medium text-amber-400">Plan Gratuit — Limité à 3 tokens et 10 transactions</p>
-              <p style={{ color: 'rgba(255,255,255,0.25)' }}>Passez en Premium pour débloquer l&apos;accès illimité.</p>
+              <p className="text-muted-foreground">Passez en Premium pour débloquer l&apos;accès illimité.</p>
             </div>
             <div className="flex items-center gap-2 shrink-0">
               <Badge className="border" style={{ background: 'rgba(245,158,11,0.12)', color: '#f59e0b', borderColor: 'rgba(245,158,11,0.2)' }}>
@@ -2144,13 +2176,13 @@ function TransactionsView({ user, onUpgrade }: { user: any; onUpgrade: () => voi
       {/* Search/Filter Bar */}
       {transactions.length > 0 && (
         <div className="relative fade-in-up stagger-2">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4" style={{ color: 'rgba(255,255,255,0.2)' }} />
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4" className="text-muted-foreground/50" />
           <Input
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             placeholder="Rechercher par token, exchange, notes..."
-            className="border text-white placeholder:text-white/20 rounded-xl h-11 pl-10"
-            style={{ background: 'rgba(255,255,255,0.04)', borderColor: 'rgba(255,255,255,0.06)' }}
+            className="border text-foreground placeholder:text-muted-foreground/50 rounded-xl h-11 pl-10"
+            style={{ background: 'var(--input)', borderColor: 'var(--border)' }}
           />
         </div>
       )}
@@ -2162,9 +2194,9 @@ function TransactionsView({ user, onUpgrade }: { user: any; onUpgrade: () => voi
             <div className="w-16 h-16 rounded-2xl glass mx-auto mb-4 flex items-center justify-center">
               <Wallet className="w-8 h-8 text-violet-400/40" />
             </div>
-            <h3 className="text-lg font-semibold text-white/70 mb-2">Aucune transaction</h3>
-            <p className="mb-6" style={{ color: 'rgba(255,255,255,0.25)' }}>Ajoutez votre première transaction pour commencer le suivi.</p>
-            <Button onClick={openNew} className="gap-2 rounded-xl shadow-lg text-white btn-primary-glow btn-ripple" style={{ background: 'linear-gradient(135deg, #7c5cfc, #06b6d4)', boxShadow: '0 4px 20px rgba(124,92,252,0.25)' }}>
+            <h3 className="text-lg font-semibold text-foreground/70 mb-2">Aucune transaction</h3>
+            <p className="mb-6" className="text-muted-foreground">Ajoutez votre première transaction pour commencer le suivi.</p>
+            <Button onClick={openNew} className="gap-2 rounded-xl shadow-lg text-foreground btn-primary-glow btn-ripple" style={{ background: 'linear-gradient(135deg, #7c5cfc, #06b6d4)', boxShadow: '0 4px 20px rgba(124,92,252,0.25)' }}>
               <Plus className="w-4 h-4" /> Ajouter une transaction
             </Button>
           </CardContent>
@@ -2177,50 +2209,50 @@ function TransactionsView({ user, onUpgrade }: { user: any; onUpgrade: () => voi
               <div className="overflow-x-auto custom-scrollbar">
                 <Table>
                   <TableHeader>
-                    <TableRow className="hover:bg-transparent" style={{ borderBottomColor: 'rgba(255,255,255,0.05)' }}>
-                      <TableHead className="cursor-pointer select-none" style={{ color: 'rgba(255,255,255,0.35)' }} onClick={() => toggleSort('date')}>
+                    <TableRow className="hover:bg-transparent" style={{ borderBottomColor: 'var(--border)' }}>
+                      <TableHead className="cursor-pointer select-none" className="text-muted-foreground" onClick={() => toggleSort('date')}>
                         <span className="flex items-center gap-1">Date <SortIcon field="date" /></span>
                       </TableHead>
-                      <TableHead className="cursor-pointer select-none" style={{ color: 'rgba(255,255,255,0.35)' }} onClick={() => toggleSort('tokenTicker')}>
+                      <TableHead className="cursor-pointer select-none" className="text-muted-foreground" onClick={() => toggleSort('tokenTicker')}>
                         <span className="flex items-center gap-1">Token <SortIcon field="tokenTicker" /></span>
                       </TableHead>
-                      <TableHead className="text-right cursor-pointer select-none" style={{ color: 'rgba(255,255,255,0.35)' }} onClick={() => toggleSort('montantInvesti')}>
+                      <TableHead className="text-right cursor-pointer select-none" className="text-muted-foreground" onClick={() => toggleSort('montantInvesti')}>
                         <span className="flex items-center justify-end gap-1">Montant <SortIcon field="montantInvesti" /></span>
                       </TableHead>
-                      <TableHead className="text-right" style={{ color: 'rgba(255,255,255,0.35)' }}>Cours</TableHead>
-                      <TableHead className="text-right" style={{ color: 'rgba(255,255,255,0.35)' }}>Quantité</TableHead>
-                      <TableHead style={{ color: 'rgba(255,255,255,0.35)' }}>Exchange</TableHead>
-                      <TableHead className="text-right" style={{ color: 'rgba(255,255,255,0.35)' }}>Actions</TableHead>
+                      <TableHead className="text-right" className="text-muted-foreground">Cours</TableHead>
+                      <TableHead className="text-right" className="text-muted-foreground">Quantité</TableHead>
+                      <TableHead className="text-muted-foreground">Exchange</TableHead>
+                      <TableHead className="text-right" className="text-muted-foreground">Actions</TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
                     {sorted.map((tx, idx) => (
-                      <TableRow key={tx.id} className={`transition-colors data-row-hover tx-row-hover ${recentTxId === tx.id ? 'tx-success-flash tx-row-enter' : ''}`} style={{ borderBottomColor: 'rgba(255,255,255,0.04)', animationDelay: `${idx * 0.05}s` }}>
-                        <TableCell className="font-mono text-sm text-white/50">
+                      <TableRow key={tx.id} className={`transition-colors data-row-hover tx-row-hover ${recentTxId === tx.id ? 'tx-success-flash tx-row-enter' : ''}`} style={{ borderBottomColor: 'var(--border)', animationDelay: `${idx * 0.05}s` }}>
+                        <TableCell className="font-mono text-sm text-foreground/50">
                           {new Date(tx.date).toLocaleDateString('fr-FR')}
                         </TableCell>
                         <TableCell>
                           <div className="flex items-center gap-2">
                             <TokenLogo ticker={tx.tokenTicker} size={28} />
-                            <Badge variant="outline" className="font-semibold border-white/10 text-white/70">
+                            <Badge variant="outline" className="font-semibold border-foreground/10 text-foreground/70">
                               {tx.tokenTicker}
                             </Badge>
                           </div>
                         </TableCell>
-                        <TableCell className="text-right font-mono text-white/60">{fmt(tx.montantInvesti)} $</TableCell>
-                        <TableCell className="text-right font-mono text-white/50">{fmt(tx.coursAchat)} $</TableCell>
-                        <TableCell className="text-right font-mono text-white/40">{fmtSmall(tx.quantite)}</TableCell>
+                        <TableCell className="text-right font-mono text-foreground/60">{fmt(tx.montantInvesti)} $</TableCell>
+                        <TableCell className="text-right font-mono text-foreground/50">{fmt(tx.coursAchat)} $</TableCell>
+                        <TableCell className="text-right font-mono text-foreground/40">{fmtSmall(tx.quantite)}</TableCell>
                         <TableCell>
                           {tx.exchange ? (
                             <div className="flex items-center gap-1.5">
                               <ExchangeLogo name={tx.exchange.name} size={20} />
-                              <span className="text-xs text-white/50">{tx.exchange.name}</span>
+                              <span className="text-xs text-foreground/50">{tx.exchange.name}</span>
                             </div>
-                          ) : <span style={{ color: 'rgba(255,255,255,0.12)' }}>—</span>}
+                          ) : <span style={{ color: 'var(--muted-foreground)' }}>—</span>}
                         </TableCell>
                         <TableCell className="text-right">
                           <div className="flex items-center justify-end gap-1">
-                            <Button variant="ghost" size="icon" className="h-8 w-8 rounded-lg hover:bg-white/5 text-white/30 hover:text-white/60" onClick={() => openEdit(tx)}>
+                            <Button variant="ghost" size="icon" className="h-8 w-8 rounded-lg hover:bg-foreground/5 text-foreground/30 hover:text-foreground/60" onClick={() => openEdit(tx)}>
                               <Edit3 className="w-3.5 h-3.5" />
                             </Button>
                             {deleteConfirm === tx.id ? (
@@ -2228,12 +2260,12 @@ function TransactionsView({ user, onUpgrade }: { user: any; onUpgrade: () => voi
                                 <Button variant="ghost" size="icon" className="h-8 w-8 rounded-lg bg-red-500/10 text-red-400 hover:bg-red-500/20" onClick={() => handleDelete(tx.id)}>
                                   <Check className="w-3.5 h-3.5" />
                                 </Button>
-                                <Button variant="ghost" size="icon" className="h-8 w-8 rounded-lg hover:bg-white/5 text-white/30" onClick={() => setDeleteConfirm(null)}>
+                                <Button variant="ghost" size="icon" className="h-8 w-8 rounded-lg hover:bg-foreground/5 text-foreground/30" onClick={() => setDeleteConfirm(null)}>
                                   <X className="w-3.5 h-3.5" />
                                 </Button>
                               </div>
                             ) : (
-                              <Button variant="ghost" size="icon" className="h-8 w-8 rounded-lg hover:bg-red-500/10 text-white/20 hover:text-red-400" onClick={() => setDeleteConfirm(tx.id)}>
+                              <Button variant="ghost" size="icon" className="h-8 w-8 rounded-lg hover:bg-red-500/10 text-foreground/20 hover:text-red-400" onClick={() => setDeleteConfirm(tx.id)}>
                                 <Trash2 className="w-3.5 h-3.5" />
                               </Button>
                             )}
@@ -2255,12 +2287,12 @@ function TransactionsView({ user, onUpgrade }: { user: any; onUpgrade: () => voi
                   <div className="flex items-center gap-3">
                     <TokenLogo ticker={tx.tokenTicker} size={40} />
                     <div>
-                      <p className="font-semibold text-white/80">{tx.tokenTicker}</p>
-                      <p className="text-xs" style={{ color: 'rgba(255,255,255,0.25)' }}>{new Date(tx.date).toLocaleDateString('fr-FR')}</p>
+                      <p className="font-semibold text-foreground/80">{tx.tokenTicker}</p>
+                      <p className="text-xs" className="text-muted-foreground">{new Date(tx.date).toLocaleDateString('fr-FR')}</p>
                     </div>
                   </div>
                   <div className="flex items-center gap-1">
-                    <Button variant="ghost" size="icon" className="h-9 w-9 rounded-xl hover:bg-white/5 text-white/30 hover:text-white/60" onClick={() => openEdit(tx)}>
+                    <Button variant="ghost" size="icon" className="h-9 w-9 rounded-xl hover:bg-foreground/5 text-foreground/30 hover:text-foreground/60" onClick={() => openEdit(tx)}>
                       <Edit3 className="w-4 h-4" />
                     </Button>
                     {deleteConfirm === tx.id ? (
@@ -2268,12 +2300,12 @@ function TransactionsView({ user, onUpgrade }: { user: any; onUpgrade: () => voi
                         <Button variant="ghost" size="icon" className="h-9 w-9 rounded-xl bg-red-500/10 text-red-400" onClick={() => handleDelete(tx.id)}>
                           <Check className="w-4 h-4" />
                         </Button>
-                        <Button variant="ghost" size="icon" className="h-9 w-9 rounded-xl hover:bg-white/5 text-white/30" onClick={() => setDeleteConfirm(null)}>
+                        <Button variant="ghost" size="icon" className="h-9 w-9 rounded-xl hover:bg-foreground/5 text-foreground/30" onClick={() => setDeleteConfirm(null)}>
                           <X className="w-4 h-4" />
                         </Button>
                       </>
                     ) : (
-                      <Button variant="ghost" size="icon" className="h-9 w-9 rounded-xl hover:bg-red-500/10 text-white/20 hover:text-red-400" onClick={() => setDeleteConfirm(tx.id)}>
+                      <Button variant="ghost" size="icon" className="h-9 w-9 rounded-xl hover:bg-red-500/10 text-foreground/20 hover:text-red-400" onClick={() => setDeleteConfirm(tx.id)}>
                         <Trash2 className="w-4 h-4" />
                       </Button>
                     )}
@@ -2281,28 +2313,28 @@ function TransactionsView({ user, onUpgrade }: { user: any; onUpgrade: () => voi
                 </div>
                 <div className="grid grid-cols-3 gap-2 text-sm">
                   <div>
-                    <p className="text-xs" style={{ color: 'rgba(255,255,255,0.2)' }}>Montant</p>
-                    <p className="text-white/60 font-mono">{fmt(tx.montantInvesti)} $</p>
+                    <p className="text-xs" className="text-muted-foreground/50">Montant</p>
+                    <p className="text-foreground/60 font-mono">{fmt(tx.montantInvesti)} $</p>
                   </div>
                   <div>
-                    <p className="text-xs" style={{ color: 'rgba(255,255,255,0.2)' }}>Cours</p>
-                    <p className="text-white/50 font-mono">{fmt(tx.coursAchat)} $</p>
+                    <p className="text-xs" className="text-muted-foreground/50">Cours</p>
+                    <p className="text-foreground/50 font-mono">{fmt(tx.coursAchat)} $</p>
                   </div>
                   <div>
-                    <p className="text-xs" style={{ color: 'rgba(255,255,255,0.2)' }}>Quantité</p>
-                    <p className="text-white/40 font-mono">{fmtSmall(tx.quantite)}</p>
+                    <p className="text-xs" className="text-muted-foreground/50">Quantité</p>
+                    <p className="text-foreground/40 font-mono">{fmtSmall(tx.quantite)}</p>
                   </div>
                 </div>
                 {(tx.exchange || tx.notes) && (
-                  <div className="flex items-center gap-2 pt-1" style={{ borderTop: '1px solid rgba(255,255,255,0.04)' }}>
+                  <div className="flex items-center gap-2 pt-1" style={{ borderTop: '1px solid var(--border)' }}>
                     {tx.exchange && (
                       <div className="flex items-center gap-1.5">
                         <ExchangeLogo name={tx.exchange.name} size={20} />
-                        <span className="text-xs text-white/35">{tx.exchange.name}</span>
+                        <span className="text-xs text-foreground/35">{tx.exchange.name}</span>
                       </div>
                     )}
                     {tx.notes && (
-                      <span className="text-xs truncate flex-1" style={{ color: 'rgba(255,255,255,0.15)' }}>{tx.notes}</span>
+                      <span className="text-xs truncate flex-1" className="text-muted-foreground/40">{tx.notes}</span>
                     )}
                   </div>
                 )}
@@ -2315,7 +2347,7 @@ function TransactionsView({ user, onUpgrade }: { user: any; onUpgrade: () => voi
       {/* FAB Button on Mobile */}
       <button
         onClick={openNew}
-        className="fab-button fab-pulse-ring fixed bottom-20 right-4 sm:hidden w-14 h-14 rounded-2xl flex items-center justify-center text-white z-40 active:scale-95"
+        className="fab-button fab-pulse-ring fixed bottom-20 right-4 sm:hidden w-14 h-14 rounded-2xl flex items-center justify-center text-foreground z-40 active:scale-95"
         style={{ background: 'linear-gradient(135deg, #7c5cfc, #06b6d4)' }}
       >
         <Plus className="w-6 h-6" />
@@ -2347,6 +2379,212 @@ declare global {
       }) => { render: (container: string) => Promise<void>; close: () => void }
     }
   }
+}
+
+// ============================================================
+// ADMIN PRICING VIEW — Manage Premium Subscription Prices
+// ============================================================
+interface PricingPlan {
+  months: number
+  discount: number
+  total: number
+  monthly: number
+  label: string
+  badge: string
+}
+
+function AdminPricingView() {
+  const [plans, setPlans] = useState<PricingPlan[]>([])
+  const [loading, setLoading] = useState(true)
+  const [saving, setSaving] = useState(false)
+  const [editIdx, setEditIdx] = useState<number | null>(null)
+  const [editPlan, setEditPlan] = useState<PricingPlan | null>(null)
+
+  const fetchPricing = useCallback(async () => {
+    try {
+      const res = await fetch('/api/admin/pricing')
+      if (res.ok) {
+        const data = await res.json()
+        setPlans(data.plans || [])
+      }
+    } catch (err) {
+      console.error(err)
+    } finally {
+      setLoading(false)
+    }
+  }, [])
+
+  useEffect(() => { fetchPricing() }, [fetchPricing])
+
+  const handleSave = async () => {
+    setSaving(true)
+    try {
+      // Recalculate derived fields
+      const updatedPlans = plans.map(p => ({
+        ...p,
+        monthly: Number((p.total / p.months).toFixed(2)),
+        badge: p.discount > 0 ? `-${p.discount}%` : '',
+      }))
+      const res = await fetch('/api/admin/pricing', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ plans: updatedPlans }),
+      })
+      if (res.ok) {
+        toast.success('Tarifs mis à jour avec succès')
+        setPlans(updatedPlans)
+        setEditIdx(null)
+        setEditPlan(null)
+      } else {
+        const data = await res.json()
+        toast.error(data.error || 'Erreur lors de la mise à jour')
+      }
+    } catch {
+      toast.error('Erreur réseau')
+    } finally {
+      setSaving(false)
+    }
+  }
+
+  const startEdit = (idx: number) => {
+    setEditIdx(idx)
+    setEditPlan({ ...plans[idx] })
+  }
+
+  const cancelEdit = () => {
+    setEditIdx(null)
+    setEditPlan(null)
+  }
+
+  const applyEdit = () => {
+    if (editPlan && editIdx !== null) {
+      const newPlans = [...plans]
+      newPlans[editIdx] = { ...editPlan }
+      setPlans(newPlans)
+      setEditIdx(null)
+      setEditPlan(null)
+    }
+  }
+
+  if (loading) return <div className="flex items-center justify-center py-20"><RefreshCw className="w-8 h-8 animate-spin text-violet-400/50" /></div>
+
+  return (
+    <div className="space-y-6 page-transition">
+      <div className="fade-in-up">
+        <h2 className="text-xl font-bold text-foreground/80 flex items-center gap-2">
+          <Tag className="w-5 h-5 text-violet-400" /> Tarification Premium
+        </h2>
+        <p className="text-sm text-muted-foreground mt-1">Modifiez les prix des offres d&apos;abonnement Premium</p>
+      </div>
+
+      <Card className="glass-card rounded-2xl fade-in-up stagger-1">
+        <CardContent className="p-6 space-y-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+            {plans.map((plan, idx) => (
+              <div
+                key={idx}
+                className={`p-5 rounded-2xl border transition-all relative ${
+                  idx === editIdx ? 'border-violet-500/30' : 'border-border'
+                }`}
+                style={idx === editIdx ? { background: 'rgba(124,92,252,0.05)' } : { background: 'var(--muted)' }}
+              >
+                {plan.badge && (
+                  <div className="absolute -top-2 -right-2 px-2 py-0.5 rounded-full text-[10px] font-bold text-black" style={{ background: 'linear-gradient(135deg, #f59e0b, #f97316)' }}>
+                    {plan.badge}
+                  </div>
+                )}
+
+                {editIdx === idx && editPlan ? (
+                  <div className="space-y-3">
+                    <div className="space-y-1.5">
+                      <Label className="text-xs text-muted-foreground">Label</Label>
+                      <Input
+                        value={editPlan.label}
+                        onChange={e => setEditPlan({ ...editPlan, label: e.target.value })}
+                        className="rounded-xl h-9 text-sm"
+                        style={{ background: 'var(--input)', borderColor: 'var(--border)' }}
+                      />
+                    </div>
+                    <div className="space-y-1.5">
+                      <Label className="text-xs text-muted-foreground">Durée (mois)</Label>
+                      <Input
+                        type="number"
+                        value={editPlan.months}
+                        onChange={e => setEditPlan({ ...editPlan, months: Number(e.target.value) })}
+                        className="rounded-xl h-9 text-sm"
+                        style={{ background: 'var(--input)', borderColor: 'var(--border)' }}
+                      />
+                    </div>
+                    <div className="space-y-1.5">
+                      <Label className="text-xs text-muted-foreground">Prix total (€)</Label>
+                      <Input
+                        type="number"
+                        step="0.01"
+                        value={editPlan.total}
+                        onChange={e => setEditPlan({ ...editPlan, total: Number(e.target.value) })}
+                        className="rounded-xl h-9 text-sm"
+                        style={{ background: 'var(--input)', borderColor: 'var(--border)' }}
+                      />
+                    </div>
+                    <div className="space-y-1.5">
+                      <Label className="text-xs text-muted-foreground">Réduction (%)</Label>
+                      <Input
+                        type="number"
+                        value={editPlan.discount}
+                        onChange={e => setEditPlan({ ...editPlan, discount: Number(e.target.value) })}
+                        className="rounded-xl h-9 text-sm"
+                        style={{ background: 'var(--input)', borderColor: 'var(--border)' }}
+                      />
+                    </div>
+                    <div className="flex gap-2 pt-1">
+                      <Button size="sm" onClick={applyEdit} className="flex-1 rounded-xl text-xs" style={{ background: 'linear-gradient(135deg, #7c5cfc, #06b6d4)' }}>
+                        <Check className="w-3 h-3 mr-1" /> OK
+                      </Button>
+                      <Button size="sm" variant="outline" onClick={cancelEdit} className="flex-1 rounded-xl text-xs">
+                        Annuler
+                      </Button>
+                    </div>
+                  </div>
+                ) : (
+                  <div className="space-y-3">
+                    <h3 className="font-semibold text-foreground/70">{plan.label}</h3>
+                    <div>
+                      <p className="text-2xl font-bold text-foreground/80">{plan.total.toFixed(2).replace('.', ',')} €</p>
+                      <p className="text-xs text-muted-foreground">{(plan.total / plan.months).toFixed(2).replace('.', ',')} €/mois</p>
+                    </div>
+                    <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                      <span>{plan.months} mois</span>
+                      {plan.discount > 0 && <Badge className="text-[10px] px-1.5 bg-amber-500/15 text-amber-500 border-amber-500/20 border">-{plan.discount}%</Badge>}
+                    </div>
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      onClick={() => startEdit(idx)}
+                      className="w-full rounded-xl text-xs"
+                    >
+                      <Edit3 className="w-3 h-3 mr-1" /> Modifier
+                    </Button>
+                  </div>
+                )}
+              </div>
+            ))}
+          </div>
+
+          <div className="flex justify-end pt-4" style={{ borderTop: '1px solid var(--border)' }}>
+            <Button
+              onClick={handleSave}
+              disabled={saving}
+              className="rounded-xl font-medium transition-all active:scale-[0.98]"
+              style={{ background: 'linear-gradient(135deg, #7c5cfc, #06b6d4)', boxShadow: '0 4px 20px rgba(124,92,252,0.25)' }}
+            >
+              {saving ? <RefreshCw className="w-4 h-4 animate-spin mr-2" /> : <Tag className="w-4 h-4 mr-2" />}
+              Enregistrer les tarifs
+            </Button>
+          </div>
+        </CardContent>
+      </Card>
+    </div>
+  )
 }
 
 // ============================================================
@@ -2548,16 +2786,16 @@ function UpgradePremiumModal({ open, onOpenChange, onSuccess }: {
               <div className="upgrade-crown-bounce">
                 <Crown className="w-20 h-20 text-amber-400" style={{ filter: 'drop-shadow(0 0 20px rgba(245,158,11,0.5))' }} />
               </div>
-              <h2 className="text-2xl font-bold text-white">Bienvenue en Premium !</h2>
-              <p className="text-sm text-white/50">Accès illimité débloqué</p>
+              <h2 className="text-2xl font-bold text-foreground">Bienvenue en Premium !</h2>
+              <p className="text-sm text-foreground/50">Accès illimité débloqué</p>
             </div>
           </div>
         )}
         {step === 'select' && (
           <>
             <DialogHeader>
-              <DialogTitle className="flex items-center gap-2 text-white">
-                <div className="w-10 h-10 rounded-xl flex items-center justify-center" style={{ background: 'rgba(245,158,11,0.12)' }}>
+              <DialogTitle className="flex items-center gap-2 text-foreground">
+                <div className="w-10 h-10 rounded-xl flex items-center justify-center" style={{ background: 'rgba(245,158,11,0.1)' }}>
                   <Crown className="w-5 h-5 text-amber-400" />
                 </div>
                 Passer en Premium
@@ -2567,15 +2805,16 @@ function UpgradePremiumModal({ open, onOpenChange, onSuccess }: {
             <div className="space-y-4 py-2">
               {/* Features */}
               <div className="space-y-2 text-sm">
-                <div className="flex items-center gap-2"><Check className="w-4 h-4 text-emerald-400 shrink-0" /> <span style={{ color: 'rgba(255,255,255,0.5)' }}>Tokens illimités</span></div>
-                <div className="flex items-center gap-2"><Check className="w-4 h-4 text-emerald-400 shrink-0" /> <span style={{ color: 'rgba(255,255,255,0.5)' }}>Transactions illimitées</span></div>
-                <div className="flex items-center gap-2"><Check className="w-4 h-4 text-emerald-400 shrink-0" /> <span style={{ color: 'rgba(255,255,255,0.5)' }}>Graphiques d&apos;évolution</span></div>
-                <div className="flex items-center gap-2"><Check className="w-4 h-4 text-emerald-400 shrink-0" /> <span style={{ color: 'rgba(255,255,255,0.5)' }}>Métriques avancées</span></div>
+                <div className="flex items-center gap-2"><Check className="w-4 h-4 text-emerald-400 shrink-0" /> <span className="text-muted-foreground">Tokens illimités</span></div>
+                <div className="flex items-center gap-2"><Check className="w-4 h-4 text-emerald-400 shrink-0" /> <span className="text-muted-foreground">Transactions illimitées</span></div>
+                <div className="flex items-center gap-2"><Check className="w-4 h-4 text-emerald-400 shrink-0" /> <span className="text-muted-foreground">Graphiques d&apos;évolution</span></div>
+                <div className="flex items-center gap-2"><Check className="w-4 h-4 text-emerald-400 shrink-0" /> <span className="text-muted-foreground">Métriques avancées</span></div>
+                <div className="flex items-center gap-2"><Sparkles className="w-4 h-4 text-violet-400 shrink-0" /> <span className="text-violet-400 font-medium">Analyse IA</span></div>
               </div>
 
               {/* Duration selector */}
               <div className="space-y-2">
-                <p className="text-xs font-medium" style={{ color: 'rgba(255,255,255,0.4)' }}>Choisissez votre durée d&apos;engagement</p>
+                <p className="text-xs font-medium" className="text-muted-foreground">Choisissez votre durée d&apos;engagement</p>
                 <div className="grid grid-cols-2 gap-2">
                   {SUBSCRIPTION_PLANS.map((plan) => {
                     const isSelected = selectedPlan === plan.months
@@ -2592,7 +2831,7 @@ function UpgradePremiumModal({ open, onOpenChange, onSuccess }: {
                         style={{
                           background: isSelected
                             ? 'rgba(245,158,11,0.08)'
-                            : 'rgba(255,255,255,0.02)',
+                            : 'var(--input)',
                         }}
                       >
                         {plan.badge && (
@@ -2608,15 +2847,15 @@ function UpgradePremiumModal({ open, onOpenChange, onSuccess }: {
                             {plan.badge}
                           </span>
                         )}
-                        <p className={`text-sm font-semibold ${isSelected ? 'text-amber-400' : 'text-white/60'}`}>
+                        <p className={`text-sm font-semibold ${isSelected ? 'text-amber-400' : 'text-foreground/60'}`}>
                           {plan.label}
                         </p>
                         <div className="mt-1">
-                          <span className={`text-lg font-bold ${isSelected ? 'text-white' : 'text-white/70'}`}>
+                          <span className={`text-lg font-bold ${isSelected ? 'text-foreground' : 'text-foreground/70'}`}>
                             {plan.total.toFixed(2).replace('.', ',')} €
                           </span>
                         </div>
-                        <p className="text-[10px] mt-0.5" style={{ color: 'rgba(255,255,255,0.3)' }}>
+                        <p className="text-[10px] mt-0.5" className="text-muted-foreground">
                           {plan.monthly.toFixed(2).replace('.', ',')} €/mois
                         </p>
                       </button>
@@ -2628,7 +2867,7 @@ function UpgradePremiumModal({ open, onOpenChange, onSuccess }: {
               {/* Summary */}
               <div className="p-3 rounded-xl" style={{ background: 'rgba(245,158,11,0.06)', border: '1px solid rgba(245,158,11,0.15)' }}>
                 <div className="flex items-center justify-between">
-                  <span className="text-sm" style={{ color: 'rgba(255,255,255,0.5)' }}>Total</span>
+                  <span className="text-sm" className="text-muted-foreground">Total</span>
                   <div className="text-right">
                     <span className="text-xl font-bold text-amber-400">{currentPlan.total.toFixed(2).replace('.', ',')} €</span>
                     {currentPlan.discount > 0 && (
@@ -2638,7 +2877,7 @@ function UpgradePremiumModal({ open, onOpenChange, onSuccess }: {
                     )}
                   </div>
                 </div>
-                <p className="text-[10px] mt-1" style={{ color: 'rgba(255,255,255,0.25)' }}>
+                <p className="text-[10px] mt-1" className="text-muted-foreground">
                   Soit {currentPlan.monthly.toFixed(2).replace('.', ',')} €/mois
                   {currentPlan.discount > 0 && ` au lieu de 9,99 €/mois`}
                 </p>
@@ -2646,7 +2885,7 @@ function UpgradePremiumModal({ open, onOpenChange, onSuccess }: {
 
               <div className="p-3 rounded-xl flex items-start gap-2" style={{ background: 'rgba(6,182,212,0.06)', border: '1px solid rgba(6,182,212,0.12)' }}>
                 <Shield className="w-4 h-4 text-cyan-400 shrink-0 mt-0.5" />
-                <p className="text-xs" style={{ color: 'rgba(255,255,255,0.35)' }}>
+                <p className="text-xs" className="text-muted-foreground">
                   Paiement sécurisé via PayPal. Annulation possible à tout moment depuis votre profil.
                 </p>
               </div>
@@ -2659,7 +2898,7 @@ function UpgradePremiumModal({ open, onOpenChange, onSuccess }: {
             </div>
             <DialogFooter className="gap-2 sm:gap-0">
               <DialogClose asChild>
-                <Button variant="ghost" className="text-white/40 hover:text-white/60 rounded-xl">Annuler</Button>
+                <Button variant="ghost" className="text-foreground/40 hover:text-foreground/60 rounded-xl">Annuler</Button>
               </DialogClose>
               <Button
                 onClick={() => setStep('paypal')}
@@ -2674,8 +2913,8 @@ function UpgradePremiumModal({ open, onOpenChange, onSuccess }: {
         {step === 'paypal' && (
           <>
             <DialogHeader>
-              <DialogTitle className="flex items-center gap-2 text-white">
-                <div className="w-10 h-10 rounded-xl flex items-center justify-center" style={{ background: 'rgba(245,158,11,0.12)' }}>
+              <DialogTitle className="flex items-center gap-2 text-foreground">
+                <div className="w-10 h-10 rounded-xl flex items-center justify-center" style={{ background: 'rgba(245,158,11,0.1)' }}>
                   <Crown className="w-5 h-5 text-amber-400" />
                 </div>
                 Paiement Premium — {currentPlan.label}
@@ -2687,8 +2926,8 @@ function UpgradePremiumModal({ open, onOpenChange, onSuccess }: {
               <div className="p-4 rounded-xl" style={{ background: 'rgba(245,158,11,0.06)', border: '1px solid rgba(245,158,11,0.15)' }}>
                 <div className="flex items-center justify-between">
                   <div>
-                    <p className="text-sm font-semibold text-white/80">CryptoFolio Premium</p>
-                    <p className="text-xs" style={{ color: 'rgba(255,255,255,0.35)' }}>
+                    <p className="text-sm font-semibold text-foreground/80">CryptoFolio Premium</p>
+                    <p className="text-xs" className="text-muted-foreground">
                       Abonnement {currentPlan.label}
                       {currentPlan.discount > 0 && ` (-${currentPlan.discount}%)`}
                     </p>
@@ -2700,15 +2939,15 @@ function UpgradePremiumModal({ open, onOpenChange, onSuccess }: {
               {/* PayPal Payment Section */}
               <div className="space-y-3">
                 <div className="flex items-center gap-2 mb-2">
-                  <div className="h-px flex-1" style={{ background: 'rgba(255,255,255,0.08)' }} />
-                  <span className="text-xs font-medium" style={{ color: 'rgba(255,255,255,0.25)' }}>Paiement sécurisé via PayPal</span>
-                  <div className="h-px flex-1" style={{ background: 'rgba(255,255,255,0.08)' }} />
+                  <div className="h-px flex-1" style={{ background: 'var(--muted)' }} />
+                  <span className="text-xs font-medium text-muted-foreground">Paiement sécurisé via PayPal</span>
+                  <div className="h-px flex-1" style={{ background: 'var(--muted)' }} />
                 </div>
 
                 {paypalLoading && (
                   <div className="flex items-center justify-center py-4 gap-2">
                     <RefreshCw className="w-4 h-4 animate-spin text-amber-400/60" />
-                    <span className="text-xs" style={{ color: 'rgba(255,255,255,0.3)' }}>Chargement de PayPal...</span>
+                    <span className="text-xs" className="text-muted-foreground">Chargement de PayPal...</span>
                   </div>
                 )}
 
@@ -2721,7 +2960,7 @@ function UpgradePremiumModal({ open, onOpenChange, onSuccess }: {
 
                 {!paypalLoaded && !paypalLoading && (
                   <div className="flex items-center justify-center py-4">
-                    <p className="text-xs" style={{ color: 'rgba(255,255,255,0.25)' }}>Chargement du bouton de paiement...</p>
+                    <p className="text-xs" className="text-muted-foreground">Chargement du bouton de paiement...</p>
                   </div>
                 )}
               </div>
@@ -2734,7 +2973,7 @@ function UpgradePremiumModal({ open, onOpenChange, onSuccess }: {
               )}
             </div>
             <DialogFooter>
-              <Button variant="ghost" className="text-white/40 hover:text-white/60 rounded-xl" onClick={() => { setStep('select'); setError('') }}>
+              <Button variant="ghost" className="text-foreground/40 hover:text-foreground/60 rounded-xl" onClick={() => { setStep('select'); setError('') }}>
                 Retour
               </Button>
             </DialogFooter>
@@ -2748,8 +2987,8 @@ function UpgradePremiumModal({ open, onOpenChange, onSuccess }: {
               </div>
             </div>
             <div className="text-center">
-              <p className="text-white/80 font-medium">Vérification du paiement...</p>
-              <p className="text-xs mt-1" style={{ color: 'rgba(255,255,255,0.3)' }}>Activation de votre abonnement Premium</p>
+              <p className="text-foreground/80 font-medium">Vérification du paiement...</p>
+              <p className="text-xs mt-1" className="text-muted-foreground">Activation de votre abonnement Premium</p>
             </div>
           </div>
         )}
@@ -2759,8 +2998,8 @@ function UpgradePremiumModal({ open, onOpenChange, onSuccess }: {
               <Check className="w-8 h-8 text-emerald-400" />
             </div>
             <div className="text-center">
-              <p className="text-white/80 font-semibold text-lg">Bienvenue en Premium !</p>
-              <p className="text-xs mt-1" style={{ color: 'rgba(255,255,255,0.3)' }}>Votre accès illimité est maintenant activé</p>
+              <p className="text-foreground/80 font-semibold text-lg">Bienvenue en Premium !</p>
+              <p className="text-xs mt-1" className="text-muted-foreground">Votre accès illimité est maintenant activé</p>
             </div>
           </div>
         )}
@@ -2776,33 +3015,141 @@ function ProfileView({ user, onUpgrade }: { user: any; onUpgrade: () => void }) 
   const isPremium = user?.role === 'user_premium'
   const isAdmin = user?.role === 'admin'
   const [showUpgrade, setShowUpgrade] = useState(false)
+  const { theme, setTheme, resolvedTheme } = useTheme()
+
+  // Email change state
+  const [newEmail, setNewEmail] = useState('')
+  const [emailPassword, setEmailPassword] = useState('')
+  const [emailLoading, setEmailLoading] = useState(false)
+
+  // Password change state
+  const [currentPwd, setCurrentPwd] = useState('')
+  const [newPwd, setNewPwd] = useState('')
+  const [confirmPwd, setConfirmPwd] = useState('')
+  const [pwdLoading, setPwdLoading] = useState(false)
+
+  // Delete account state
+  const [deletePassword, setDeletePassword] = useState('')
+  const [deleteLoading, setDeleteLoading] = useState(false)
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false)
+
+  const handleUpdateEmail = async () => {
+    if (!newEmail || !emailPassword) {
+      toast.error('Veuillez remplir tous les champs')
+      return
+    }
+    setEmailLoading(true)
+    try {
+      const res = await fetch('/api/user/update-email', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ userId: user.id, newEmail, currentPassword: emailPassword }),
+      })
+      const data = await res.json()
+      if (res.ok) {
+        toast.success('Email mis à jour avec succès')
+        setNewEmail('')
+        setEmailPassword('')
+        onUpgrade() // refresh session
+      } else {
+        toast.error(data.error || 'Erreur lors de la mise à jour')
+      }
+    } catch {
+      toast.error('Erreur réseau')
+    } finally {
+      setEmailLoading(false)
+    }
+  }
+
+  const handleUpdatePassword = async () => {
+    if (!currentPwd || !newPwd || !confirmPwd) {
+      toast.error('Veuillez remplir tous les champs')
+      return
+    }
+    if (newPwd.length < 6) {
+      toast.error('Le nouveau mot de passe doit contenir au moins 6 caractères')
+      return
+    }
+    if (newPwd !== confirmPwd) {
+      toast.error('Les mots de passe ne correspondent pas')
+      return
+    }
+    setPwdLoading(true)
+    try {
+      const res = await fetch('/api/user/update-password', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ userId: user.id, currentPassword: currentPwd, newPassword: newPwd }),
+      })
+      const data = await res.json()
+      if (res.ok) {
+        toast.success('Mot de passe mis à jour avec succès')
+        setCurrentPwd('')
+        setNewPwd('')
+        setConfirmPwd('')
+      } else {
+        toast.error(data.error || 'Erreur lors de la mise à jour')
+      }
+    } catch {
+      toast.error('Erreur réseau')
+    } finally {
+      setPwdLoading(false)
+    }
+  }
+
+  const handleDeleteAccount = async () => {
+    if (!deletePassword) {
+      toast.error('Veuillez entrer votre mot de passe')
+      return
+    }
+    setDeleteLoading(true)
+    try {
+      const res = await fetch('/api/user/delete-account', {
+        method: 'DELETE',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ userId: user.id, currentPassword: deletePassword }),
+      })
+      const data = await res.json()
+      if (res.ok) {
+        toast.success('Compte supprimé. Déconnexion...')
+        setTimeout(() => signOut({ redirect: false }), 1000)
+      } else {
+        toast.error(data.error || 'Erreur lors de la suppression')
+      }
+    } catch {
+      toast.error('Erreur réseau')
+    } finally {
+      setDeleteLoading(false)
+      setShowDeleteConfirm(false)
+    }
+  }
 
   return (
     <div className="space-y-6 max-w-2xl view-enter-cinematic">
       <div className="fade-in-up">
         <h1 className="text-2xl font-bold gradient-shimmer-text">Profil & Abonnement</h1>
-        <p className="mt-1" style={{ color: 'rgba(255,255,255,0.3)' }}>Gérez votre compte et votre abonnement</p>
+        <p className="mt-1 text-muted-foreground">Gérez votre compte et votre abonnement</p>
       </div>
 
       {/* User Info */}
       <Card className="glass-card rounded-2xl fade-in-up stagger-1">
         <CardHeader className="pb-3">
-          <CardTitle className="text-sm font-medium" style={{ color: 'rgba(255,255,255,0.4)' }}>Informations du compte</CardTitle>
+          <CardTitle className="text-sm font-medium text-muted-foreground">Informations du compte</CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
           <div className="flex items-center gap-4">
             <div className="avatar-ring">
-              <div className="w-16 h-16 flex items-center justify-center text-white text-2xl font-bold" style={{ background: 'linear-gradient(135deg, #7c5cfc, #06b6d4)' }}>
+              <div className="w-16 h-16 flex items-center justify-center text-foreground text-2xl font-bold" style={{ background: 'linear-gradient(135deg, #7c5cfc, #06b6d4)' }}>
                 {user?.name?.[0] || user?.email?.[0]?.toUpperCase() || '?'}
               </div>
             </div>
             <div>
-              <p className="text-lg font-semibold text-white/80">{user?.name || 'Utilisateur'}</p>
-              <p className="text-sm" style={{ color: 'rgba(255,255,255,0.3)' }}>{user?.email}</p>
+              <p className="text-lg font-semibold text-foreground/80">{user?.name || 'Utilisateur'}</p>
+              <p className="text-sm text-muted-foreground">{user?.email}</p>
               <Badge className={`mt-1.5 text-xs border ${
                 isAdmin ? 'bg-violet-500/15 text-violet-400 border-violet-500/20' :
                 isPremium ? 'bg-amber-500/15 text-amber-400 border-amber-500/20' :
-                'bg-white/5 text-white/30 border-white/10'
+                'bg-foreground/5 text-foreground/30 border-foreground/10'
               }`}>
                 {isAdmin ? 'Administrateur' : isPremium ? 'Premium' : 'Gratuit'}
               </Badge>
@@ -2814,7 +3161,7 @@ function ProfileView({ user, onUpgrade }: { user: any; onUpgrade: () => void }) 
       {/* Plan Comparison */}
       <Card className="glass-card rounded-2xl fade-in-up stagger-2">
         <CardHeader className="pb-3">
-          <CardTitle className="text-sm font-medium" style={{ color: 'rgba(255,255,255,0.4)' }}>Comparatif des plans</CardTitle>
+          <CardTitle className="text-sm font-medium text-muted-foreground">Comparatif des plans</CardTitle>
         </CardHeader>
         <CardContent>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -2823,23 +3170,24 @@ function ProfileView({ user, onUpgrade }: { user: any; onUpgrade: () => void }) 
               !isPremium && !isAdmin
                 ? 'border-violet-500/30 glass-card'
                 : ''
-            }`} style={!isPremium && !isAdmin ? { background: 'rgba(124,92,252,0.05)' } : { background: 'rgba(255,255,255,0.02)', borderColor: 'rgba(255,255,255,0.05)' }}>
+            }`} style={!isPremium && !isAdmin ? { background: 'rgba(124,92,252,0.05)' } : { background: 'var(--muted)', borderColor: 'var(--border)' }}>
               <div className="flex items-center gap-2 mb-3">
-                <div className="w-8 h-8 rounded-lg flex items-center justify-center" style={{ background: 'rgba(255,255,255,0.05)' }}>
-                  <User className="w-4 h-4 text-white/40" />
+                <div className="w-8 h-8 rounded-lg flex items-center justify-center" style={{ background: 'var(--muted)' }}>
+                  <User className="w-4 h-4 text-foreground/40" />
                 </div>
-                <h3 className="font-semibold text-white/70">Gratuit</h3>
+                <h3 className="font-semibold text-foreground/70">Gratuit</h3>
               </div>
-              <p className="text-2xl font-bold text-white/80 mb-4">0 €<span className="text-sm font-normal" style={{ color: 'rgba(255,255,255,0.25)' }}>/mois</span></p>
+              <p className="text-2xl font-bold text-foreground/80 mb-4">0 €<span className="text-sm font-normal text-muted-foreground">/mois</span></p>
               <ul className="space-y-2.5 text-sm">
-                <li className="flex items-center gap-2.5"><Check className="w-4 h-4 text-emerald-400 shrink-0" /> <span style={{ color: 'rgba(255,255,255,0.45)' }}>Accès au tableau de bord</span></li>
-                <li className="flex items-center gap-2.5"><Check className="w-4 h-4 text-emerald-400 shrink-0" /> <span style={{ color: 'rgba(255,255,255,0.45)' }}>3 tokens maximum</span></li>
-                <li className="flex items-center gap-2.5"><Check className="w-4 h-4 text-emerald-400 shrink-0" /> <span style={{ color: 'rgba(255,255,255,0.45)' }}>10 transactions maximum</span></li>
-                <li className="flex items-center gap-2.5"><X className="w-4 h-4 text-red-400/60 shrink-0" /> <span style={{ color: 'rgba(255,255,255,0.2)' }}>Pas de graphiques avancés</span></li>
-                <li className="flex items-center gap-2.5"><X className="w-4 h-4 text-red-400/60 shrink-0" /> <span style={{ color: 'rgba(255,255,255,0.2)' }}>Pas de métriques avancées</span></li>
+                <li className="flex items-center gap-2.5"><Check className="w-4 h-4 text-emerald-400 shrink-0" /> <span className="text-muted-foreground">Accès au tableau de bord</span></li>
+                <li className="flex items-center gap-2.5"><Check className="w-4 h-4 text-emerald-400 shrink-0" /> <span className="text-muted-foreground">3 tokens maximum</span></li>
+                <li className="flex items-center gap-2.5"><Check className="w-4 h-4 text-emerald-400 shrink-0" /> <span className="text-muted-foreground">10 transactions maximum</span></li>
+                <li className="flex items-center gap-2.5"><X className="w-4 h-4 text-red-400/60 shrink-0" /> <span className="text-muted-foreground/50">Pas de graphiques avancés</span></li>
+                <li className="flex items-center gap-2.5"><X className="w-4 h-4 text-red-400/60 shrink-0" /> <span className="text-muted-foreground/50">Pas de métriques avancées</span></li>
+                <li className="flex items-center gap-2.5"><X className="w-4 h-4 text-red-400/60 shrink-0" /> <span className="text-muted-foreground/50">Pas d&apos;analyse IA</span></li>
               </ul>
               {!isPremium && !isAdmin && (
-                <Badge className="mt-4 text-white border-0" style={{ background: 'linear-gradient(135deg, #7c5cfc, #06b6d4)' }}>Plan actuel</Badge>
+                <Badge className="mt-4 text-foreground border-0" style={{ background: 'linear-gradient(135deg, #7c5cfc, #06b6d4)' }}>Plan actuel</Badge>
               )}
             </div>
 
@@ -2848,20 +3196,21 @@ function ProfileView({ user, onUpgrade }: { user: any; onUpgrade: () => void }) 
               isPremium
                 ? 'border-amber-500/30 glass-card'
                 : ''
-            }`} style={isPremium ? { background: 'rgba(245,158,11,0.05)' } : { background: 'rgba(255,255,255,0.02)', borderColor: 'rgba(255,255,255,0.05)' }}>
+            }`} style={isPremium ? { background: 'rgba(245,158,11,0.05)' } : { background: 'var(--muted)', borderColor: 'var(--border)' }}>
               <div className="flex items-center gap-2 mb-3">
                 <div className="w-8 h-8 rounded-lg flex items-center justify-center" style={{ background: 'rgba(245,158,11,0.1)' }}>
                   <Crown className="w-4 h-4 text-amber-400" />
                 </div>
-                <h3 className="font-semibold text-white/70">Premium</h3>
+                <h3 className="font-semibold text-foreground/70">Premium</h3>
               </div>
-              <p className="text-2xl font-bold text-white/80 mb-4">9,99 €<span className="text-sm font-normal" style={{ color: 'rgba(255,255,255,0.25)' }}>/mois</span></p>
+              <p className="text-2xl font-bold text-foreground/80 mb-4">9,99 €<span className="text-sm font-normal text-muted-foreground">/mois</span></p>
               <ul className="space-y-2.5 text-sm">
-                <li className="flex items-center gap-2.5"><Check className="w-4 h-4 text-emerald-400 shrink-0" /> <span style={{ color: 'rgba(255,255,255,0.45)' }}>Accès au tableau de bord</span></li>
-                <li className="flex items-center gap-2.5"><Check className="w-4 h-4 text-emerald-400 shrink-0" /> <span style={{ color: 'rgba(255,255,255,0.45)' }}>Tokens illimités</span></li>
-                <li className="flex items-center gap-2.5"><Check className="w-4 h-4 text-emerald-400 shrink-0" /> <span style={{ color: 'rgba(255,255,255,0.45)' }}>Transactions illimitées</span></li>
-                <li className="flex items-center gap-2.5"><Check className="w-4 h-4 text-emerald-400 shrink-0" /> <span style={{ color: 'rgba(255,255,255,0.45)' }}>Graphiques d&apos;évolution</span></li>
-                <li className="flex items-center gap-2.5"><Check className="w-4 h-4 text-emerald-400 shrink-0" /> <span style={{ color: 'rgba(255,255,255,0.45)' }}>Métriques avancées</span></li>
+                <li className="flex items-center gap-2.5"><Check className="w-4 h-4 text-emerald-400 shrink-0" /> <span className="text-muted-foreground">Accès au tableau de bord</span></li>
+                <li className="flex items-center gap-2.5"><Check className="w-4 h-4 text-emerald-400 shrink-0" /> <span className="text-muted-foreground">Tokens illimités</span></li>
+                <li className="flex items-center gap-2.5"><Check className="w-4 h-4 text-emerald-400 shrink-0" /> <span className="text-muted-foreground">Transactions illimitées</span></li>
+                <li className="flex items-center gap-2.5"><Check className="w-4 h-4 text-emerald-400 shrink-0" /> <span className="text-muted-foreground">Graphiques d&apos;évolution</span></li>
+                <li className="flex items-center gap-2.5"><Check className="w-4 h-4 text-emerald-400 shrink-0" /> <span className="text-muted-foreground">Métriques avancées</span></li>
+                <li className="flex items-center gap-2.5"><Sparkles className="w-4 h-4 text-violet-400 shrink-0" /> <span className="text-violet-400 font-medium">Analyse IA</span></li>
               </ul>
               {isPremium ? (
                 <Badge className="mt-4 bg-amber-500 text-black border-0">Plan actuel</Badge>
@@ -2878,7 +3227,7 @@ function ProfileView({ user, onUpgrade }: { user: any; onUpgrade: () => void }) 
           </div>
           {!isPremium && !isAdmin && (
             <div className="flex flex-col items-center mt-5 gap-3">
-              <p className="text-xs" style={{ color: 'rgba(255,255,255,0.3)' }}>
+              <p className="text-xs text-muted-foreground">
                 Débloquez l&apos;accès illimité pour {SUBSCRIPTION_PLANS[0].monthly.toFixed(2).replace('.', ',')} €/mois
               </p>
               <Button
@@ -2897,6 +3246,199 @@ function ProfileView({ user, onUpgrade }: { user: any; onUpgrade: () => void }) 
             onOpenChange={setShowUpgrade}
             onSuccess={onUpgrade}
           />
+        </CardContent>
+      </Card>
+
+      {/* Apparence — Theme Selection */}
+      <Card className="glass-card rounded-2xl fade-in-up stagger-3">
+        <CardHeader className="pb-3">
+          <CardTitle className="text-sm font-medium text-muted-foreground flex items-center gap-2">
+            <Monitor className="w-4 h-4" /> Apparence
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <p className="text-sm text-muted-foreground mb-4">Choisissez le thème de l&apos;application</p>
+          <div className="grid grid-cols-3 gap-3">
+            {([
+              { value: 'light' as const, label: 'Clair', icon: Sun },
+              { value: 'dark' as const, label: 'Sombre', icon: Moon },
+              { value: 'system' as const, label: 'Système', icon: Monitor },
+            ]).map(opt => {
+              const isActive = theme === opt.value
+              return (
+                <button
+                  key={opt.value}
+                  onClick={() => setTheme(opt.value)}
+                  className={`flex flex-col items-center gap-2 p-4 rounded-xl border-2 transition-all duration-300 ${
+                    isActive
+                      ? 'border-violet-500/50 shadow-[0_0_16px_rgba(124,92,252,0.15)]'
+                      : 'border-transparent hover:border-foreground/10'
+                  }`}
+                  style={isActive ? { background: 'rgba(124,92,252,0.08)' } : { background: 'var(--muted)' }}
+                >
+                  <opt.icon className={`w-5 h-5 ${isActive ? 'text-violet-400' : 'text-foreground/40'}`} />
+                  <span className={`text-xs font-medium ${isActive ? 'text-violet-400' : 'text-foreground/50'}`}>{opt.label}</span>
+                  {isActive && (
+                    <div className="w-1.5 h-1.5 rounded-full" style={{ background: 'linear-gradient(135deg, #7c5cfc, #06b6d4)' }} />
+                  )}
+                </button>
+              )
+            })}
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* Modifier l'email */}
+      <Card className="glass-card rounded-2xl fade-in-up stagger-4">
+        <CardHeader className="pb-3">
+          <CardTitle className="text-sm font-medium text-muted-foreground flex items-center gap-2">
+            <Mail className="w-4 h-4" /> Modifier l&apos;email
+          </CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <div className="p-3 rounded-xl border" style={{ background: 'var(--muted)', borderColor: 'var(--border)' }}>
+            <p className="text-xs text-muted-foreground mb-1">Email actuel</p>
+            <p className="text-sm font-medium text-foreground/80">{user?.email}</p>
+          </div>
+          <div className="space-y-2">
+            <Label className="text-xs font-medium text-muted-foreground">Nouvel email</Label>
+            <Input
+              type="email"
+              value={newEmail}
+              onChange={(e) => setNewEmail(e.target.value)}
+              placeholder="nouveau@email.com"
+              className="border rounded-xl h-10"
+              style={{ background: 'var(--input)', borderColor: 'var(--border)' }}
+            />
+          </div>
+          <div className="space-y-2">
+            <Label className="text-xs font-medium text-muted-foreground">Mot de passe actuel</Label>
+            <Input
+              type="password"
+              value={emailPassword}
+              onChange={(e) => setEmailPassword(e.target.value)}
+              placeholder="••••••••"
+              className="border rounded-xl h-10"
+              style={{ background: 'var(--input)', borderColor: 'var(--border)' }}
+            />
+          </div>
+          <Button
+            onClick={handleUpdateEmail}
+            disabled={emailLoading}
+            className="w-full rounded-xl font-medium transition-all active:scale-[0.98]"
+            style={{ background: 'linear-gradient(135deg, #7c5cfc, #06b6d4)', boxShadow: '0 4px 20px rgba(124,92,252,0.25)' }}
+          >
+            {emailLoading ? <RefreshCw className="w-4 h-4 animate-spin mr-2" /> : <Mail className="w-4 h-4 mr-2" />}
+            Mettre à jour l&apos;email
+          </Button>
+        </CardContent>
+      </Card>
+
+      {/* Modifier le mot de passe */}
+      <Card className="glass-card rounded-2xl fade-in-up stagger-5">
+        <CardHeader className="pb-3">
+          <CardTitle className="text-sm font-medium text-muted-foreground flex items-center gap-2">
+            <Shield className="w-4 h-4" /> Modifier le mot de passe
+          </CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <div className="space-y-2">
+            <Label className="text-xs font-medium text-muted-foreground">Mot de passe actuel</Label>
+            <Input
+              type="password"
+              value={currentPwd}
+              onChange={(e) => setCurrentPwd(e.target.value)}
+              placeholder="••••••••"
+              className="border rounded-xl h-10"
+              style={{ background: 'var(--input)', borderColor: 'var(--border)' }}
+            />
+          </div>
+          <div className="space-y-2">
+            <Label className="text-xs font-medium text-muted-foreground">Nouveau mot de passe</Label>
+            <Input
+              type="password"
+              value={newPwd}
+              onChange={(e) => setNewPwd(e.target.value)}
+              placeholder="••••••••"
+              className="border rounded-xl h-10"
+              style={{ background: 'var(--input)', borderColor: 'var(--border)' }}
+            />
+          </div>
+          <div className="space-y-2">
+            <Label className="text-xs font-medium text-muted-foreground">Confirmer le nouveau mot de passe</Label>
+            <Input
+              type="password"
+              value={confirmPwd}
+              onChange={(e) => setConfirmPwd(e.target.value)}
+              placeholder="••••••••"
+              className="border rounded-xl h-10"
+              style={{ background: 'var(--input)', borderColor: 'var(--border)' }}
+            />
+          </div>
+          <Button
+            onClick={handleUpdatePassword}
+            disabled={pwdLoading}
+            className="w-full rounded-xl font-medium transition-all active:scale-[0.98]"
+            style={{ background: 'linear-gradient(135deg, #7c5cfc, #06b6d4)', boxShadow: '0 4px 20px rgba(124,92,252,0.25)' }}
+          >
+            {pwdLoading ? <RefreshCw className="w-4 h-4 animate-spin mr-2" /> : <Shield className="w-4 h-4 mr-2" />}
+            Mettre à jour le mot de passe
+          </Button>
+        </CardContent>
+      </Card>
+
+      {/* Zone dangereuse */}
+      <Card className="glass-card rounded-2xl fade-in-up stagger-6 border-red-500/20">
+        <CardHeader className="pb-3">
+          <CardTitle className="text-sm font-medium text-red-400 flex items-center gap-2">
+            <AlertTriangle className="w-4 h-4" /> Zone dangereuse
+          </CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <p className="text-sm text-muted-foreground">
+            La suppression de votre compte est irréversible. Toutes vos données, y compris vos transactions, seront définitivement supprimées.
+          </p>
+          {!showDeleteConfirm ? (
+            <Button
+              variant="outline"
+              onClick={() => setShowDeleteConfirm(true)}
+              className="w-full rounded-xl text-red-400 border-red-500/30 hover:bg-red-500/10 hover:text-red-400 hover:border-red-500/50 font-medium transition-all"
+            >
+              <Trash2 className="w-4 h-4 mr-2" /> Supprimer mon compte
+            </Button>
+          ) : (
+            <div className="space-y-3 p-4 rounded-xl border border-red-500/20" style={{ background: 'rgba(239,68,68,0.05)' }}>
+              <p className="text-sm font-medium text-red-400">Êtes-vous sûr ? Cette action est irréversible.</p>
+              <div className="space-y-2">
+                <Label className="text-xs font-medium text-muted-foreground">Confirmez avec votre mot de passe</Label>
+                <Input
+                  type="password"
+                  value={deletePassword}
+                  onChange={(e) => setDeletePassword(e.target.value)}
+                  placeholder="••••••••"
+                  className="border rounded-xl h-10 border-red-500/30 focus:border-red-500/50"
+                  style={{ background: 'var(--input)' }}
+                />
+              </div>
+              <div className="flex gap-3">
+                <Button
+                  variant="outline"
+                  onClick={() => { setShowDeleteConfirm(false); setDeletePassword('') }}
+                  className="flex-1 rounded-xl font-medium"
+                >
+                  Annuler
+                </Button>
+                <Button
+                  onClick={handleDeleteAccount}
+                  disabled={deleteLoading || !deletePassword}
+                  className="flex-1 rounded-xl bg-red-500 hover:bg-red-600 text-white font-medium transition-all active:scale-[0.98]"
+                >
+                  {deleteLoading ? <RefreshCw className="w-4 h-4 animate-spin mr-2" /> : <Trash2 className="w-4 h-4 mr-2" />}
+                  Supprimer définitivement
+                </Button>
+              </div>
+            </div>
+          )}
         </CardContent>
       </Card>
     </div>
@@ -2973,8 +3515,8 @@ function AdminUsersView() {
   return (
     <div className="space-y-6 page-transition">
       <div className="fade-in-up">
-        <h1 className="text-2xl font-bold text-white/90">Gestion Utilisateurs</h1>
-        <p className="mt-1" style={{ color: 'rgba(255,255,255,0.3)' }}>{users.length} comptes enregistrés</p>
+        <h1 className="text-2xl font-bold text-foreground/90">Gestion Utilisateurs</h1>
+        <p className="mt-1" className="text-muted-foreground">{users.length} comptes enregistrés</p>
       </div>
 
       {/* Desktop Table */}
@@ -2983,41 +3525,41 @@ function AdminUsersView() {
           <div className="overflow-x-auto custom-scrollbar">
             <Table>
               <TableHeader>
-                <TableRow className="hover:bg-transparent" style={{ borderBottomColor: 'rgba(255,255,255,0.05)' }}>
-                  <TableHead style={{ color: 'rgba(255,255,255,0.35)' }}>Utilisateur</TableHead>
-                  <TableHead style={{ color: 'rgba(255,255,255,0.35)' }}>Rôle</TableHead>
-                  <TableHead className="text-center" style={{ color: 'rgba(255,255,255,0.35)' }}>Transactions</TableHead>
-                  <TableHead style={{ color: 'rgba(255,255,255,0.35)' }}>Statut</TableHead>
-                  <TableHead className="text-right" style={{ color: 'rgba(255,255,255,0.35)' }}>Actions</TableHead>
+                <TableRow className="hover:bg-transparent" style={{ borderBottomColor: 'var(--border)' }}>
+                  <TableHead className="text-muted-foreground">Utilisateur</TableHead>
+                  <TableHead className="text-muted-foreground">Rôle</TableHead>
+                  <TableHead className="text-center" className="text-muted-foreground">Transactions</TableHead>
+                  <TableHead className="text-muted-foreground">Statut</TableHead>
+                  <TableHead className="text-right" className="text-muted-foreground">Actions</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
                 {users.map((u) => (
-                  <TableRow key={u.id} className="transition-colors" style={{ borderBottomColor: 'rgba(255,255,255,0.04)' }}>
+                  <TableRow key={u.id} className="transition-colors" style={{ borderBottomColor: 'var(--border)' }}>
                     <TableCell>
                       <div className="flex items-center gap-3">
-                        <div className="w-9 h-9 rounded-xl flex items-center justify-center text-white text-xs font-bold" style={{ background: 'linear-gradient(135deg, rgba(124,92,252,0.25), rgba(6,182,212,0.25))' }}>
+                        <div className="w-9 h-9 rounded-xl flex items-center justify-center text-foreground text-xs font-bold" style={{ background: 'linear-gradient(135deg, rgba(124,92,252,0.25), rgba(6,182,212,0.25))' }}>
                           {u.name?.[0] || u.email?.[0]?.toUpperCase() || '?'}
                         </div>
                         <div>
-                          <p className="font-medium text-white/70">{u.name || 'Sans nom'}</p>
-                          <p className="text-xs" style={{ color: 'rgba(255,255,255,0.25)' }}>{u.email}</p>
+                          <p className="font-medium text-foreground/70">{u.name || 'Sans nom'}</p>
+                          <p className="text-xs" className="text-muted-foreground">{u.email}</p>
                         </div>
                       </div>
                     </TableCell>
                     <TableCell>
                       <Select value={u.role} onValueChange={(v) => updateRole(u.id, v)}>
-                        <SelectTrigger className="w-32 border text-white/60 rounded-xl h-9" style={{ background: 'rgba(255,255,255,0.04)', borderColor: 'rgba(255,255,255,0.08)' }}>
+                        <SelectTrigger className="w-32 border text-foreground/60 rounded-xl h-9" style={{ background: 'var(--input)', borderColor: 'var(--border)' }}>
                           <SelectValue />
                         </SelectTrigger>
-                        <SelectContent style={{ background: 'rgba(26,29,46,0.95)', border: '1px solid rgba(255,255,255,0.1)' }}>
+                        <SelectContent style={{ background: 'var(--popover)', border: '1px solid var(--border)' }}>
                           <SelectItem value="user_free">Gratuit</SelectItem>
                           <SelectItem value="user_premium">Premium</SelectItem>
                           <SelectItem value="admin">Admin</SelectItem>
                         </SelectContent>
                       </Select>
                     </TableCell>
-                    <TableCell className="text-center text-white/40">{u._count.transactions}</TableCell>
+                    <TableCell className="text-center text-foreground/40">{u._count.transactions}</TableCell>
                     <TableCell>
                       {u.suspended ? (
                         <Badge className="bg-red-400/10 text-red-400 border-red-400/20 border">Suspendu</Badge>
@@ -3065,12 +3607,12 @@ function AdminUsersView() {
           <div key={u.id} className="glass-card rounded-2xl p-4 space-y-3 card-hover">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-xl flex items-center justify-center text-white text-sm font-bold" style={{ background: 'linear-gradient(135deg, rgba(124,92,252,0.25), rgba(6,182,212,0.25))' }}>
+                <div className="w-10 h-10 rounded-xl flex items-center justify-center text-foreground text-sm font-bold" style={{ background: 'linear-gradient(135deg, rgba(124,92,252,0.25), rgba(6,182,212,0.25))' }}>
                   {u.name?.[0] || u.email?.[0]?.toUpperCase() || '?'}
                 </div>
                 <div>
-                  <p className="font-semibold text-white/70">{u.name || 'Sans nom'}</p>
-                  <p className="text-xs" style={{ color: 'rgba(255,255,255,0.25)' }}>{u.email}</p>
+                  <p className="font-semibold text-foreground/70">{u.name || 'Sans nom'}</p>
+                  <p className="text-xs" className="text-muted-foreground">{u.email}</p>
                 </div>
               </div>
               {u.suspended ? (
@@ -3081,12 +3623,12 @@ function AdminUsersView() {
             </div>
             <div className="grid grid-cols-2 gap-2 text-sm">
               <div>
-                <p className="text-xs" style={{ color: 'rgba(255,255,255,0.2)' }}>Rôle</p>
+                <p className="text-xs" className="text-muted-foreground/50">Rôle</p>
                 <Select value={u.role} onValueChange={(v) => updateRole(u.id, v)}>
-                  <SelectTrigger className="w-full border text-white/60 rounded-xl h-9 text-xs mt-1" style={{ background: 'rgba(255,255,255,0.04)', borderColor: 'rgba(255,255,255,0.08)' }}>
+                  <SelectTrigger className="w-full border text-foreground/60 rounded-xl h-9 text-xs mt-1" style={{ background: 'var(--input)', borderColor: 'var(--border)' }}>
                     <SelectValue />
                   </SelectTrigger>
-                  <SelectContent style={{ background: 'rgba(26,29,46,0.95)', border: '1px solid rgba(255,255,255,0.1)' }}>
+                  <SelectContent style={{ background: 'var(--popover)', border: '1px solid var(--border)' }}>
                     <SelectItem value="user_free">Gratuit</SelectItem>
                     <SelectItem value="user_premium">Premium</SelectItem>
                     <SelectItem value="admin">Admin</SelectItem>
@@ -3094,11 +3636,11 @@ function AdminUsersView() {
                 </Select>
               </div>
               <div>
-                <p className="text-xs" style={{ color: 'rgba(255,255,255,0.2)' }}>Transactions</p>
-                <p className="text-white/40 mt-1 font-mono">{u._count.transactions}</p>
+                <p className="text-xs" className="text-muted-foreground/50">Transactions</p>
+                <p className="text-foreground/40 mt-1 font-mono">{u._count.transactions}</p>
               </div>
             </div>
-            <div className="flex items-center gap-2 pt-2" style={{ borderTop: '1px solid rgba(255,255,255,0.04)' }}>
+            <div className="flex items-center gap-2 pt-2" style={{ borderTop: '1px solid var(--border)' }}>
               <Button
                 variant="outline"
                 size="sm"
@@ -3192,64 +3734,64 @@ function AdminTokensView() {
     <div className="space-y-6 page-transition">
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 fade-in-up">
         <div>
-          <h1 className="text-2xl font-bold text-white/90">Gestion des Tokens</h1>
-          <p className="mt-1" style={{ color: 'rgba(255,255,255,0.3)' }}>{tokens.length} tokens configurés</p>
+          <h1 className="text-2xl font-bold text-foreground/90">Gestion des Tokens</h1>
+          <p className="mt-1" className="text-muted-foreground">{tokens.length} tokens configurés</p>
         </div>
         <Dialog open={addOpen} onOpenChange={setAddOpen}>
           <DialogTrigger asChild>
-            <Button className="gap-2 rounded-xl h-10 shadow-lg text-white transition-all active:scale-[0.98]" style={{ background: 'linear-gradient(135deg, #7c5cfc, #06b6d4)', boxShadow: '0 4px 20px rgba(124,92,252,0.25)' }}>
+            <Button className="gap-2 rounded-xl h-10 shadow-lg text-foreground transition-all active:scale-[0.98]" style={{ background: 'linear-gradient(135deg, #7c5cfc, #06b6d4)', boxShadow: '0 4px 20px rgba(124,92,252,0.25)' }}>
               <Plus className="w-4 h-4" /> Ajouter un Token
             </Button>
           </DialogTrigger>
-          <DialogContent className="rounded-2xl dialog-mobile-fullscreen text-white" style={{ background: 'rgba(26,29,46,0.95)', backdropFilter: 'blur(30px)', border: '1px solid rgba(255,255,255,0.1)' }}>
+          <DialogContent className="rounded-2xl dialog-mobile-fullscreen text-foreground" style={{ background: 'var(--popover)', backdropFilter: 'blur(30px)', border: '1px solid var(--border)' }}>
             <DialogHeader>
-              <DialogTitle className="text-white/90">Nouveau Token</DialogTitle>
+              <DialogTitle className="text-foreground/90">Nouveau Token</DialogTitle>
               <DialogDescription className="sr-only">Formulaire d\'ajout d\'un nouveau token</DialogDescription>
             </DialogHeader>
             <div className="space-y-4">
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div className="space-y-2">
-                  <Label className="text-xs" style={{ color: 'rgba(255,255,255,0.45)' }}>Ticker</Label>
+                  <Label className="text-xs" className="text-muted-foreground">Ticker</Label>
                   <Input
                     value={newToken.ticker}
                     onChange={e => setNewToken({ ...newToken, ticker: e.target.value.toUpperCase() })}
                     placeholder="BTC"
-                    className="border text-white placeholder:text-white/20 rounded-xl h-11"
-                    style={{ background: 'rgba(255,255,255,0.04)', borderColor: 'rgba(255,255,255,0.08)' }}
+                    className="border text-foreground placeholder:text-muted-foreground/50 rounded-xl h-11"
+                    style={{ background: 'var(--input)', borderColor: 'var(--border)' }}
                   />
                 </div>
                 <div className="space-y-2">
-                  <Label className="text-xs" style={{ color: 'rgba(255,255,255,0.45)' }}>Nom</Label>
+                  <Label className="text-xs" className="text-muted-foreground">Nom</Label>
                   <Input
                     value={newToken.name}
                     onChange={e => setNewToken({ ...newToken, name: e.target.value })}
                     placeholder="Bitcoin"
-                    className="border text-white placeholder:text-white/20 rounded-xl h-11"
-                    style={{ background: 'rgba(255,255,255,0.04)', borderColor: 'rgba(255,255,255,0.08)' }}
+                    className="border text-foreground placeholder:text-muted-foreground/50 rounded-xl h-11"
+                    style={{ background: 'var(--input)', borderColor: 'var(--border)' }}
                   />
                 </div>
               </div>
               <div className="space-y-2">
-                <Label className="text-xs" style={{ color: 'rgba(255,255,255,0.45)' }}>CoinGecko ID</Label>
+                <Label className="text-xs" className="text-muted-foreground">CoinGecko ID</Label>
                 <Input
                   value={newToken.coingeckoId}
                   onChange={e => setNewToken({ ...newToken, coingeckoId: e.target.value })}
                   placeholder="bitcoin"
-                  className="border text-white placeholder:text-white/20 rounded-xl h-11"
-                  style={{ background: 'rgba(255,255,255,0.04)', borderColor: 'rgba(255,255,255,0.08)' }}
+                  className="border text-foreground placeholder:text-muted-foreground/50 rounded-xl h-11"
+                  style={{ background: 'var(--input)', borderColor: 'var(--border)' }}
                 />
               </div>
               <div className="space-y-2">
-                <Label className="text-xs" style={{ color: 'rgba(255,255,255,0.45)' }}>CryptoCompare ID</Label>
+                <Label className="text-xs" className="text-muted-foreground">CryptoCompare ID</Label>
                 <Input
                   value={newToken.cryptoCompareId}
                   onChange={e => setNewToken({ ...newToken, cryptoCompareId: e.target.value })}
                   placeholder="BTC"
-                  className="border text-white placeholder:text-white/20 rounded-xl h-11"
-                  style={{ background: 'rgba(255,255,255,0.04)', borderColor: 'rgba(255,255,255,0.08)' }}
+                  className="border text-foreground placeholder:text-muted-foreground/50 rounded-xl h-11"
+                  style={{ background: 'var(--input)', borderColor: 'var(--border)' }}
                 />
               </div>
-              <Button onClick={addToken} className="w-full rounded-xl shadow-lg text-white transition-all active:scale-[0.98]" style={{ background: 'linear-gradient(135deg, #7c5cfc, #06b6d4)', boxShadow: '0 4px 20px rgba(124,92,252,0.25)' }}>Ajouter</Button>
+              <Button onClick={addToken} className="w-full rounded-xl shadow-lg text-foreground transition-all active:scale-[0.98]" style={{ background: 'linear-gradient(135deg, #7c5cfc, #06b6d4)', boxShadow: '0 4px 20px rgba(124,92,252,0.25)' }}>Ajouter</Button>
             </div>
           </DialogContent>
         </Dialog>
@@ -3261,31 +3803,31 @@ function AdminTokensView() {
           <div className="overflow-x-auto custom-scrollbar">
             <Table>
               <TableHeader>
-                <TableRow className="hover:bg-transparent" style={{ borderBottomColor: 'rgba(255,255,255,0.05)' }}>
-                  <TableHead style={{ color: 'rgba(255,255,255,0.35)' }}>Ticker</TableHead>
-                  <TableHead style={{ color: 'rgba(255,255,255,0.35)' }}>Nom</TableHead>
-                  <TableHead style={{ color: 'rgba(255,255,255,0.35)' }}>CoinGecko ID</TableHead>
-                  <TableHead className="text-right" style={{ color: 'rgba(255,255,255,0.35)' }}>Prix Actuel</TableHead>
-                  <TableHead className="text-center" style={{ color: 'rgba(255,255,255,0.35)' }}>Transactions</TableHead>
-                  <TableHead className="text-center" style={{ color: 'rgba(255,255,255,0.35)' }}>Statut</TableHead>
-                  <TableHead className="text-right" style={{ color: 'rgba(255,255,255,0.35)' }}>Actions</TableHead>
+                <TableRow className="hover:bg-transparent" style={{ borderBottomColor: 'var(--border)' }}>
+                  <TableHead className="text-muted-foreground">Ticker</TableHead>
+                  <TableHead className="text-muted-foreground">Nom</TableHead>
+                  <TableHead className="text-muted-foreground">CoinGecko ID</TableHead>
+                  <TableHead className="text-right" className="text-muted-foreground">Prix Actuel</TableHead>
+                  <TableHead className="text-center" className="text-muted-foreground">Transactions</TableHead>
+                  <TableHead className="text-center" className="text-muted-foreground">Statut</TableHead>
+                  <TableHead className="text-right" className="text-muted-foreground">Actions</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
                 {tokens.map((t) => (
-                  <TableRow key={t.id} className="transition-colors" style={{ borderBottomColor: 'rgba(255,255,255,0.04)' }}>
+                  <TableRow key={t.id} className="transition-colors" style={{ borderBottomColor: 'var(--border)' }}>
                     <TableCell>
                       <div className="flex items-center gap-2">
                         <TokenLogo ticker={t.ticker} size={28} />
-                        <Badge variant="outline" className="font-bold border-white/10 text-white/70">{t.ticker}</Badge>
+                        <Badge variant="outline" className="font-bold border-foreground/10 text-foreground/70">{t.ticker}</Badge>
                       </div>
                     </TableCell>
-                    <TableCell className="text-white/60">{t.name}</TableCell>
-                    <TableCell className="font-mono text-xs" style={{ color: 'rgba(255,255,255,0.25)' }}>{t.coingeckoId || '—'}</TableCell>
-                    <TableCell className="text-right font-mono text-white/60">
+                    <TableCell className="text-foreground/60">{t.name}</TableCell>
+                    <TableCell className="font-mono text-xs" className="text-muted-foreground">{t.coingeckoId || '—'}</TableCell>
+                    <TableCell className="text-right font-mono text-foreground/60">
                       {t.currentPrice ? fmt(t.currentPrice) + ' $' : '—'}
                     </TableCell>
-                    <TableCell className="text-center text-white/40">{t._count.transactions}</TableCell>
+                    <TableCell className="text-center text-foreground/40">{t._count.transactions}</TableCell>
                     <TableCell className="text-center">
                       <div className="flex items-center justify-center">
                         <Switch
@@ -3326,8 +3868,8 @@ function AdminTokensView() {
               <div className="flex items-center gap-3">
                 <TokenLogo ticker={t.ticker} size={40} />
                 <div>
-                  <p className="font-semibold text-white/80">{t.ticker}</p>
-                  <p className="text-xs" style={{ color: 'rgba(255,255,255,0.25)' }}>{t.name}</p>
+                  <p className="font-semibold text-foreground/80">{t.ticker}</p>
+                  <p className="text-xs" className="text-muted-foreground">{t.name}</p>
                 </div>
               </div>
               <div className="flex items-center gap-2">
@@ -3340,22 +3882,22 @@ function AdminTokensView() {
             </div>
             <div className="grid grid-cols-2 gap-2 text-sm">
               <div>
-                <p className="text-xs" style={{ color: 'rgba(255,255,255,0.2)' }}>Prix</p>
-                <p className="text-white/60 font-mono">{t.currentPrice ? fmt(t.currentPrice) + ' $' : '—'}</p>
+                <p className="text-xs" className="text-muted-foreground/50">Prix</p>
+                <p className="text-foreground/60 font-mono">{t.currentPrice ? fmt(t.currentPrice) + ' $' : '—'}</p>
               </div>
               <div>
-                <p className="text-xs" style={{ color: 'rgba(255,255,255,0.2)' }}>Transactions</p>
-                <p className="text-white/40 font-mono">{t._count.transactions}</p>
+                <p className="text-xs" className="text-muted-foreground/50">Transactions</p>
+                <p className="text-foreground/40 font-mono">{t._count.transactions}</p>
               </div>
             </div>
-            <div className="flex items-center gap-2 pt-2" style={{ borderTop: '1px solid rgba(255,255,255,0.04)' }}>
+            <div className="flex items-center gap-2 pt-2" style={{ borderTop: '1px solid var(--border)' }}>
               {t.active ? (
                 <Badge className="bg-emerald-400/10 text-emerald-400 border-emerald-400/20 border text-xs">Actif</Badge>
               ) : (
                 <Badge className="bg-red-400/10 text-red-400 border-red-400/20 border text-xs">Inactif</Badge>
               )}
               {t.coingeckoId && (
-                <span className="text-xs font-mono" style={{ color: 'rgba(255,255,255,0.12)' }}>{t.coingeckoId}</span>
+                <span className="text-xs font-mono" style={{ color: 'var(--muted-foreground)' }}>{t.coingeckoId}</span>
               )}
             </div>
           </div>
@@ -3428,32 +3970,32 @@ function AdminExchangesView() {
     <div className="space-y-6 page-transition">
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 fade-in-up">
         <div>
-          <h1 className="text-2xl font-bold text-white/90">Gestion des Exchanges</h1>
-          <p className="mt-1" style={{ color: 'rgba(255,255,255,0.3)' }}>{exchanges.length} plateformes configurées</p>
+          <h1 className="text-2xl font-bold text-foreground/90">Gestion des Exchanges</h1>
+          <p className="mt-1" className="text-muted-foreground">{exchanges.length} plateformes configurées</p>
         </div>
         <Dialog open={addOpen} onOpenChange={setAddOpen}>
           <DialogTrigger asChild>
-            <Button className="gap-2 rounded-xl h-10 shadow-lg text-white transition-all active:scale-[0.98]" style={{ background: 'linear-gradient(135deg, #7c5cfc, #06b6d4)', boxShadow: '0 4px 20px rgba(124,92,252,0.25)' }}>
+            <Button className="gap-2 rounded-xl h-10 shadow-lg text-foreground transition-all active:scale-[0.98]" style={{ background: 'linear-gradient(135deg, #7c5cfc, #06b6d4)', boxShadow: '0 4px 20px rgba(124,92,252,0.25)' }}>
               <Plus className="w-4 h-4" /> Ajouter un Exchange
             </Button>
           </DialogTrigger>
-          <DialogContent className="rounded-2xl dialog-mobile-fullscreen text-white" style={{ background: 'rgba(26,29,46,0.95)', backdropFilter: 'blur(30px)', border: '1px solid rgba(255,255,255,0.1)' }}>
+          <DialogContent className="rounded-2xl dialog-mobile-fullscreen text-foreground" style={{ background: 'var(--popover)', backdropFilter: 'blur(30px)', border: '1px solid var(--border)' }}>
             <DialogHeader>
-              <DialogTitle className="text-white/90">Nouvel Exchange</DialogTitle>
+              <DialogTitle className="text-foreground/90">Nouvel Exchange</DialogTitle>
               <DialogDescription className="sr-only">Formulaire d\'ajout d\'un nouvel exchange</DialogDescription>
             </DialogHeader>
             <div className="space-y-4">
               <div className="space-y-2">
-                <Label className="text-xs" style={{ color: 'rgba(255,255,255,0.45)' }}>Nom</Label>
+                <Label className="text-xs" className="text-muted-foreground">Nom</Label>
                 <Input
                   value={newName}
                   onChange={e => setNewName(e.target.value.toUpperCase())}
                   placeholder="BINANCE"
-                  className="border text-white placeholder:text-white/20 rounded-xl h-11"
-                  style={{ background: 'rgba(255,255,255,0.04)', borderColor: 'rgba(255,255,255,0.08)' }}
+                  className="border text-foreground placeholder:text-muted-foreground/50 rounded-xl h-11"
+                  style={{ background: 'var(--input)', borderColor: 'var(--border)' }}
                 />
               </div>
-              <Button onClick={addExchange} className="w-full rounded-xl shadow-lg text-white transition-all active:scale-[0.98]" style={{ background: 'linear-gradient(135deg, #7c5cfc, #06b6d4)', boxShadow: '0 4px 20px rgba(124,92,252,0.25)' }}>Ajouter</Button>
+              <Button onClick={addExchange} className="w-full rounded-xl shadow-lg text-foreground transition-all active:scale-[0.98]" style={{ background: 'linear-gradient(135deg, #7c5cfc, #06b6d4)', boxShadow: '0 4px 20px rgba(124,92,252,0.25)' }}>Ajouter</Button>
             </div>
           </DialogContent>
         </Dialog>
@@ -3465,23 +4007,23 @@ function AdminExchangesView() {
           <div className="overflow-x-auto custom-scrollbar">
             <Table>
               <TableHeader>
-                <TableRow className="hover:bg-transparent" style={{ borderBottomColor: 'rgba(255,255,255,0.05)' }}>
-                  <TableHead style={{ color: 'rgba(255,255,255,0.35)' }}>Nom</TableHead>
-                  <TableHead className="text-center" style={{ color: 'rgba(255,255,255,0.35)' }}>Transactions</TableHead>
-                  <TableHead className="text-center" style={{ color: 'rgba(255,255,255,0.35)' }}>Statut</TableHead>
-                  <TableHead className="text-right" style={{ color: 'rgba(255,255,255,0.35)' }}>Actions</TableHead>
+                <TableRow className="hover:bg-transparent" style={{ borderBottomColor: 'var(--border)' }}>
+                  <TableHead className="text-muted-foreground">Nom</TableHead>
+                  <TableHead className="text-center" className="text-muted-foreground">Transactions</TableHead>
+                  <TableHead className="text-center" className="text-muted-foreground">Statut</TableHead>
+                  <TableHead className="text-right" className="text-muted-foreground">Actions</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
                 {exchanges.map((e) => (
-                  <TableRow key={e.id} className="transition-colors" style={{ borderBottomColor: 'rgba(255,255,255,0.04)' }}>
+                  <TableRow key={e.id} className="transition-colors" style={{ borderBottomColor: 'var(--border)' }}>
                     <TableCell>
                       <div className="flex items-center gap-3">
                         <ExchangeLogo name={e.name} size={32} />
-                        <span className="font-semibold text-white/70">{e.name}</span>
+                        <span className="font-semibold text-foreground/70">{e.name}</span>
                       </div>
                     </TableCell>
-                    <TableCell className="text-center text-white/40">{e._count.transactions}</TableCell>
+                    <TableCell className="text-center text-foreground/40">{e._count.transactions}</TableCell>
                     <TableCell className="text-center">
                       <div className="flex items-center justify-center">
                         <Switch
@@ -3522,8 +4064,8 @@ function AdminExchangesView() {
               <div className="flex items-center gap-3">
                 <ExchangeLogo name={e.name} size={40} />
                 <div>
-                  <p className="font-semibold text-white/80">{e.name}</p>
-                  <p className="text-xs" style={{ color: 'rgba(255,255,255,0.25)' }}>{e._count.transactions} transactions</p>
+                  <p className="font-semibold text-foreground/80">{e.name}</p>
+                  <p className="text-xs" className="text-muted-foreground">{e._count.transactions} transactions</p>
                 </div>
               </div>
               <Switch
@@ -3532,7 +4074,7 @@ function AdminExchangesView() {
                 className={`${e.active ? 'bg-emerald-500' : 'bg-white/10'}`}
               />
             </div>
-            <div className="flex items-center gap-2 mt-3 pt-3" style={{ borderTop: '1px solid rgba(255,255,255,0.04)' }}>
+            <div className="flex items-center gap-2 mt-3 pt-3" style={{ borderTop: '1px solid var(--border)' }}>
               {e.active ? (
                 <Badge className="bg-emerald-400/10 text-emerald-400 border-emerald-400/20 border text-xs">Actif</Badge>
               ) : (
@@ -3711,11 +4253,11 @@ function AIAnalysisView({ user }: { user: any }) {
             </div>
             <div>
               <h1 className="text-2xl font-bold gradient-text">Analyse IA</h1>
-              <p className="text-sm" style={{ color: 'rgba(255,255,255,0.35)' }}>L&apos;IA analyse le marché pour vous aider à décider</p>
+              <p className="text-sm" className="text-muted-foreground">L&apos;IA analyse le marché pour vous aider à décider</p>
             </div>
           </div>
           {history.length > 0 && (
-            <Button variant="ghost" size="sm" onClick={() => setShowHistory(!showHistory)} className="text-white/30 hover:text-white/60 hover:bg-white/5 rounded-xl">
+            <Button variant="ghost" size="sm" onClick={() => setShowHistory(!showHistory)} className="text-foreground/30 hover:text-foreground/60 hover:bg-foreground/5 rounded-xl">
               <Activity className="w-4 h-4 mr-1" />
               <span className="text-xs">Historique ({history.length})</span>
             </Button>
@@ -3726,28 +4268,28 @@ function AIAnalysisView({ user }: { user: any }) {
       {/* History panel */}
       {showHistory && history.length > 0 && (
         <ScrollReveal>
-          <div className="rounded-2xl p-4 relative overflow-hidden" style={{ background: 'rgba(6,6,10,0.7)', backdropFilter: 'blur(20px)', border: '1px solid rgba(255,255,255,0.04)' }}>
+          <div className="rounded-2xl p-4 relative overflow-hidden" style={{ background: 'var(--popover)', backdropFilter: 'blur(20px)', border: '1px solid var(--border)' }}>
             <div className="absolute top-0 left-0 right-0 h-px" style={{ background: 'linear-gradient(90deg, transparent, rgba(124,92,252,0.2), transparent)' }} />
             <div className="flex items-center justify-between mb-3">
-              <h3 className="text-xs font-semibold text-white/60 uppercase tracking-wider">Historique des analyses</h3>
+              <h3 className="text-xs font-semibold text-foreground/60 uppercase tracking-wider">Historique des analyses</h3>
               <Button variant="ghost" size="sm" onClick={() => { setHistory([]); try { localStorage.removeItem('cf_ai_history') } catch {} }} className="text-red-400/50 hover:text-red-400 h-6 text-[10px] hover:bg-red-500/10">
                 Effacer
               </Button>
             </div>
             <div className="space-y-2 max-h-48 overflow-y-auto custom-scrollbar">
               {history.map((h, i) => (
-                <button key={i} onClick={() => { setSelectedTicker(h.ticker); setShowHistory(false) }} className="w-full flex items-center gap-3 p-2.5 rounded-xl border transition-all text-left group hover:border-violet-500/20" style={{ background: 'rgba(255,255,255,0.02)', borderColor: 'rgba(255,255,255,0.04)' }}>
+                <button key={i} onClick={() => { setSelectedTicker(h.ticker); setShowHistory(false) }} className="w-full flex items-center gap-3 p-2.5 rounded-xl border transition-all text-left group hover:border-violet-500/20" style={{ background: 'var(--muted)', borderColor: 'var(--border)' }}>
                   <TokenLogo ticker={h.ticker} size={24} />
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-2">
-                      <span className="text-xs font-medium text-white/70">{h.ticker}</span>
+                      <span className="text-xs font-medium text-foreground/70">{h.ticker}</span>
                       <Badge className={`${signalConfig(h.signal).bg} ${signalConfig(h.signal).text} text-[9px] px-1.5 py-0`}>{h.signal}</Badge>
                     </div>
-                    <p className="text-[10px] text-white/25 truncate mt-0.5">{h.summary}</p>
+                    <p className="text-[10px] text-foreground/25 truncate mt-0.5">{h.summary}</p>
                   </div>
                   <div className="text-right shrink-0">
                     <p className={`text-xs font-bold ${signalConfig(h.signal).text}`}>{h.confidence}%</p>
-                    <p className="text-[9px] text-white/20">{new Date(h.timestamp).toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' })}</p>
+                    <p className="text-[9px] text-foreground/20">{new Date(h.timestamp).toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' })}</p>
                   </div>
                 </button>
               ))}
@@ -3762,33 +4304,33 @@ function AIAnalysisView({ user }: { user: any }) {
           <AlertTriangle className="w-5 h-5 text-amber-400 shrink-0 mt-0.5" />
           <div>
             <p className="text-sm font-medium text-amber-400">Assistance, pas conseil financier</p>
-            <p className="text-xs mt-1" style={{ color: 'rgba(255,255,255,0.4)' }}>L&apos;IA vous aide à analyser les données techniques et l&apos;actualité du marché. Vous prenez la décision finale. Ceci ne constitue pas un conseil en investissement.</p>
+            <p className="text-xs mt-1" className="text-muted-foreground">L&apos;IA vous aide à analyser les données techniques et l&apos;actualité du marché. Vous prenez la décision finale. Ceci ne constitue pas un conseil en investissement.</p>
           </div>
         </div>
       </ScrollReveal>
 
       {/* Token selector */}
       <ScrollReveal>
-        <div className="rounded-2xl p-5 relative overflow-hidden" style={{ background: 'rgba(6,6,10,0.7)', backdropFilter: 'blur(20px)', border: '1px solid rgba(255,255,255,0.04)' }}>
+        <div className="rounded-2xl p-5 relative overflow-hidden" style={{ background: 'var(--popover)', backdropFilter: 'blur(20px)', border: '1px solid var(--border)' }}>
           <div className="absolute top-0 left-0 right-0 h-px" style={{ background: 'linear-gradient(90deg, transparent, rgba(124,92,252,0.3), rgba(6,182,212,0.2), transparent)' }} />
 
-          <Label className="text-xs font-medium mb-3 block" style={{ color: 'rgba(255,255,255,0.5)' }}>Sélectionnez un token à analyser</Label>
+          <Label className="text-xs font-medium mb-3 block" className="text-muted-foreground">Sélectionnez un token à analyser</Label>
 
           <div className="flex gap-3 items-end">
             <div className="flex-1">
               <Select value={selectedTicker} onValueChange={setSelectedTicker}>
-                <SelectTrigger className="w-full border rounded-xl h-11 text-white" style={{ background: 'rgba(255,255,255,0.03)', borderColor: 'rgba(255,255,255,0.06)' }}>
+                <SelectTrigger className="w-full border rounded-xl h-11 text-foreground" style={{ background: 'var(--input)', borderColor: 'var(--border)' }}>
                   <SelectValue placeholder="Choisir un token" />
                 </SelectTrigger>
-                <SelectContent style={{ background: 'rgba(10,10,16,0.98)', border: '1px solid rgba(255,255,255,0.08)' }}>
+                <SelectContent style={{ background: 'var(--popover)', border: '1px solid var(--border)' }}>
                   {tokens.map(t => (
-                    <SelectItem key={t.ticker} value={t.ticker} className="text-white/80 focus:text-white focus:bg-violet-500/10">
+                    <SelectItem key={t.ticker} value={t.ticker} className="text-foreground/80 focus:text-foreground focus:bg-violet-500/10">
                       <div className="flex items-center gap-2">
                         <TokenLogo ticker={t.ticker} size={20} />
                         <span>{t.ticker}</span>
-                        <span className="text-white/30 text-xs">{t.name}</span>
+                        <span className="text-foreground/30 text-xs">{t.name}</span>
                         {prices[t.ticker] && (
-                          <span className="text-white/20 text-xs ml-auto">${fmtPrice(prices[t.ticker])}</span>
+                          <span className="text-foreground/20 text-xs ml-auto">${fmtPrice(prices[t.ticker])}</span>
                         )}
                       </div>
                     </SelectItem>
@@ -3799,7 +4341,7 @@ function AIAnalysisView({ user }: { user: any }) {
             <Button
               onClick={runAnalysis}
               disabled={loading || !selectedTicker}
-              className="btn-primary-glow btn-ripple text-white rounded-xl h-11 px-6 font-medium transition-all active:scale-[0.98]"
+              className="btn-primary-glow btn-ripple text-foreground rounded-xl h-11 px-6 font-medium transition-all active:scale-[0.98]"
               style={{ background: 'linear-gradient(135deg, #7c5cfc, #06b6d4)', boxShadow: '0 4px 20px rgba(124,92,252,0.25)' }}
             >
               {loading ? <RefreshCw className="w-4 h-4 animate-spin mr-2" /> : <Sparkles className="w-4 h-4 mr-2" />}
@@ -3809,10 +4351,10 @@ function AIAnalysisView({ user }: { user: any }) {
 
           {/* Selected token quick info */}
           {selectedTicker && prices[selectedTicker] && (
-            <div className="mt-3 flex items-center gap-2 text-xs" style={{ color: 'rgba(255,255,255,0.3)' }}>
+            <div className="mt-3 flex items-center gap-2 text-xs" className="text-muted-foreground">
               <TokenLogo ticker={selectedTicker} size={16} />
               <span>{selectedTicker}</span>
-              <span className="text-white/50 font-medium">${fmtPrice(prices[selectedTicker])}</span>
+              <span className="text-foreground/50 font-medium">${fmtPrice(prices[selectedTicker])}</span>
             </div>
           )}
         </div>
@@ -3821,7 +4363,7 @@ function AIAnalysisView({ user }: { user: any }) {
       {/* Loading animation */}
       {loading && (
         <div className="fade-in-up">
-          <div className="rounded-2xl p-8 relative overflow-hidden flex flex-col items-center justify-center gap-4" style={{ background: 'rgba(6,6,10,0.7)', backdropFilter: 'blur(20px)', border: '1px solid rgba(255,255,255,0.04)' }}>
+          <div className="rounded-2xl p-8 relative overflow-hidden flex flex-col items-center justify-center gap-4" style={{ background: 'var(--popover)', backdropFilter: 'blur(20px)', border: '1px solid var(--border)' }}>
             <div className="relative">
               <div className="w-16 h-16 rounded-2xl flex items-center justify-center" style={{ background: 'rgba(124,92,252,0.1)' }}>
                 <Brain className="w-8 h-8 text-violet-400 animate-pulse" />
@@ -3829,8 +4371,8 @@ function AIAnalysisView({ user }: { user: any }) {
               <div className="absolute inset-0 rounded-2xl orbit" style={{ animationDuration: '3s', border: '2px solid transparent', borderTopColor: 'rgba(124,92,252,0.5)', borderRightColor: 'rgba(6,182,212,0.3)' }} />
             </div>
             <div className="text-center">
-              <p className="text-sm font-medium text-white/60">L&apos;IA analyse le marché...</p>
-              <p className="text-xs text-white/25 mt-1">Données techniques, sentiment, actualités</p>
+              <p className="text-sm font-medium text-foreground/60">L&apos;IA analyse le marché...</p>
+              <p className="text-xs text-foreground/25 mt-1">Données techniques, sentiment, actualités</p>
             </div>
             <div className="flex gap-1.5">
               <div className="w-2 h-2 rounded-full bg-violet-400 animate-bounce" style={{ animationDelay: '0ms' }} />
@@ -3855,16 +4397,16 @@ function AIAnalysisView({ user }: { user: any }) {
           {/* 24h Price Chart */}
           {analysis.chartData && analysis.chartData.length > 0 && (
             <ScrollReveal>
-              <div className="rounded-2xl p-5 relative overflow-hidden" style={{ background: 'rgba(6,6,10,0.7)', backdropFilter: 'blur(20px)', border: '1px solid rgba(255,255,255,0.04)' }}>
+              <div className="rounded-2xl p-5 relative overflow-hidden" style={{ background: 'var(--popover)', backdropFilter: 'blur(20px)', border: '1px solid var(--border)' }}>
                 <div className="absolute top-0 left-0 right-0 h-px" style={{ background: 'linear-gradient(90deg, transparent, rgba(124,92,252,0.3), rgba(6,182,212,0.2), transparent)' }} />
                 <div className="flex items-center justify-between mb-3">
                   <div className="flex items-center gap-2">
                     <Activity className="w-4 h-4 text-violet-400" />
-                    <h3 className="text-sm font-semibold text-white/80">Prix 24h</h3>
+                    <h3 className="text-sm font-semibold text-foreground/80">Prix 24h</h3>
                   </div>
                   {(analysis.currentPrice || analysis.priceChangePct24h !== undefined) && (
                     <div className="flex items-center gap-2">
-                      {analysis.currentPrice && <span className="text-sm font-bold text-white">${fmtPrice(analysis.currentPrice)}</span>}
+                      {analysis.currentPrice && <span className="text-sm font-bold text-foreground">${fmtPrice(analysis.currentPrice)}</span>}
                       {analysis.priceChangePct24h !== undefined && (
                         <Badge className={`${analysis.priceChangePct24h >= 0 ? 'bg-emerald-500/15 text-emerald-400' : 'bg-red-500/15 text-red-400'} text-[10px] px-1.5 py-0`}>
                           {analysis.priceChangePct24h >= 0 ? '+' : ''}{analysis.priceChangePct24h.toFixed(2)}%
@@ -3882,10 +4424,10 @@ function AIAnalysisView({ user }: { user: any }) {
                           <stop offset="95%" stopColor={analysis.priceChangePct24h !== undefined && analysis.priceChangePct24h < 0 ? "#ef4444" : "#7c5cfc"} stopOpacity={0} />
                         </linearGradient>
                       </defs>
-                      <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.03)" />
-                      <XAxis dataKey="time" tick={{ fontSize: 10, fill: 'rgba(255,255,255,0.25)' }} axisLine={false} tickLine={false} interval="preserveStartEnd" />
-                      <YAxis domain={['auto', 'auto']} tick={{ fontSize: 10, fill: 'rgba(255,255,255,0.25)' }} axisLine={false} tickLine={false} width={60} tickFormatter={(v: number) => '$' + fmtPrice(v)} />
-                      <Tooltip contentStyle={{ background: 'rgba(10,10,16,0.95)', border: '1px solid rgba(255,255,255,0.08)', borderRadius: '12px', fontSize: '11px', color: '#fff' }} formatter={(value: number) => ['$' + fmtPrice(value), 'Prix']} labelStyle={{ color: 'rgba(255,255,255,0.4)' }} />
+                      <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
+                      <XAxis dataKey="time" tick={{ fontSize: 10, fill: 'var(--muted-foreground)' }} axisLine={false} tickLine={false} interval="preserveStartEnd" />
+                      <YAxis domain={['auto', 'auto']} tick={{ fontSize: 10, fill: 'var(--muted-foreground)' }} axisLine={false} tickLine={false} width={60} tickFormatter={(v: number) => '$' + fmtPrice(v)} />
+                      <Tooltip contentStyle={{ background: 'var(--popover)', border: '1px solid var(--border)', borderRadius: '12px', fontSize: '11px', color: 'var(--foreground)' }} formatter={(value: number) => ['$' + fmtPrice(value), 'Prix']} labelStyle={{ color: 'var(--muted-foreground)' }} />
                       <Area type="monotone" dataKey="price" stroke={analysis.priceChangePct24h !== undefined && analysis.priceChangePct24h < 0 ? "#ef4444" : "#7c5cfc"} strokeWidth={2} fill="url(#aiChartGradient)" />
                     </AreaChart>
                   </ResponsiveContainer>
@@ -3896,21 +4438,21 @@ function AIAnalysisView({ user }: { user: any }) {
 
           {/* Signal Card */}
           <ScrollReveal direction="scale">
-            <div className={`rounded-2xl p-6 border relative overflow-hidden ${signalConfig(analysis.signal).glow}`} style={{ background: 'rgba(6,6,10,0.7)', borderColor: 'rgba(255,255,255,0.04)' }}>
+            <div className={`rounded-2xl p-6 border relative overflow-hidden glass-card ${signalConfig(analysis.signal).glow}`}>
               <div className="absolute top-0 left-0 right-0 h-px" style={{ background: 'linear-gradient(90deg, transparent, rgba(124,92,252,0.3), rgba(6,182,212,0.2), transparent)' }} />
 
               <div className="flex items-center justify-between mb-4">
                 <div className="flex items-center gap-3">
                   {signalIcon(analysis.signal)}
                   <div>
-                    <p className="text-xs font-medium" style={{ color: 'rgba(255,255,255,0.4)' }}>Signal</p>
+                    <p className="text-xs font-medium" className="text-muted-foreground">Signal</p>
                     <p className={`text-2xl font-bold ${signalConfig(analysis.signal).text}`}>
                       {analysis.signal}
                     </p>
                   </div>
                 </div>
                 <div className="text-right">
-                  <p className="text-xs font-medium" style={{ color: 'rgba(255,255,255,0.4)' }}>Confiance</p>
+                  <p className="text-xs font-medium" className="text-muted-foreground">Confiance</p>
                   <p className={`text-2xl font-bold ${signalConfig(analysis.signal).text}`}>
                     {analysis.confidence}%
                   </p>
@@ -3918,7 +4460,7 @@ function AIAnalysisView({ user }: { user: any }) {
               </div>
 
               {/* Confidence bar */}
-              <div className="w-full h-2 rounded-full mb-4" style={{ background: 'rgba(255,255,255,0.05)' }}>
+              <div className="w-full h-2 rounded-full mb-4" style={{ background: 'var(--muted)' }}>
                 <div
                   className="h-2 rounded-full transition-all duration-1000"
                   style={{
@@ -3929,7 +4471,7 @@ function AIAnalysisView({ user }: { user: any }) {
                 />
               </div>
 
-              <p className="text-sm leading-relaxed" style={{ color: 'rgba(255,255,255,0.6)' }}>{analysis.summary}</p>
+              <p className="text-sm leading-relaxed text-foreground/60">{analysis.summary}</p>
             </div>
           </ScrollReveal>
 
@@ -3937,11 +4479,11 @@ function AIAnalysisView({ user }: { user: any }) {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             {/* Technical */}
             <ScrollReveal direction="left">
-              <div className="rounded-2xl p-5 relative overflow-hidden h-full" style={{ background: 'rgba(6,6,10,0.7)', backdropFilter: 'blur(20px)', border: '1px solid rgba(255,255,255,0.04)' }}>
+              <div className="rounded-2xl p-5 relative overflow-hidden h-full" style={{ background: 'var(--popover)', backdropFilter: 'blur(20px)', border: '1px solid var(--border)' }}>
                 <div className="absolute top-0 left-0 right-0 h-px" style={{ background: 'linear-gradient(90deg, transparent, rgba(124,92,252,0.2), transparent)' }} />
                 <div className="flex items-center gap-2 mb-4">
                   <BarChart3 className="w-4 h-4 text-violet-400" />
-                  <h3 className="text-sm font-semibold text-white/80">Analyse Technique</h3>
+                  <h3 className="text-sm font-semibold text-foreground/80">Analyse Technique</h3>
                 </div>
                 <div className="space-y-3">
                   {[
@@ -3952,8 +4494,8 @@ function AIAnalysisView({ user }: { user: any }) {
                     { label: 'Volume 24h', value: analysis.technicalAnalysis.volume24h },
                   ].map(item => (
                     <div key={item.label} className="flex items-center justify-between">
-                      <span className="text-xs" style={{ color: 'rgba(255,255,255,0.35)' }}>{item.label}</span>
-                      <span className="text-xs font-medium text-white/70">{item.value}</span>
+                      <span className="text-xs" className="text-muted-foreground">{item.label}</span>
+                      <span className="text-xs font-medium text-foreground/70">{item.value}</span>
                     </div>
                   ))}
                 </div>
@@ -3962,11 +4504,11 @@ function AIAnalysisView({ user }: { user: any }) {
 
             {/* Sentiment */}
             <ScrollReveal direction="left">
-              <div className="rounded-2xl p-5 relative overflow-hidden h-full" style={{ background: 'rgba(6,6,10,0.7)', backdropFilter: 'blur(20px)', border: '1px solid rgba(255,255,255,0.04)' }}>
+              <div className="rounded-2xl p-5 relative overflow-hidden h-full" style={{ background: 'var(--popover)', backdropFilter: 'blur(20px)', border: '1px solid var(--border)' }}>
                 <div className="absolute top-0 left-0 right-0 h-px" style={{ background: 'linear-gradient(90deg, transparent, rgba(6,182,212,0.2), transparent)' }} />
                 <div className="flex items-center gap-2 mb-4">
                   <Gauge className="w-4 h-4 text-cyan-400" />
-                  <h3 className="text-sm font-semibold text-white/80">Sentiment du Marche</h3>
+                  <h3 className="text-sm font-semibold text-foreground/80">Sentiment du Marche</h3>
                 </div>
                 <div className="flex items-center justify-center mb-4">
                   <div className="relative w-24 h-24">
@@ -3975,15 +4517,15 @@ function AIAnalysisView({ user }: { user: any }) {
                       <circle cx="50" cy="50" r="40" fill="none" stroke={analysis.sentiment.fearGreedIndex <= 25 ? '#ef4444' : analysis.sentiment.fearGreedIndex <= 45 ? '#f97316' : analysis.sentiment.fearGreedIndex <= 55 ? '#f59e0b' : analysis.sentiment.fearGreedIndex <= 75 ? '#10b981' : '#06b6d4'} strokeWidth="8" strokeLinecap="round" strokeDasharray={`${(analysis.sentiment.fearGreedIndex / 100) * 251.3} 251.3`} />
                     </svg>
                     <div className="absolute inset-0 flex flex-col items-center justify-center">
-                      <span className="text-xl font-bold text-white">{analysis.sentiment.fearGreedIndex}</span>
-                      <span className="text-[9px]" style={{ color: 'rgba(255,255,255,0.35)' }}>F&amp;G</span>
+                      <span className="text-xl font-bold text-foreground">{analysis.sentiment.fearGreedIndex}</span>
+                      <span className="text-[9px]" className="text-muted-foreground">F&amp;G</span>
                     </div>
                   </div>
                   <div className="ml-4">
                     <Badge className={`${analysis.sentiment.fearGreedIndex <= 25 ? 'bg-red-500/15 text-red-400 border-red-500/30' : analysis.sentiment.fearGreedIndex <= 45 ? 'bg-orange-500/15 text-orange-400 border-orange-500/30' : analysis.sentiment.fearGreedIndex <= 55 ? 'bg-amber-500/15 text-amber-400 border-amber-500/30' : analysis.sentiment.fearGreedIndex <= 75 ? 'bg-emerald-500/15 text-emerald-400 border-emerald-500/30' : 'bg-cyan-500/15 text-cyan-400 border-cyan-500/30'} text-xs`}>
                       {analysis.sentiment.fearGreedLabel}
                     </Badge>
-                    <p className="text-xs mt-2" style={{ color: 'rgba(255,255,255,0.4)' }}>{analysis.sentiment.interpretation}</p>
+                    <p className="text-xs mt-2" className="text-muted-foreground">{analysis.sentiment.interpretation}</p>
                   </div>
                 </div>
               </div>
@@ -3993,28 +4535,28 @@ function AIAnalysisView({ user }: { user: any }) {
           {/* News Impact + News Items */}
           {(analysis.newsImpact || (analysis.newsItems && analysis.newsItems.length > 0)) && (
             <ScrollReveal>
-              <div className="rounded-2xl p-5 relative overflow-hidden" style={{ background: 'rgba(6,6,10,0.7)', backdropFilter: 'blur(20px)', border: '1px solid rgba(255,255,255,0.04)' }}>
+              <div className="rounded-2xl p-5 relative overflow-hidden" style={{ background: 'var(--popover)', backdropFilter: 'blur(20px)', border: '1px solid var(--border)' }}>
                 <div className="absolute top-0 left-0 right-0 h-px" style={{ background: 'linear-gradient(90deg, transparent, rgba(6,182,212,0.3), rgba(124,92,252,0.2), transparent)' }} />
                 <div className="flex items-center gap-2 mb-3">
                   <MessageSquare className="w-4 h-4 text-cyan-400" />
-                  <h3 className="text-sm font-semibold text-white/80">Impact des Actualites</h3>
+                  <h3 className="text-sm font-semibold text-foreground/80">Impact des Actualites</h3>
                 </div>
                 {analysis.newsImpact && (
                   <p className="text-sm leading-relaxed mb-4" style={{ color: 'rgba(255,255,255,0.55)' }}>{analysis.newsImpact}</p>
                 )}
                 {analysis.newsItems && analysis.newsItems.length > 0 && (
                   <div className="space-y-2">
-                    <p className="text-[10px] font-semibold uppercase tracking-wider mb-2" style={{ color: 'rgba(255,255,255,0.25)' }}>Dernieres actualites</p>
+                    <p className="text-[10px] font-semibold uppercase tracking-wider mb-2" className="text-muted-foreground">Dernieres actualites</p>
                     {analysis.newsItems.map((news, i) => (
-                      <div key={i} className="rounded-xl p-3 border" style={{ background: 'rgba(255,255,255,0.02)', borderColor: 'rgba(255,255,255,0.04)' }}>
+                      <div key={i} className="rounded-xl p-3 border" style={{ background: 'var(--muted)', borderColor: 'var(--border)' }}>
                         <div className="flex items-start gap-2">
                           <div className="w-5 h-5 rounded-md flex items-center justify-center shrink-0 mt-0.5 text-[10px] font-bold" style={{ background: 'rgba(6,182,212,0.1)', color: 'rgba(6,182,212,0.8)' }}>{i + 1}</div>
                           <div className="min-w-0">
-                            <p className="text-xs font-medium text-white/60 truncate">{news.title}</p>
-                            <p className="text-[10px] mt-0.5 leading-relaxed" style={{ color: 'rgba(255,255,255,0.35)' }}>{news.snippet}</p>
+                            <p className="text-xs font-medium text-foreground/60 truncate">{news.title}</p>
+                            <p className="text-[10px] mt-0.5 leading-relaxed" className="text-muted-foreground">{news.snippet}</p>
                             <div className="flex items-center gap-2 mt-1">
-                              {news.source && <span className="text-[9px]" style={{ color: 'rgba(255,255,255,0.2)' }}>{news.source}</span>}
-                              {news.date && <span className="text-[9px]" style={{ color: 'rgba(255,255,255,0.15)' }}>{news.date}</span>}
+                              {news.source && <span className="text-[9px]" className="text-muted-foreground/50">{news.source}</span>}
+                              {news.date && <span className="text-[9px]" className="text-muted-foreground/40">{news.date}</span>}
                             </div>
                           </div>
                         </div>
@@ -4030,17 +4572,17 @@ function AIAnalysisView({ user }: { user: any }) {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             {/* Key Factors */}
             <ScrollReveal>
-              <div className="rounded-2xl p-5 relative overflow-hidden h-full" style={{ background: 'rgba(6,6,10,0.7)', backdropFilter: 'blur(20px)', border: '1px solid rgba(255,255,255,0.04)' }}>
+              <div className="rounded-2xl p-5 relative overflow-hidden h-full" style={{ background: 'var(--popover)', backdropFilter: 'blur(20px)', border: '1px solid var(--border)' }}>
                 <div className="absolute top-0 left-0 right-0 h-px" style={{ background: 'linear-gradient(90deg, transparent, rgba(16,185,129,0.2), transparent)' }} />
                 <div className="flex items-center gap-2 mb-4">
                   <Eye className="w-4 h-4 text-emerald-400" />
-                  <h3 className="text-sm font-semibold text-white/80">Facteurs Cles a Suivre</h3>
+                  <h3 className="text-sm font-semibold text-foreground/80">Facteurs Cles a Suivre</h3>
                 </div>
                 <div className="space-y-2">
                   {analysis.keyFactors.map((factor, i) => (
                     <div key={i} className="flex items-start gap-2">
                       <div className="w-5 h-5 rounded-md flex items-center justify-center shrink-0 mt-0.5 text-[10px] font-bold" style={{ background: 'rgba(16,185,129,0.1)', color: 'rgba(16,185,129,0.8)' }}>{i + 1}</div>
-                      <p className="text-xs leading-relaxed" style={{ color: 'rgba(255,255,255,0.5)' }}>{factor}</p>
+                      <p className="text-xs leading-relaxed" className="text-muted-foreground">{factor}</p>
                     </div>
                   ))}
                 </div>
@@ -4049,17 +4591,17 @@ function AIAnalysisView({ user }: { user: any }) {
 
             {/* Risks */}
             <ScrollReveal>
-              <div className="rounded-2xl p-5 relative overflow-hidden h-full" style={{ background: 'rgba(6,6,10,0.7)', backdropFilter: 'blur(20px)', border: '1px solid rgba(255,255,255,0.04)' }}>
+              <div className="rounded-2xl p-5 relative overflow-hidden h-full" style={{ background: 'var(--popover)', backdropFilter: 'blur(20px)', border: '1px solid var(--border)' }}>
                 <div className="absolute top-0 left-0 right-0 h-px" style={{ background: 'linear-gradient(90deg, transparent, rgba(239,68,68,0.2), transparent)' }} />
                 <div className="flex items-center gap-2 mb-4">
                   <AlertTriangle className="w-4 h-4 text-red-400" />
-                  <h3 className="text-sm font-semibold text-white/80">Risques Identifies</h3>
+                  <h3 className="text-sm font-semibold text-foreground/80">Risques Identifies</h3>
                 </div>
                 <div className="space-y-2">
                   {analysis.risks.map((risk, i) => (
                     <div key={i} className="flex items-start gap-2">
                       <div className="w-5 h-5 rounded-md flex items-center justify-center shrink-0 mt-0.5 text-[10px] font-bold" style={{ background: 'rgba(239,68,68,0.1)', color: 'rgba(239,68,68,0.8)' }}>{i + 1}</div>
-                      <p className="text-xs leading-relaxed" style={{ color: 'rgba(255,255,255,0.5)' }}>{risk}</p>
+                      <p className="text-xs leading-relaxed" className="text-muted-foreground">{risk}</p>
                     </div>
                   ))}
                 </div>
@@ -4069,8 +4611,8 @@ function AIAnalysisView({ user }: { user: any }) {
 
           {/* Disclaimer */}
           <ScrollReveal>
-            <div className="rounded-xl p-4 border text-center" style={{ background: 'rgba(255,255,255,0.02)', borderColor: 'rgba(255,255,255,0.04)' }}>
-              <p className="text-[11px] leading-relaxed" style={{ color: 'rgba(255,255,255,0.25)' }}>{analysis.disclaimer}</p>
+            <div className="rounded-xl p-4 border text-center" style={{ background: 'var(--muted)', borderColor: 'var(--border)' }}>
+              <p className="text-[11px] leading-relaxed text-muted-foreground">{analysis.disclaimer}</p>
             </div>
           </ScrollReveal>
         </div>
@@ -4079,28 +4621,28 @@ function AIAnalysisView({ user }: { user: any }) {
       {/* Empty state */}
       {!analysis && !loading && !error && (
         <ScrollReveal direction="scale">
-          <div className="rounded-2xl p-10 relative overflow-hidden flex flex-col items-center justify-center text-center" style={{ background: 'rgba(6,6,10,0.5)', backdropFilter: 'blur(20px)', border: '1px solid rgba(255,255,255,0.04)' }}>
+          <div className="rounded-2xl p-10 relative overflow-hidden flex flex-col items-center justify-center text-center glass-card">
             <div className="w-20 h-20 rounded-2xl flex items-center justify-center mb-4 breathe" style={{ background: 'rgba(124,92,252,0.08)', border: '1px solid rgba(124,92,252,0.15)' }}>
               <Brain className="w-10 h-10 text-violet-400/50" />
             </div>
-            <h3 className="text-lg font-semibold text-white/60 mb-2">L&apos;IA est prete a analyser</h3>
-            <p className="text-sm max-w-md" style={{ color: 'rgba(255,255,255,0.3)' }}>
+            <h3 className="text-lg font-semibold text-foreground/60 mb-2">L&apos;IA est prete a analyser</h3>
+            <p className="text-sm max-w-md" className="text-muted-foreground">
               Selectionnez un token et lancez l&apos;analyse. L&apos;IA etudiera les indicateurs techniques, le sentiment du marche, les actualites et les facteurs cles pour vous fournir une analyse claire.
             </p>
             <div className="flex items-center gap-4 mt-6">
-              <div className="flex items-center gap-2 text-xs" style={{ color: 'rgba(255,255,255,0.2)' }}>
+              <div className="flex items-center gap-2 text-xs" className="text-muted-foreground/50">
                 <BarChart3 className="w-3.5 h-3.5" />
                 <span>Technique</span>
               </div>
-              <div className="flex items-center gap-2 text-xs" style={{ color: 'rgba(255,255,255,0.2)' }}>
+              <div className="flex items-center gap-2 text-xs" className="text-muted-foreground/50">
                 <Gauge className="w-3.5 h-3.5" />
                 <span>Sentiment</span>
               </div>
-              <div className="flex items-center gap-2 text-xs" style={{ color: 'rgba(255,255,255,0.2)' }}>
+              <div className="flex items-center gap-2 text-xs" className="text-muted-foreground/50">
                 <MessageSquare className="w-3.5 h-3.5" />
                 <span>Actualites</span>
               </div>
-              <div className="flex items-center gap-2 text-xs" style={{ color: 'rgba(255,255,255,0.2)' }}>
+              <div className="flex items-center gap-2 text-xs" className="text-muted-foreground/50">
                 <Eye className="w-3.5 h-3.5" />
                 <span>Facteurs cles</span>
               </div>
@@ -4147,7 +4689,7 @@ export function CryptoApp() {
 
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center relative" style={{ background: '#000000' }}>
+      <div className="min-h-screen flex items-center justify-center relative bg-background">
         <ParticleField />
         <div className="flex flex-col items-center gap-5">
           {/* Orbit animation around wallet icon */}
@@ -4168,7 +4710,7 @@ export function CryptoApp() {
           </div>
           <div className="flex items-center gap-2">
             <RefreshCw className="w-4 h-4 animate-spin text-violet-400/50" />
-            <span className="text-sm text-white/30 font-medium">Chargement...</span>
+            <span className="text-sm text-foreground/30 font-medium">Chargement...</span>
           </div>
         </div>
       </div>
@@ -4183,19 +4725,20 @@ export function CryptoApp() {
 
   const renderView = () => {
     // Admin section uses tabs
-    if (currentView === 'admin-users' || currentView === 'admin-tokens' || currentView === 'admin-exchanges') {
+    if (currentView === 'admin-users' || currentView === 'admin-tokens' || currentView === 'admin-exchanges' || currentView === 'admin-pricing') {
       if (!isAdmin) return <DashboardView user={user} onUpgrade={() => setShowUpgrade(true)} />
       return (
         <div className="space-y-6 page-transition view-enter-cinematic">
           <div className="fade-in-up">
             <h1 className="text-2xl font-bold gradient-shimmer-text">Administration</h1>
-            <p className="mt-1" style={{ color: 'rgba(255,255,255,0.3)' }}>Gérez les utilisateurs, tokens et exchanges</p>
+            <p className="mt-1 text-muted-foreground">Gérez les utilisateurs, tokens, exchanges et tarifs</p>
           </div>
           <Tabs value={currentView} onValueChange={(v) => setCurrentView(v as View)} className="fade-in-up stagger-1">
-            <TabsList className="w-full justify-start rounded-xl p-1 h-auto" style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.06)' }}>
-              <TabsTrigger value="admin-users" className="rounded-lg px-4 py-2 text-sm data-[state=active]:text-white data-[state=active]:shadow-sm" style={{ color: 'rgba(255,255,255,0.4)' }}>Utilisateurs</TabsTrigger>
-              <TabsTrigger value="admin-tokens" className="rounded-lg px-4 py-2 text-sm data-[state=active]:text-white data-[state=active]:shadow-sm" style={{ color: 'rgba(255,255,255,0.4)' }}>Tokens</TabsTrigger>
-              <TabsTrigger value="admin-exchanges" className="rounded-lg px-4 py-2 text-sm data-[state=active]:text-white data-[state=active]:shadow-sm" style={{ color: 'rgba(255,255,255,0.4)' }}>Exchanges</TabsTrigger>
+            <TabsList className="w-full justify-start rounded-xl p-1 h-auto flex-wrap" style={{ background: 'var(--input)', border: '1px solid var(--border)' }}>
+              <TabsTrigger value="admin-users" className="rounded-lg px-4 py-2 text-sm data-[state=active]:text-foreground data-[state=active]:shadow-sm text-muted-foreground">Utilisateurs</TabsTrigger>
+              <TabsTrigger value="admin-tokens" className="rounded-lg px-4 py-2 text-sm data-[state=active]:text-foreground data-[state=active]:shadow-sm text-muted-foreground">Tokens</TabsTrigger>
+              <TabsTrigger value="admin-exchanges" className="rounded-lg px-4 py-2 text-sm data-[state=active]:text-foreground data-[state=active]:shadow-sm text-muted-foreground">Exchanges</TabsTrigger>
+              <TabsTrigger value="admin-pricing" className="rounded-lg px-4 py-2 text-sm data-[state=active]:text-foreground data-[state=active]:shadow-sm text-muted-foreground">Tarifs</TabsTrigger>
             </TabsList>
             <TabsContent value="admin-users" className="mt-6">
               <AdminUsersView />
@@ -4206,6 +4749,9 @@ export function CryptoApp() {
             <TabsContent value="admin-exchanges" className="mt-6">
               <AdminExchangesView />
             </TabsContent>
+            <TabsContent value="admin-pricing" className="mt-6">
+              <AdminPricingView />
+            </TabsContent>
           </Tabs>
         </div>
       )
@@ -4214,14 +4760,37 @@ export function CryptoApp() {
     switch (currentView) {
       case 'dashboard': return <DashboardView user={user} onUpgrade={() => setShowUpgrade(true)} />
       case 'transactions': return <TransactionsView user={user} onUpgrade={() => setShowUpgrade(true)} />
-      case 'ai-analysis': return <AIAnalysisView user={user} />
+      case 'ai-analysis': {
+        const isPremiumOrAdmin = user?.role === 'user_premium' || user?.role === 'admin'
+        if (!isPremiumOrAdmin) {
+          return (
+            <div className="flex flex-col items-center justify-center py-20 space-y-6 fade-in-up">
+              <div className="w-20 h-20 rounded-2xl flex items-center justify-center" style={{ background: 'linear-gradient(135deg, rgba(245,158,11,0.15), rgba(249,115,22,0.1))', border: '1px solid rgba(245,158,11,0.2)' }}>
+                <Crown className="w-10 h-10 text-amber-400" />
+              </div>
+              <div className="text-center space-y-2">
+                <h2 className="text-xl font-bold text-foreground/80">Analyse IA — Premium</h2>
+                <p className="text-sm text-muted-foreground max-w-md">L&apos;analyse IA par intelligence artificielle est réservée aux membres Premium. Passez en Premium pour débloquer cette fonctionnalité.</p>
+              </div>
+              <Button
+                className="rounded-xl text-black font-semibold shadow-lg transition-all active:scale-[0.98]"
+                style={{ background: 'linear-gradient(135deg, #f59e0b, #f97316)', boxShadow: '0 4px 20px rgba(245,158,11,0.3)' }}
+                onClick={() => setShowUpgrade(true)}
+              >
+                <Crown className="w-4 h-4 mr-2" /> Passer en Premium
+              </Button>
+            </div>
+          )
+        }
+        return <AIAnalysisView user={user} />
+      }
       case 'profile': return <ProfileView user={user} onUpgrade={refreshSession} />
       default: return <DashboardView user={user} onUpgrade={() => setShowUpgrade(true)} />
     }
   }
 
   return (
-    <div className="flex min-h-screen relative noise-overlay mesh-gradient" style={{ background: '#000000' }}>
+    <div className="flex min-h-screen relative noise-overlay mesh-gradient bg-background">
       <AmbientBackground />
       <ParticleField />
       <MouseGlow />
