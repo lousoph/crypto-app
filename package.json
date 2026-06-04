@@ -5,7 +5,9 @@
   "scripts": {
     "dev": "NODE_OPTIONS='--max-old-space-size=2048' next dev -p 3000 2>&1 | tee dev.log",
     "build": "next build",
-    "start": "NODE_ENV=production NODE_OPTIONS='--max-old-space-size=2048' npx next start -p 3000 2>&1 | tee server.log",
+    "start": "NODE_ENV=production NODE_OPTIONS='--max-old-space-size=1024' node node_modules/.bin/next start -p 3000",
+    "start:pm2": "pm2 start 'NODE_ENV=production NODE_OPTIONS=--max-old-space-size=1024 node node_modules/.bin/next\\ start\\ -p\\ 3000' --name cryptofolio",
+    "stop:pm2": "pm2 stop cryptofolio && pm2 delete cryptofolio",
     "lint": "eslint .",
     "db:push": "prisma db push",
     "db:generate": "prisma generate",
