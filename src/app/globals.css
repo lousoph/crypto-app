@@ -1055,33 +1055,6 @@ input:focus, select:focus, textarea:focus {
 }
 
 /* ============================================================
-   DEMO ACCOUNT BUTTONS — IMMERSIVE HOVER
-   ============================================================ */
-
-.demo-account-btn {
-  position: relative;
-  overflow: hidden;
-}
-
-.demo-account-btn::before {
-  content: '';
-  position: absolute;
-  inset: 0;
-  background: linear-gradient(90deg, rgba(124,92,252,0.06), transparent);
-  opacity: 0;
-  transition: opacity 0.3s ease;
-  border-radius: inherit;
-}
-
-.demo-account-btn:hover::before {
-  opacity: 1;
-}
-
-.demo-account-btn:hover {
-  transform: translateX(4px);
-}
-
-/* ============================================================
    PARTICLE FIELD — FLOATING DOTS
    ============================================================ */
 .particle-field {
@@ -1405,18 +1378,6 @@ input:focus, select:focus, textarea:focus {
   0%, 100% { opacity: 1; }
   50% { opacity: 0; }
 }
-
-/* ============================================================
-   STAGGER WAVE — WAVE-LIKE STAGGER EFFECT
-   ============================================================ */
-.wave-stagger > *:nth-child(1) { animation-delay: 0s; }
-.wave-stagger > *:nth-child(2) { animation-delay: 0.08s; }
-.wave-stagger > *:nth-child(3) { animation-delay: 0.16s; }
-.wave-stagger > *:nth-child(4) { animation-delay: 0.24s; }
-.wave-stagger > *:nth-child(5) { animation-delay: 0.32s; }
-.wave-stagger > *:nth-child(6) { animation-delay: 0.40s; }
-.wave-stagger > *:nth-child(7) { animation-delay: 0.48s; }
-.wave-stagger > *:nth-child(8) { animation-delay: 0.56s; }
 
 /* ============================================================
    ELASTIC BOUNCE — SPRING ENTRANCE

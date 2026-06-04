@@ -28,49 +28,7 @@ export async function POST(req: Request) {
       })
     }
 
-    // 1b. Also keep a demo admin for quick testing
-    const existingDemoAdmin = await db.user.findUnique({ where: { email: "admin@cryptotracker.com" } })
-    if (!existingDemoAdmin) {
-      const hashedPassword = await bcrypt.hash("admin123", 10)
-      await db.user.create({
-        data: {
-          email: "admin@cryptotracker.com",
-          name: "Admin (Demo)",
-          passwordHash: hashedPassword,
-          role: "admin",
-        },
-      })
-    }
-
-    // 2. Create demo free user
-    const existingDemo = await db.user.findUnique({ where: { email: "demo@cryptotracker.com" } })
-    if (!existingDemo) {
-      const hashedPassword = await bcrypt.hash("demo123", 10)
-      await db.user.create({
-        data: {
-          email: "demo@cryptotracker.com",
-          name: "Demo User",
-          passwordHash: hashedPassword,
-          role: "user_free",
-        },
-      })
-    }
-
-    // 3. Create premium demo user
-    const existingPremium = await db.user.findUnique({ where: { email: "premium@cryptotracker.com" } })
-    if (!existingPremium) {
-      const hashedPassword = await bcrypt.hash("premium123", 10)
-      await db.user.create({
-        data: {
-          email: "premium@cryptotracker.com",
-          name: "Premium User",
-          passwordHash: hashedPassword,
-          role: "user_premium",
-        },
-      })
-    }
-
-    // 4. Create tokens from Excel
+    // 2. Create tokens
     const tokens = [
       { ticker: "BTC", name: "Bitcoin", coingeckoId: "bitcoin", cryptoCompareId: "BTC" },
       { ticker: "ETH", name: "Ethereum", coingeckoId: "ethereum", cryptoCompareId: "ETH" },
@@ -125,7 +83,7 @@ export async function POST(req: Request) {
       })
     }
 
-    // 5. Create exchanges from Excel
+    // 3. Create exchanges
     const exchanges = ["BINANCE", "BYBIT", "COINBASE", "KRAKEN", "OKX"]
 
     for (const name of exchanges) {

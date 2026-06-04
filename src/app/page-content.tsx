@@ -496,12 +496,6 @@ function LoginScreen({ onLogin, onRegister }: {
     }
   }
 
-  const fillDemo = (demoEmail: string, demoPassword: string) => {
-    setEmail(demoEmail)
-    setPassword(demoPassword)
-    setError('')
-  }
-
   // Check which OAuth providers are available
   const hasGoogle = !!(process.env.NEXT_PUBLIC_HAS_GOOGLE)
   const hasApple = !!(process.env.NEXT_PUBLIC_HAS_APPLE)
@@ -691,59 +685,7 @@ function LoginScreen({ onLogin, onRegister }: {
             )}
           </div>
 
-          {/* Demo accounts — login only */}
-          {!isRegister && (
-            <div className="mt-5 space-y-2">
-              <p className="text-xs font-medium text-center mb-3 text-muted-foreground">Comptes de démonstration</p>
-              <div className="space-y-2 wave-stagger">
-                <button
-                  type="button"
-                  onClick={() => fillDemo('unibus93@gmail.com', '#@769891506Fs#@')}
-                  className="demo-account-btn fade-in-up w-full flex items-center gap-3 p-3 rounded-xl border transition-all duration-300 text-left group"
-                  style={{ background: 'rgba(124,92,252,0.06)', borderColor: 'rgba(124,92,252,0.15)' }}
-                >
-                  <div className="w-8 h-8 rounded-lg flex items-center justify-center shrink-0" style={{ background: 'rgba(124,92,252,0.1)' }}>
-                    <Shield className="w-4 h-4 text-violet-400" />
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <p className="text-sm font-medium text-foreground/70 group-hover:text-foreground transition-colors">Admin</p>
-                    <p className="text-xs text-foreground/25 truncate">unibus93@gmail.com</p>
-                  </div>
-                  <LogIn className="w-4 h-4 text-foreground/15 group-hover:text-violet-400 transition-colors" />
-                </button>
-                <button
-                  type="button"
-                  onClick={() => fillDemo('premium@cryptotracker.com', 'premium123')}
-                  className="demo-account-btn w-full flex items-center gap-3 p-3 rounded-xl border transition-all duration-300 text-left group"
-                  style={{ background: 'rgba(245,158,11,0.06)', borderColor: 'rgba(245,158,11,0.15)' }}
-                >
-                  <div className="w-8 h-8 rounded-lg flex items-center justify-center shrink-0" style={{ background: 'rgba(245,158,11,0.1)' }}>
-                    <Crown className="w-4 h-4 text-amber-400" />
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <p className="text-sm font-medium text-foreground/70 group-hover:text-foreground transition-colors">Premium</p>
-                    <p className="text-xs text-foreground/25 truncate">premium@cryptotracker.com</p>
-                  </div>
-                  <LogIn className="w-4 h-4 text-foreground/15 group-hover:text-amber-400 transition-colors" />
-                </button>
-                <button
-                  type="button"
-                  onClick={() => fillDemo('demo@cryptotracker.com', 'demo123')}
-                  className="demo-account-btn w-full flex items-center gap-3 p-3 rounded-xl border transition-all duration-300 text-left group"
-                  style={{ background: 'var(--input)', borderColor: 'var(--border)' }}
-                >
-                  <div className="w-8 h-8 rounded-lg flex items-center justify-center shrink-0" style={{ background: 'var(--muted)' }}>
-                    <User className="w-4 h-4 text-foreground/35" />
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <p className="text-sm font-medium text-foreground/70 group-hover:text-foreground transition-colors">Gratuit</p>
-                    <p className="text-xs text-foreground/25 truncate">demo@cryptotracker.com</p>
-                  </div>
-                  <LogIn className="w-4 h-4 text-foreground/15 group-hover:text-foreground/50 transition-colors" />
-                </button>
-              </div>
-            </div>
-          )}
+
         </div>
 
         {/* Bottom security note */}
