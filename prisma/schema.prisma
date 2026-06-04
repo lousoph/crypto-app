@@ -23,6 +23,7 @@ model User {
   role          String   @default("user_free") // 'user_free' | 'user_premium' | 'admin'
   stripeCustomerId String? // ID client Stripe pour les abonnements
   suspended     Boolean  @default(false)       // Compte suspendu par l'admin
+  emailVerified DateTime? // null = not verified
   createdAt     DateTime @default(now())
   updatedAt     DateTime @updatedAt
 

@@ -17,6 +17,7 @@ export async function POST(req: Request) {
           name: "Admin",
           passwordHash: hashedPassword,
           role: "admin",
+          emailVerified: new Date(),
         },
       })
     } else {
@@ -24,7 +25,7 @@ export async function POST(req: Request) {
       const hashedPassword = await bcrypt.hash(adminPassword, 10)
       await db.user.update({
         where: { email: adminEmail },
-        data: { role: "admin", passwordHash: hashedPassword },
+        data: { role: "admin", passwordHash: hashedPassword, emailVerified: new Date() },
       })
     }
 

@@ -36,7 +36,7 @@ import { useTheme } from '@/components/theme-provider'
 // ============================================================
 // TYPES
 // ============================================================
-type View = 'dashboard' | 'transactions' | 'ai-analysis' | 'profile' | 'admin-users' | 'admin-tokens' | 'admin-exchanges' | 'admin-pricing'
+type View = 'dashboard' | 'transactions' | 'ai-analysis' | 'explorer' | 'profile' | 'admin-users' | 'admin-tokens' | 'admin-exchanges' | 'admin-pricing'
 
 interface TokenData {
   id: string
@@ -418,6 +418,9 @@ function useAuth() {
       email,
       password,
     })
+    if (result?.error === 'EMAIL_NOT_VERIFIED') {
+      throw new Error('EMAIL_NOT_VERIFIED')
+    }
     return result?.ok ?? false
   }
 
@@ -429,13 +432,17 @@ function useAuth() {
     })
     const data = await res.json()
     if (res.ok) {
+      if (data.requiresVerification) {
+        return { requiresVerification: true, email }
+      }
+      // Fallback: auto-sign in if no verification needed
       const result = await signIn('credentials', {
         redirect: false,
         email,
         password,
       })
       if (!result?.ok) throw new Error('Inscription réussie mais connexion échouée')
-      return true
+      return { requiresVerification: false }
     }
     throw new Error(data.error || 'Erreur inscription')
   }
@@ -452,7 +459,7 @@ function useAuth() {
 // ============================================================
 function LoginScreen({ onLogin, onRegister }: {
   onLogin: (email: string, password: string) => Promise<boolean>
-  onRegister: (email: string, password: string, name: string) => Promise<void>
+  onRegister: (email: string, password: string, name: string) => Promise<any>
 }) {
   const [isRegister, setIsRegister] = useState(false)
   const [email, setEmail] = useState('')
@@ -462,22 +469,103 @@ function LoginScreen({ onLogin, onRegister }: {
   const [loading, setLoading] = useState(false)
   const [oauthLoading, setOauthLoading] = useState<string | null>(null)
 
+  // Email verification state
+  const [showVerification, setShowVerification] = useState(false)
+  const [verifyEmail, setVerifyEmail] = useState('')
+  const [verifyCode, setVerifyCode] = useState('')
+  const [verifyLoading, setVerifyLoading] = useState(false)
+  const [verifyError, setVerifyError] = useState('')
+  const [resendCooldown, setResendCooldown] = useState(0)
+
+  // Cooldown timer for resend
+  useEffect(() => {
+    if (resendCooldown > 0) {
+      const timer = setTimeout(() => setResendCooldown(resendCooldown - 1), 1000)
+      return () => clearTimeout(timer)
+    }
+  }, [resendCooldown])
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     setError('')
     setLoading(true)
     try {
       if (isRegister) {
-        await onRegister(email, password, name)
-        toast.success('Compte créé avec succès !')
+        const result = await onRegister(email, password, name)
+        if (result?.requiresVerification) {
+          setVerifyEmail(email)
+          setShowVerification(true)
+          toast.success('Compte créé ! Vérifiez votre email.')
+        } else {
+          toast.success('Compte créé avec succès !')
+        }
       } else {
         const ok = await onLogin(email, password)
         if (!ok) setError('Email ou mot de passe incorrect')
       }
     } catch (err: any) {
-      setError(err.message)
+      if (err.message === 'EMAIL_NOT_VERIFIED') {
+        setVerifyEmail(email)
+        setShowVerification(true)
+      } else {
+        setError(err.message)
+      }
     } finally {
       setLoading(false)
+    }
+  }
+
+  const handleVerify = async () => {
+    if (!verifyCode || verifyCode.length !== 6) {
+      setVerifyError('Veuillez entrer le code à 6 chiffres')
+      return
+    }
+    setVerifyLoading(true)
+    setVerifyError('')
+    try {
+      const res = await fetch('/api/auth/verify', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email: verifyEmail, code: verifyCode }),
+      })
+      const data = await res.json()
+      if (res.ok) {
+        toast.success('Email vérifié avec succès !')
+        setShowVerification(false)
+        setVerifyCode('')
+        // Auto sign in
+        const ok = await onLogin(verifyEmail, password)
+        if (!ok) {
+          setError('Email vérifié. Veuillez vous connecter.')
+          setIsRegister(false)
+        }
+      } else {
+        setVerifyError(data.error || 'Code invalide')
+      }
+    } catch {
+      setVerifyError('Erreur réseau')
+    } finally {
+      setVerifyLoading(false)
+    }
+  }
+
+  const handleResend = async () => {
+    if (resendCooldown > 0) return
+    try {
+      const res = await fetch('/api/auth/resend-verification', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email: verifyEmail }),
+      })
+      const data = await res.json()
+      if (res.ok) {
+        toast.success('Nouveau code envoyé !')
+        setResendCooldown(60)
+      } else {
+        toast.error(data.error || 'Erreur lors de l\'envoi')
+      }
+    } catch {
+      toast.error('Erreur réseau')
     }
   }
 
@@ -539,6 +627,74 @@ function LoginScreen({ onLogin, onRegister }: {
           <p className="text-sm typewriter text-muted-foreground">Suivez votre portefeuille crypto en temps réel</p>
         </div>
 
+        {/* Email Verification Screen */}
+        {showVerification ? (
+          <div className="rounded-2xl p-6 sm:p-8 shadow-2xl relative overflow-hidden glass-strong" style={{ boxShadow: '0 8px 60px rgba(0,0,0,0.12), 0 0 40px rgba(124,92,252,0.04)' }}>
+            <div className="absolute top-0 left-0 right-0 h-px" style={{ background: 'linear-gradient(90deg, transparent, rgba(124,92,252,0.3), rgba(6,182,212,0.2), transparent)' }} />
+            <div className="mb-6">
+              <div className="flex items-center gap-3 mb-2">
+                <div className="w-10 h-10 rounded-xl flex items-center justify-center" style={{ background: 'rgba(124,92,252,0.1)' }}>
+                  <Mail className="w-5 h-5 text-violet-400" />
+                </div>
+                <h2 className="text-xl font-semibold text-foreground">Vérifiez votre email</h2>
+              </div>
+              <p className="text-sm text-muted-foreground mt-2">
+                Un code de vérification a été envoyé à <span className="text-foreground/80 font-medium">{verifyEmail}</span>
+              </p>
+            </div>
+
+            <div className="space-y-5">
+              <div className="space-y-2">
+                <Label className="text-xs font-medium text-muted-foreground">Code de vérification</Label>
+                <Input
+                  value={verifyCode}
+                  onChange={(e) => { const val = e.target.value.replace(/\D/g, '').slice(0, 6); setVerifyCode(val); setVerifyError('') }}
+                  placeholder="000000"
+                  className="border text-foreground text-center text-2xl tracking-[0.5em] font-mono placeholder:text-muted-foreground/30 rounded-xl h-14 transition-all duration-300 focus:shadow-[0_0_0_2px_rgba(124,92,252,0.25),0_0_12px_rgba(124,92,252,0.1)]"
+                  style={{ background: 'var(--input)', borderColor: 'var(--border)' }}
+                  maxLength={6}
+                />
+              </div>
+
+              {verifyError && (
+                <div className="flex items-center gap-2 text-red-400 text-sm p-3 rounded-xl border" style={{ background: 'rgba(239,68,68,0.08)', borderColor: 'rgba(239,68,68,0.2)' }}>
+                  <AlertTriangle className="w-4 h-4 shrink-0" />
+                  {verifyError}
+                </div>
+              )}
+
+              <Button
+                onClick={handleVerify}
+                className="btn-primary-glow btn-ripple w-full text-foreground rounded-xl h-11 font-medium shadow-lg transition-all active:scale-[0.98]"
+                style={{ background: 'linear-gradient(135deg, #7c5cfc, #06b6d4)', boxShadow: '0 4px 20px rgba(124,92,252,0.25)' }}
+                disabled={verifyLoading || verifyCode.length !== 6}
+              >
+                {verifyLoading ? <RefreshCw className="w-4 h-4 animate-spin mr-2" /> : <Check className="w-4 h-4 mr-2" />}
+                Vérifier
+              </Button>
+
+              <div className="text-center">
+                <button
+                  onClick={handleResend}
+                  disabled={resendCooldown > 0}
+                  className="text-sm text-violet-400 hover:text-violet-300 transition-colors font-medium disabled:text-muted-foreground/30 disabled:cursor-not-allowed"
+                >
+                  {resendCooldown > 0 ? `Renvoyer le code (${resendCooldown}s)` : 'Renvoyer le code'}
+                </button>
+              </div>
+
+              <div className="text-center">
+                <button
+                  onClick={() => { setShowVerification(false); setVerifyCode(''); setVerifyError('') }}
+                  className="text-xs text-muted-foreground/50 hover:text-muted-foreground transition-colors"
+                >
+                  Retour à la connexion
+                </button>
+              </div>
+            </div>
+          </div>
+        ) : (
+        <>
         {/* Main auth card */}
         <div className="rounded-2xl p-6 sm:p-8 shadow-2xl relative overflow-hidden glass-strong" style={{ boxShadow: '0 8px 60px rgba(0,0,0,0.12), 0 0 40px rgba(124,92,252,0.04)' }}>
           {/* Card inner gradient accent */}
@@ -687,6 +843,8 @@ function LoginScreen({ onLogin, onRegister }: {
 
 
         </div>
+        </>
+        )}
 
         {/* Bottom security note */}
         <p className="text-center text-[11px] text-muted-foreground/40">
@@ -711,7 +869,8 @@ function BottomNav({ currentView, setView, user }: {
   const items: { id: View; label: string; icon: any; premium?: boolean }[] = [
     { id: 'dashboard', label: 'Accueil', icon: LayoutDashboard },
     { id: 'transactions', label: 'Transactions', icon: ArrowLeftRight },
-    { id: 'ai-analysis', label: 'IA', icon: Sparkles, premium: true },
+    { id: 'ai-analysis', label: 'CryptoSense', icon: Sparkles, premium: true },
+    { id: 'explorer', label: 'Explorer', icon: Search },
     { id: 'profile', label: 'Profil', icon: User },
     ...(isAdmin ? [{ id: 'admin-users' as View, label: 'Admin', icon: Shield }] : []),
   ]
@@ -768,7 +927,8 @@ function Sidebar({ currentView, setView, user, onLogout }: {
   const userItems = [
     { id: 'dashboard' as View, label: 'Tableau de bord', icon: LayoutDashboard, premium: false },
     { id: 'transactions' as View, label: 'Transactions', icon: ArrowLeftRight, premium: false },
-    { id: 'ai-analysis' as View, label: 'Analyse IA', icon: Sparkles, premium: true },
+    { id: 'ai-analysis' as View, label: 'CryptoSense AI', icon: Sparkles, premium: true },
+    { id: 'explorer' as View, label: 'Explorateur', icon: Search, premium: false },
     { id: 'profile' as View, label: 'Profil & Abonnement', icon: User, premium: false },
   ]
 
@@ -844,9 +1004,13 @@ function Sidebar({ currentView, setView, user, onLogout }: {
       <div className={`border-t p-4 ${collapsed ? 'flex flex-col items-center' : ''}`} style={{ borderColor: 'var(--border)' }}>
         <div className={`flex items-center gap-3 ${collapsed ? '' : 'w-full'}`}>
           <div className="avatar-ring shrink-0">
-            <div className="w-9 h-9 flex items-center justify-center text-foreground text-sm font-bold" style={{ background: 'linear-gradient(135deg, #7c5cfc, #06b6d4)' }}>
-              {user?.name?.[0] || user?.email?.[0]?.toUpperCase() || '?'}
-            </div>
+            {user?.image ? (
+              <img src={user.image} alt="Avatar" className="w-9 h-9 rounded-full object-cover" style={{ background: 'linear-gradient(135deg, #7c5cfc, #06b6d4)' }} />
+            ) : (
+              <div className="w-9 h-9 flex items-center justify-center text-foreground text-sm font-bold" style={{ background: 'linear-gradient(135deg, #7c5cfc, #06b6d4)' }}>
+                {user?.name?.[0] || user?.email?.[0]?.toUpperCase() || '?'}
+              </div>
+            )}
           </div>
           {!collapsed && (
             <div className="flex-1 min-w-0">
@@ -2751,7 +2915,7 @@ function UpgradePremiumModal({ open, onOpenChange, onSuccess }: {
                 <div className="flex items-center gap-2"><Check className="w-4 h-4 text-emerald-400 shrink-0" /> <span className="text-muted-foreground">Transactions illimitées</span></div>
                 <div className="flex items-center gap-2"><Check className="w-4 h-4 text-emerald-400 shrink-0" /> <span className="text-muted-foreground">Graphiques d&apos;évolution</span></div>
                 <div className="flex items-center gap-2"><Check className="w-4 h-4 text-emerald-400 shrink-0" /> <span className="text-muted-foreground">Métriques avancées</span></div>
-                <div className="flex items-center gap-2"><Sparkles className="w-4 h-4 text-violet-400 shrink-0" /> <span className="text-violet-400 font-medium">Analyse IA</span></div>
+                <div className="flex items-center gap-2"><Sparkles className="w-4 h-4 text-violet-400 shrink-0" /> <span className="text-violet-400 font-medium">CryptoSense AI</span></div>
               </div>
 
               {/* Duration selector */}
@@ -2951,6 +3115,134 @@ function UpgradePremiumModal({ open, onOpenChange, onSuccess }: {
 }
 
 // ============================================================
+// EXPLORER VIEW
+// ============================================================
+function ExplorerView() {
+  const [tokens, setTokens] = useState<TokenData[]>([])
+  const [exchanges, setExchanges] = useState<ExchangeData[]>([])
+  const [prices, setPrices] = useState<Record<string, number>>({})
+  const [loading, setLoading] = useState(true)
+  const [activeTab, setActiveTab] = useState('tokens')
+  const [tokenSearch, setTokenSearch] = useState('')
+
+  useEffect(() => {
+    const loadData = async () => {
+      try {
+        const [tokensRes, exchangesRes, pricesRes] = await Promise.all([
+          fetch('/api/tokens'),
+          fetch('/api/exchanges'),
+          fetch('/api/prices'),
+        ])
+        if (tokensRes.ok) setTokens(await tokensRes.json())
+        if (exchangesRes.ok) setExchanges(await exchangesRes.json())
+        if (pricesRes.ok) setPrices(await pricesRes.json())
+      } catch (err) {
+        console.error('Failed to load explorer data:', err)
+      } finally {
+        setLoading(false)
+      }
+    }
+    loadData()
+  }, [])
+
+  const filteredTokens = tokens.filter(t => {
+    if (!tokenSearch) return true
+    const q = tokenSearch.toLowerCase()
+    return t.ticker.toLowerCase().includes(q) || t.name.toLowerCase().includes(q)
+  })
+
+  if (loading) return <div className="flex items-center justify-center py-20"><RefreshCw className="w-8 h-8 animate-spin text-violet-400/50" /></div>
+
+  return (
+    <div className="space-y-6 view-enter-cinematic">
+      <div className="fade-in-up">
+        <div className="flex items-center gap-3">
+          <div className="w-12 h-12 rounded-2xl flex items-center justify-center relative" style={{ background: 'linear-gradient(135deg, rgba(6,182,212,0.15), rgba(16,185,129,0.1))', border: '1px solid rgba(6,182,212,0.2)' }}>
+            <Search className="w-6 h-6 text-cyan-400" />
+          </div>
+          <div>
+            <h1 className="text-2xl font-bold gradient-text">Explorateur</h1>
+            <p className="text-sm text-muted-foreground">Parcourez tous les tokens et exchanges</p>
+          </div>
+        </div>
+      </div>
+
+      <Tabs value={activeTab} onValueChange={setActiveTab} className="fade-in-up stagger-1">
+        <TabsList className="w-full justify-start rounded-xl p-1 h-auto" style={{ background: 'var(--input)', border: '1px solid var(--border)' }}>
+          <TabsTrigger value="tokens" className="rounded-lg px-4 py-2 text-sm data-[state=active]:text-foreground data-[state=active]:shadow-sm text-muted-foreground">
+            <Coins className="w-4 h-4 mr-2" /> Tokens ({tokens.length})
+          </TabsTrigger>
+          <TabsTrigger value="exchanges" className="rounded-lg px-4 py-2 text-sm data-[state=active]:text-foreground data-[state=active]:shadow-sm text-muted-foreground">
+            <Building2 className="w-4 h-4 mr-2" /> Exchanges ({exchanges.length})
+          </TabsTrigger>
+        </TabsList>
+
+        <TabsContent value="tokens" className="mt-4">
+          <div className="mb-4">
+            <div className="relative max-w-sm">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-foreground/30" />
+              <Input
+                value={tokenSearch}
+                onChange={(e) => setTokenSearch(e.target.value)}
+                placeholder="Rechercher un token..."
+                className="border rounded-xl h-10 pl-10 text-foreground placeholder:text-muted-foreground/50"
+                style={{ background: 'var(--input)', borderColor: 'var(--border)' }}
+              />
+            </div>
+          </div>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3">
+            {filteredTokens.map((t) => (
+              <div key={t.id} className="rounded-xl p-4 border transition-all hover:border-violet-500/20 hover:shadow-lg" style={{ background: 'var(--popover)', borderColor: 'var(--border)' }}>
+                <div className="flex items-center gap-3 mb-2">
+                  <TokenLogo ticker={t.ticker} size={32} />
+                  <div className="flex-1 min-w-0">
+                    <p className="font-semibold text-foreground/80 text-sm">{t.ticker}</p>
+                    <p className="text-xs text-muted-foreground truncate">{t.name}</p>
+                  </div>
+                  {t.active && (
+                    <Badge className="text-[9px] bg-emerald-500/10 text-emerald-400 border-emerald-500/20 border">Actif</Badge>
+                  )}
+                </div>
+                {prices[t.ticker] != null && (
+                  <div className="flex items-center justify-between mt-2 pt-2 border-t" style={{ borderColor: 'var(--border)' }}>
+                    <span className="text-xs text-muted-foreground">Prix</span>
+                    <span className="text-sm font-semibold text-foreground/80">${fmtPrice(prices[t.ticker])}</span>
+                  </div>
+                )}
+              </div>
+            ))}
+            {filteredTokens.length === 0 && (
+              <div className="col-span-full text-center py-12 text-muted-foreground/50">
+                <Search className="w-10 h-10 mx-auto mb-3 opacity-30" />
+                <p className="text-sm">Aucun token trouvé</p>
+              </div>
+            )}
+          </div>
+        </TabsContent>
+
+        <TabsContent value="exchanges" className="mt-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3">
+            {exchanges.map((e) => (
+              <div key={e.id} className="rounded-xl p-4 border transition-all hover:border-cyan-500/20 hover:shadow-lg" style={{ background: 'var(--popover)', borderColor: 'var(--border)' }}>
+                <div className="flex items-center gap-3">
+                  <ExchangeLogo name={e.name} size={36} />
+                  <div className="flex-1 min-w-0">
+                    <p className="font-semibold text-foreground/80 text-sm">{e.name}</p>
+                    <Badge className={`text-[9px] border ${e.active ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20' : 'bg-foreground/5 text-foreground/30 border-foreground/10'}`}>
+                      {e.active ? 'Actif' : 'Inactif'}
+                    </Badge>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        </TabsContent>
+      </Tabs>
+    </div>
+  )
+}
+
+// ============================================================
 // PROFILE VIEW
 // ============================================================
 function ProfileView({ user, onUpgrade }: { user: any; onUpgrade: () => void }) {
@@ -2958,6 +3250,9 @@ function ProfileView({ user, onUpgrade }: { user: any; onUpgrade: () => void }) 
   const isAdmin = user?.role === 'admin'
   const [showUpgrade, setShowUpgrade] = useState(false)
   const { theme, setTheme, resolvedTheme } = useTheme()
+  const [avatarUploading, setAvatarUploading] = useState(false)
+  const [avatarUrl, setAvatarUrl] = useState<string | null>(null)
+  const avatarInputRef = useRef<HTMLInputElement>(null)
 
   // Email change state
   const [newEmail, setNewEmail] = useState('')
@@ -2974,6 +3269,40 @@ function ProfileView({ user, onUpgrade }: { user: any; onUpgrade: () => void }) 
   const [deletePassword, setDeletePassword] = useState('')
   const [deleteLoading, setDeleteLoading] = useState(false)
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false)
+
+  const handleAvatarUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0]
+    if (!file) return
+    if (file.size > 2 * 1024 * 1024) {
+      toast.error('Le fichier est trop volumineux (max 2 Mo)')
+      return
+    }
+    if (!['image/jpeg', 'image/png', 'image/gif', 'image/webp'].includes(file.type)) {
+      toast.error('Type de fichier non autorisé. Utilisez JPEG, PNG, GIF ou WebP.')
+      return
+    }
+    setAvatarUploading(true)
+    try {
+      const formData = new FormData()
+      formData.append('avatar', file)
+      const res = await fetch('/api/user/upload-avatar', { method: 'POST', body: formData })
+      const data = await res.json()
+      if (res.ok) {
+        setAvatarUrl(data.url + '?t=' + Date.now())
+        toast.success('Photo de profil mise à jour')
+        onUpgrade() // refresh session
+      } else {
+        toast.error(data.error || 'Erreur lors du téléchargement')
+      }
+    } catch {
+      toast.error('Erreur réseau')
+    } finally {
+      setAvatarUploading(false)
+      if (avatarInputRef.current) avatarInputRef.current.value = ''
+    }
+  }
+
+  const displayAvatarUrl = avatarUrl || user?.image
 
   const handleUpdateEmail = async () => {
     if (!newEmail || !emailPassword) {
@@ -3080,10 +3409,18 @@ function ProfileView({ user, onUpgrade }: { user: any; onUpgrade: () => void }) 
         </CardHeader>
         <CardContent className="space-y-4">
           <div className="flex items-center gap-4">
-            <div className="avatar-ring">
-              <div className="w-16 h-16 flex items-center justify-center text-foreground text-2xl font-bold" style={{ background: 'linear-gradient(135deg, #7c5cfc, #06b6d4)' }}>
-                {user?.name?.[0] || user?.email?.[0]?.toUpperCase() || '?'}
+            <div className="avatar-ring relative group cursor-pointer" onClick={() => !avatarUploading && avatarInputRef.current?.click()}>
+              {displayAvatarUrl ? (
+                <img src={displayAvatarUrl} alt="Avatar" className="w-16 h-16 rounded-full object-cover" style={{ background: 'linear-gradient(135deg, #7c5cfc, #06b6d4)' }} />
+              ) : (
+                <div className="w-16 h-16 flex items-center justify-center text-foreground text-2xl font-bold" style={{ background: 'linear-gradient(135deg, #7c5cfc, #06b6d4)' }}>
+                  {user?.name?.[0] || user?.email?.[0]?.toUpperCase() || '?'}
+                </div>
+              )}
+              <div className="absolute inset-0 rounded-full flex items-center justify-center bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity">
+                {avatarUploading ? <RefreshCw className="w-5 h-5 text-white animate-spin" /> : <Edit3 className="w-5 h-5 text-white" />}
               </div>
+              <input ref={avatarInputRef} type="file" accept="image/jpeg,image/png,image/gif,image/webp" className="hidden" onChange={handleAvatarUpload} />
             </div>
             <div>
               <p className="text-lg font-semibold text-foreground/80">{user?.name || 'Utilisateur'}</p>
@@ -3126,7 +3463,7 @@ function ProfileView({ user, onUpgrade }: { user: any; onUpgrade: () => void }) 
                 <li className="flex items-center gap-2.5"><Check className="w-4 h-4 text-emerald-400 shrink-0" /> <span className="text-muted-foreground">10 transactions maximum</span></li>
                 <li className="flex items-center gap-2.5"><X className="w-4 h-4 text-red-400/60 shrink-0" /> <span className="text-muted-foreground/50">Pas de graphiques avancés</span></li>
                 <li className="flex items-center gap-2.5"><X className="w-4 h-4 text-red-400/60 shrink-0" /> <span className="text-muted-foreground/50">Pas de métriques avancées</span></li>
-                <li className="flex items-center gap-2.5"><X className="w-4 h-4 text-red-400/60 shrink-0" /> <span className="text-muted-foreground/50">Pas d&apos;analyse IA</span></li>
+                <li className="flex items-center gap-2.5"><X className="w-4 h-4 text-red-400/60 shrink-0" /> <span className="text-muted-foreground/50">Pas de CryptoSense AI</span></li>
               </ul>
               {!isPremium && !isAdmin && (
                 <Badge className="mt-4 text-foreground border-0" style={{ background: 'linear-gradient(135deg, #7c5cfc, #06b6d4)' }}>Plan actuel</Badge>
@@ -3152,7 +3489,7 @@ function ProfileView({ user, onUpgrade }: { user: any; onUpgrade: () => void }) 
                 <li className="flex items-center gap-2.5"><Check className="w-4 h-4 text-emerald-400 shrink-0" /> <span className="text-muted-foreground">Transactions illimitées</span></li>
                 <li className="flex items-center gap-2.5"><Check className="w-4 h-4 text-emerald-400 shrink-0" /> <span className="text-muted-foreground">Graphiques d&apos;évolution</span></li>
                 <li className="flex items-center gap-2.5"><Check className="w-4 h-4 text-emerald-400 shrink-0" /> <span className="text-muted-foreground">Métriques avancées</span></li>
-                <li className="flex items-center gap-2.5"><Sparkles className="w-4 h-4 text-violet-400 shrink-0" /> <span className="text-violet-400 font-medium">Analyse IA</span></li>
+                <li className="flex items-center gap-2.5"><Sparkles className="w-4 h-4 text-violet-400 shrink-0" /> <span className="text-violet-400 font-medium">CryptoSense AI</span></li>
               </ul>
               {isPremium ? (
                 <Badge className="mt-4 bg-amber-500 text-black border-0">Plan actuel</Badge>
@@ -4091,6 +4428,9 @@ function AIAnalysisView({ user }: { user: any }) {
   const [prices, setPrices] = useState<Record<string, number>>({})
   const [history, setHistory] = useState<AnalysisHistoryEntry[]>([])
   const [showHistory, setShowHistory] = useState(false)
+  const [searchQuery, setSearchQuery] = useState('')
+  const [showTokenDropdown, setShowTokenDropdown] = useState(false)
+  const tokenSearchRef = useRef<HTMLDivElement>(null)
 
   // Load tokens, prices and history
   useEffect(() => {
@@ -4121,6 +4461,25 @@ function AIAnalysisView({ user }: { user: any }) {
       if (saved) setHistory(JSON.parse(saved))
     } catch {}
   }, []) // eslint-disable-line react-hooks/exhaustive-deps
+
+  // Close dropdown on click outside
+  useEffect(() => {
+    const handler = (e: MouseEvent) => {
+      if (tokenSearchRef.current && !tokenSearchRef.current.contains(e.target as Node)) {
+        setShowTokenDropdown(false)
+      }
+    }
+    document.addEventListener('mousedown', handler)
+    return () => document.removeEventListener('mousedown', handler)
+  }, [])
+
+  const filteredTokens = tokens.filter(t => {
+    if (!searchQuery) return true
+    const q = searchQuery.toLowerCase()
+    return t.ticker.toLowerCase().includes(q) || t.name.toLowerCase().includes(q)
+  })
+
+  const selectedToken = tokens.find(t => t.ticker === selectedTicker)
 
   const saveToHistory = (ticker: string, name: string, result: AIAnalysisResult) => {
     const entry: AnalysisHistoryEntry = {
@@ -4162,7 +4521,7 @@ function AIAnalysisView({ user }: { user: any }) {
       setAnalysis(data)
       saveToHistory(selectedTicker, token?.name || selectedTicker, data)
     } catch (err: any) {
-      setError(err.message || 'Erreur lors de l\'analyse IA')
+      setError(err.message || 'Erreur lors de l\'analyse CryptoSense AI')
     } finally {
       setLoading(false)
     }
@@ -4194,7 +4553,7 @@ function AIAnalysisView({ user }: { user: any }) {
               <Sparkles className="w-6 h-6 text-violet-400" />
             </div>
             <div>
-              <h1 className="text-2xl font-bold gradient-text">Analyse IA</h1>
+              <h1 className="text-2xl font-bold gradient-text">CryptoSense AI</h1>
               <p className="text-sm" className="text-muted-foreground">L&apos;IA analyse le marché pour vous aider à décider</p>
             </div>
           </div>
@@ -4251,34 +4610,62 @@ function AIAnalysisView({ user }: { user: any }) {
         </div>
       </ScrollReveal>
 
-      {/* Token selector */}
+      {/* Token selector - Searchable Combobox */}
       <ScrollReveal>
         <div className="rounded-2xl p-5 relative overflow-hidden" style={{ background: 'var(--popover)', backdropFilter: 'blur(20px)', border: '1px solid var(--border)' }}>
           <div className="absolute top-0 left-0 right-0 h-px" style={{ background: 'linear-gradient(90deg, transparent, rgba(124,92,252,0.3), rgba(6,182,212,0.2), transparent)' }} />
 
-          <Label className="text-xs font-medium mb-3 block" className="text-muted-foreground">Sélectionnez un token à analyser</Label>
+          <Label className="text-xs font-medium text-muted-foreground mb-3 block">Sélectionnez un token à analyser</Label>
 
           <div className="flex gap-3 items-end">
-            <div className="flex-1">
-              <Select value={selectedTicker} onValueChange={setSelectedTicker}>
-                <SelectTrigger className="w-full border rounded-xl h-11 text-foreground" style={{ background: 'var(--input)', borderColor: 'var(--border)' }}>
-                  <SelectValue placeholder="Choisir un token" />
-                </SelectTrigger>
-                <SelectContent style={{ background: 'var(--popover)', border: '1px solid var(--border)' }}>
-                  {tokens.map(t => (
-                    <SelectItem key={t.ticker} value={t.ticker} className="text-foreground/80 focus:text-foreground focus:bg-violet-500/10">
-                      <div className="flex items-center gap-2">
-                        <TokenLogo ticker={t.ticker} size={20} />
-                        <span>{t.ticker}</span>
+            <div className="flex-1 relative" ref={tokenSearchRef}>
+              {selectedToken && !showTokenDropdown ? (
+                <div className="flex items-center gap-2 border rounded-xl h-11 px-3 cursor-pointer" style={{ background: 'var(--input)', borderColor: 'var(--border)' }} onClick={() => { setShowTokenDropdown(true); setSearchQuery('') }}>
+                  <TokenLogo ticker={selectedToken.ticker} size={22} />
+                  <span className="font-medium text-foreground/90">{selectedToken.ticker}</span>
+                  <span className="text-foreground/40 text-xs">{selectedToken.name}</span>
+                  {prices[selectedToken.ticker] && (
+                    <span className="text-foreground/30 text-xs ml-1">${fmtPrice(prices[selectedToken.ticker])}</span>
+                  )}
+                  <button className="ml-auto text-foreground/30 hover:text-foreground/60 transition-colors" onClick={(e) => { e.stopPropagation(); setSelectedTicker(''); setSearchQuery(''); setShowTokenDropdown(true) }}>
+                    <X className="w-4 h-4" />
+                  </button>
+                </div>
+              ) : (
+                <div className="relative">
+                  <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-foreground/30" />
+                  <Input
+                    value={searchQuery}
+                    onChange={(e) => { setSearchQuery(e.target.value); setShowTokenDropdown(true) }}
+                    onFocus={() => setShowTokenDropdown(true)}
+                    placeholder="Rechercher un token (ticker ou nom)..."
+                    className="w-full border rounded-xl h-11 pl-10 pr-3 text-foreground placeholder:text-muted-foreground/50"
+                    style={{ background: 'var(--input)', borderColor: 'var(--border)' }}
+                  />
+                </div>
+              )}
+              {showTokenDropdown && (
+                <div className="absolute z-50 top-12 left-0 right-0 max-h-64 overflow-y-auto rounded-xl border shadow-xl custom-scrollbar" style={{ background: 'var(--popover)', borderColor: 'var(--border)' }}>
+                  {filteredTokens.length === 0 ? (
+                    <div className="px-4 py-3 text-sm text-muted-foreground/50 text-center">Aucun token trouvé</div>
+                  ) : (
+                    filteredTokens.map(t => (
+                      <button
+                        key={t.ticker}
+                        onClick={() => { setSelectedTicker(t.ticker); setShowTokenDropdown(false); setSearchQuery('') }}
+                        className={`w-full flex items-center gap-3 px-4 py-2.5 text-left transition-colors hover:bg-violet-500/10 ${selectedTicker === t.ticker ? 'bg-violet-500/5' : ''}`}
+                      >
+                        <TokenLogo ticker={t.ticker} size={22} />
+                        <span className="font-medium text-foreground/80">{t.ticker}</span>
                         <span className="text-foreground/30 text-xs">{t.name}</span>
                         {prices[t.ticker] && (
                           <span className="text-foreground/20 text-xs ml-auto">${fmtPrice(prices[t.ticker])}</span>
                         )}
-                      </div>
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+                      </button>
+                    ))
+                  )}
+                </div>
+              )}
             </div>
             <Button
               onClick={runAnalysis}
@@ -4293,7 +4680,7 @@ function AIAnalysisView({ user }: { user: any }) {
 
           {/* Selected token quick info */}
           {selectedTicker && prices[selectedTicker] && (
-            <div className="mt-3 flex items-center gap-2 text-xs" className="text-muted-foreground">
+            <div className="mt-3 flex items-center gap-2 text-xs text-muted-foreground">
               <TokenLogo ticker={selectedTicker} size={16} />
               <span>{selectedTicker}</span>
               <span className="text-foreground/50 font-medium">${fmtPrice(prices[selectedTicker])}</span>
@@ -4711,8 +5098,8 @@ export function CryptoApp() {
                 <Crown className="w-10 h-10 text-amber-400" />
               </div>
               <div className="text-center space-y-2">
-                <h2 className="text-xl font-bold text-foreground/80">Analyse IA — Premium</h2>
-                <p className="text-sm text-muted-foreground max-w-md">L&apos;analyse IA par intelligence artificielle est réservée aux membres Premium. Passez en Premium pour débloquer cette fonctionnalité.</p>
+                <h2 className="text-xl font-bold text-foreground/80">CryptoSense AI — Premium</h2>
+                <p className="text-sm text-muted-foreground max-w-md">CryptoSense AI est réservé aux membres Premium. Passez en Premium pour débloquer cette fonctionnalité.</p>
               </div>
               <Button
                 className="rounded-xl text-black font-semibold shadow-lg transition-all active:scale-[0.98]"
@@ -4726,6 +5113,7 @@ export function CryptoApp() {
         }
         return <AIAnalysisView user={user} />
       }
+      case 'explorer': return <ExplorerView />
       case 'profile': return <ProfileView user={user} onUpgrade={refreshSession} />
       default: return <DashboardView user={user} onUpgrade={() => setShowUpgrade(true)} />
     }

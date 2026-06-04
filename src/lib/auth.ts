@@ -26,6 +26,11 @@ const providers: NextAuthOptions["providers"] = [
       const isValid = await bcrypt.compare(credentials.password, user.passwordHash)
       if (!isValid) return null
 
+      // Check if email is verified
+      if (!user.emailVerified) {
+        throw new Error("EMAIL_NOT_VERIFIED")
+      }
+
       return {
         id: user.id,
         email: user.email,
@@ -74,13 +79,14 @@ export const authOptions: NextAuthOptions = {
         })
 
         if (!existingUser) {
-          // Create new user from OAuth profile
+          // Create new user from OAuth profile — auto-verify email
           await db.user.create({
             data: {
               email: user.email,
               name: user.name || user.email.split("@")[0],
               image: user.image,
               role: "user_free",
+              emailVerified: new Date(),
             },
           })
         } else if (existingUser.suspended) {

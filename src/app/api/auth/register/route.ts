@@ -30,7 +30,22 @@ export async function POST(req: NextRequest) {
       },
     })
 
-    return NextResponse.json({ id: user.id, email: user.email, role: user.role }, { status: 201 })
+    // Generate 6-digit verification code
+    const code = Math.floor(100000 + Math.random() * 900000).toString()
+
+    // Store verification token (expires in 15 minutes)
+    await db.verificationToken.create({
+      data: {
+        identifier: email,
+        token: code,
+        expires: new Date(Date.now() + 15 * 60 * 1000),
+      },
+    })
+
+    // In production, send email here. For now, log it.
+    console.log(`[VERIFICATION] Code for ${email}: ${code}`)
+
+    return NextResponse.json({ id: user.id, email: user.email, role: user.role, requiresVerification: true }, { status: 201 })
   } catch (error: any) {
     return NextResponse.json({ error: error.message }, { status: 500 })
   }
