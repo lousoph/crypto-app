@@ -60,3 +60,28 @@ Stage Summary:
 - API endpoint: POST /api/ai-analysis with { ticker, name }
 - UI: New "Analyse IA" view accessible from sidebar and mobile nav
 - All text in French, dark immersive theme matching existing design
+---
+Task ID: 2
+Agent: Main Agent
+Task: Enhance AI Market Analysis with news, chart, and history
+
+Work Log:
+- Enhanced /api/ai-analysis/route.ts with web search for market news via z-ai-web-dev-sdk
+- Added newsImpact and newsItems fields to API response
+- Added chartData (24h hourly prices) to API response for frontend chart
+- Added currentPrice and priceChangePct24h to API response
+- Updated AIAnalysisView in page-content.tsx with:
+  - 24h price chart using Recharts AreaChart (green/violet for up, red for down)
+  - News Impact panel with AI-analyzed news impact + list of recent articles
+  - Analysis History with localStorage persistence (up to 20 entries)
+  - History toggle button in header
+  - MessageSquare icon added to empty state
+- Tested API with SOL - returns news (5 items), chart data (25 points), news impact
+- Site returns HTTP 200
+
+Stage Summary:
+- AI analysis now includes 3 data sources: technical + sentiment + NEWS
+- 24h interactive price chart with gradient fill
+- News panel showing latest articles and their impact
+- History panel with localStorage persistence
+- All features working end-to-end

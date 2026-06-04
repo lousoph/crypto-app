@@ -12,12 +12,19 @@ interface CryptoPriceData {
   low24h: number
   volume24h: number
   marketCap: number | null
-  hourlyPrices: { time: string; price: number }[]
+  hourlyPrices: { time: string; price: number; open: number; high: number; low: number; volume: number }[]
 }
 
 interface FearGreedData {
   value: number
   classification: string
+}
+
+interface NewsItem {
+  title: string
+  snippet: string
+  source: string
+  date: string
 }
 
 async function fetchCryptoData(ticker: string): Promise<CryptoPriceData | null> {
@@ -36,13 +43,17 @@ async function fetchCryptoData(ticker: string): Promise<CryptoPriceData | null> 
     const histUrl = `https://min-api.cryptocompare.com/data/v2/histohour?fsym=${ticker}&tsym=USD&limit=24&api_key=${CRYPTO_COMPARE_API_KEY}`
     const histRes = await fetch(histUrl, { cache: "no-store" })
 
-    let hourlyPrices: { time: string; price: number }[] = []
+    let hourlyPrices: { time: string; price: number; open: number; high: number; low: number; volume: number }[] = []
     if (histRes.ok) {
       const histData = await histRes.json()
       if (histData?.Data?.Data) {
         hourlyPrices = histData.Data.Data.map((d: any) => ({
           time: new Date(d.time * 1000).toISOString(),
           price: d.close,
+          open: d.open,
+          high: d.high,
+          low: d.low,
+          volume: d.volumeto,
         }))
       }
     }
@@ -84,11 +95,32 @@ async function fetchFearGreedIndex(): Promise<FearGreedData | null> {
   }
 }
 
-function approximateRSI(hourlyPrices: { time: string; price: number }[]): string {
+async function fetchMarketNews(ticker: string, name: string): Promise<NewsItem[]> {
+  try {
+    const zai = await ZAI.create()
+    const searchResult = await zai.functions.invoke("web_search", {
+      query: `${ticker} ${name || ''} crypto news today 2025`,
+      num: 6,
+    })
+
+    if (!Array.isArray(searchResult)) return []
+
+    return searchResult.slice(0, 5).map((item: any) => ({
+      title: item.name || "Actualité",
+      snippet: item.snippet || "",
+      source: item.host_name || "",
+      date: item.date || "",
+    }))
+  } catch (error) {
+    console.error("Error fetching market news:", error)
+    return []
+  }
+}
+
+function approximateRSI(hourlyPrices: { price: number }[]): string {
   if (hourlyPrices.length < 14) return "Données insuffisantes"
 
-  // Simple RSI approximation using last 14 hourly candles
-  const recent = hourlyPrices.slice(-15) // Need 15 to get 14 changes
+  const recent = hourlyPrices.slice(-15)
   let gains = 0
   let losses = 0
 
@@ -110,7 +142,7 @@ function approximateRSI(hourlyPrices: { time: string; price: number }[]): string
   return `${rsi.toFixed(1)} (Neutre)`
 }
 
-function determineTrend(hourlyPrices: { time: string; price: number }[]): string {
+function determineTrend(hourlyPrices: { price: number }[]): string {
   if (hourlyPrices.length < 6) return "Indéterminé"
 
   const recent = hourlyPrices.slice(-6)
@@ -125,7 +157,7 @@ function determineTrend(hourlyPrices: { time: string; price: number }[]): string
   return "Neutre →"
 }
 
-// POST /api/ai-analysis — AI-powered market analysis
+// POST /api/ai-analysis — AI-powered market analysis with news
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json()
@@ -135,10 +167,11 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "Le ticker est requis" }, { status: 400 })
     }
 
-    // Fetch market data in parallel
-    const [cryptoData, fearGreedData] = await Promise.all([
+    // Fetch market data + news in parallel
+    const [cryptoData, fearGreedData, newsItems] = await Promise.all([
       fetchCryptoData(ticker.toUpperCase()),
       fetchFearGreedIndex(),
+      fetchMarketNews(ticker.toUpperCase(), name || ticker),
     ])
 
     if (!cryptoData) {
@@ -161,6 +194,11 @@ export async function POST(request: NextRequest) {
       ? `$${(cryptoData.volume24h / 1_000_000).toFixed(2)}M`
       : "N/A"
 
+    // Build news context for AI
+    const newsContext = newsItems.length > 0
+      ? `\n\nDERNIÈRES ACTUALITÉS :\n${newsItems.map((n, i) => `${i + 1}. ${n.title} — ${n.snippet}`).join("\n")}`
+      : "\n\nACTUALITÉS : Aucune actualité récente trouvée."
+
     // Build the context for AI
     const marketContext = `
 DONNÉES DE MARCHÉ POUR ${ticker.toUpperCase()} (${name || ticker}) :
@@ -176,12 +214,12 @@ ${fearGreedData ? `- Indice de Peur & Cupidité du marché crypto : ${fearGreedD
 
 DERNIERS PRIX HORAIRE (24h) :
 ${cryptoData.hourlyPrices.map(h => `${new Date(h.time).getHours()}:00 → $${h.price.toFixed(2)}`).join("\n")}
-`.trim()
+${newsContext}`.trim()
 
     // Create the AI client and request analysis
     const zai = await ZAI.create()
 
-    const systemPrompt = `Tu es un analyste de marché crypto expert. Tu analyses les données techniques et le sentiment du marché pour fournir des recommandations claires et accessibles.
+    const systemPrompt = `Tu es un analyste de marché crypto expert. Tu analyses les données techniques, le sentiment du marché ET les dernières actualités pour fournir des recommandations claires et accessibles.
 
 RÈGLES STRICTES :
 1. Réponds UNIQUEMENT en JSON valide, sans markdown, sans commentaires, sans balises de code.
@@ -189,12 +227,12 @@ RÈGLES STRICTES :
 {
   "signal": "ACHAT" | "VENTE" | "NEUTRE",
   "confidence": <nombre entre 0 et 100>,
-  "summary": "<résumé de 2-3 phrases en français de ton analyse>",
+  "summary": "<résumé de 2-3 phrases en français de ton analyse, en intégrant les actualités si pertinent>",
   "technicalAnalysis": {
     "trend": "<tendance identifiée en français>",
     "supportLevel": "<niveau de support avec prix>",
     "resistanceLevel": "<niveau de résistance avec prix>",
-    "rsiApprox": "<valeur RSI et interprétation>",
+    "rsiApprox": "<valeur RSI et interprétation concrète>",
     "volume24h": "<volume avec interprétation>"
   },
   "sentiment": {
@@ -202,14 +240,15 @@ RÈGLES STRICTES :
     "fearGreedLabel": "<label en français : Peur Extrême / Peur / Neutre / Cupidité / Cupidité Extrême>",
     "interpretation": "<interprétation du sentiment en 1 phrase>"
   },
+  "newsImpact": "<analyse de l'impact des actualités récentes sur le prix du token en 2-3 phrases>",
   "keyFactors": ["<facteur 1>", "<facteur 2>", "<facteur 3>", "<facteur 4>"],
   "risks": ["<risque 1>", "<risque 2>", "<risque 3>"],
   "disclaimer": "⚠️ Cette analyse est générée par une IA et constitue une assistance à la décision, NON un conseil financier. Les performances passées ne garantissent pas les résultats futurs. Vous êtes seul responsable de vos décisions d'investissement. Consultez un conseiller financier professionnel avant toute décision d'investissement importante."
 }
 
 3. Le signal doit être :
-   - ACHAT si les indicateurs techniques et le sentiment sont positifs
-   - VENTE si les indicateurs techniques et le sentiment sont négatifs
+   - ACHAT si les indicateurs techniques, le sentiment et les actualités sont positifs
+   - VENTE si les indicateurs techniques, le sentiment et les actualités sont négatifs
    - NEUTRE si les signaux sont mitigés ou peu clairs
 
 4. Le niveau de confiance doit refléter la cohérence des signaux (0-100%).
@@ -222,12 +261,14 @@ RÈGLES STRICTES :
 
 8. Pour le RSI, explique ce qu'il signifie concrètement pour le trader.
 
-9. Les facteurs clés et risques doivent être spécifiques au token analysé et aux données fournies.`
+9. Les facteurs clés et risques doivent être spécifiques au token analysé, aux données techniques ET aux actualités fournies.
+
+10. Le champ "newsImpact" doit résumer comment les actualités récentes pourraient affecter le prix à court terme.`
 
     const completion = await zai.chat.completions.create({
       messages: [
         { role: "system", content: systemPrompt },
-        { role: "user", content: `Analyse le marché pour ce token en te basant sur les données suivantes :\n\n${marketContext}` },
+        { role: "user", content: `Analyse le marché pour ce token en te basant sur les données techniques, le sentiment et les actualités suivantes :\n\n${marketContext}` },
       ],
       thinking: { type: "disabled" },
     })
@@ -252,7 +293,6 @@ RÈGLES STRICTES :
     try {
       analysis = JSON.parse(jsonStr)
     } catch {
-      // If parsing fails, try to find JSON object in the response
       const objectMatch = aiContent.match(/\{[\s\S]*\}/)
       if (objectMatch) {
         try {
@@ -278,7 +318,6 @@ RÈGLES STRICTES :
       ? Math.max(0, Math.min(100, Math.round(analysis.confidence)))
       : 50
 
-    // Ensure fearGreedIndex is a number
     const fgIndex = fearGreedData?.value ?? (typeof analysis.sentiment?.fearGreedIndex === "number" ? analysis.sentiment.fearGreedIndex : 50)
 
     const fgLabel = (() => {
@@ -288,6 +327,16 @@ RÈGLES STRICTES :
       if (fgIndex <= 80) return "Cupidité"
       return "Cupidité Extrême"
     })()
+
+    // Build chart data for the frontend
+    const chartData = cryptoData.hourlyPrices.map(h => ({
+      time: new Date(h.time).getHours() + ":00",
+      price: h.price,
+      open: h.open,
+      high: h.high,
+      low: h.low,
+      volume: h.volume,
+    }))
 
     const result = {
       signal,
@@ -305,8 +354,13 @@ RÈGLES STRICTES :
         fearGreedLabel: analysis.sentiment?.fearGreedLabel || fgLabel,
         interpretation: analysis.sentiment?.interpretation || "Sentiment de marché neutre.",
       },
+      newsImpact: analysis.newsImpact || "Aucune actualité marquante à signaler.",
+      newsItems,
       keyFactors: Array.isArray(analysis.keyFactors) ? analysis.keyFactors.slice(0, 5) : ["Données techniques analysées"],
       risks: Array.isArray(analysis.risks) ? analysis.risks.slice(0, 5) : ["Volatilité inhérente au marché crypto"],
+      chartData,
+      currentPrice: cryptoData.currentPrice,
+      priceChangePct24h: cryptoData.priceChangePct24h,
       disclaimer: analysis.disclaimer || "⚠️ Cette analyse est générée par une IA et constitue une assistance à la décision, NON un conseil financier. Les performances passées ne garantissent pas les résultats futurs. Vous êtes seul responsable de vos décisions d'investissement. Consultez un conseiller financier professionnel avant toute décision d'investissement importante.",
     }
 

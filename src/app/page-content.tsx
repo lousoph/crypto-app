@@ -3579,9 +3579,23 @@ interface AIAnalysisResult {
     fearGreedLabel: string
     interpretation: string
   }
+  newsImpact?: string
+  newsItems?: { title: string; snippet: string; source: string; date: string }[]
   keyFactors: string[]
   risks: string[]
   disclaimer: string
+  chartData?: { time: string; price: number; open: number; high: number; low: number; volume: number }[]
+  currentPrice?: number
+  priceChangePct24h?: number
+}
+
+interface AnalysisHistoryEntry {
+  ticker: string
+  name: string
+  timestamp: number
+  signal: string
+  confidence: number
+  summary: string
 }
 
 function AIAnalysisView({ user }: { user: any }) {
@@ -3591,8 +3605,10 @@ function AIAnalysisView({ user }: { user: any }) {
   const [analysis, setAnalysis] = useState<AIAnalysisResult | null>(null)
   const [error, setError] = useState('')
   const [prices, setPrices] = useState<Record<string, number>>({})
+  const [history, setHistory] = useState<AnalysisHistoryEntry[]>([])
+  const [showHistory, setShowHistory] = useState(false)
 
-  // Load tokens and prices
+  // Load tokens, prices and history
   useEffect(() => {
     const loadData = async () => {
       try {
@@ -3615,7 +3631,26 @@ function AIAnalysisView({ user }: { user: any }) {
       }
     }
     loadData()
-  }, [])
+    // Load history from localStorage
+    try {
+      const saved = localStorage.getItem('cf_ai_history')
+      if (saved) setHistory(JSON.parse(saved))
+    } catch {}
+  }, []) // eslint-disable-line react-hooks/exhaustive-deps
+
+  const saveToHistory = (ticker: string, name: string, result: AIAnalysisResult) => {
+    const entry: AnalysisHistoryEntry = {
+      ticker,
+      name,
+      timestamp: Date.now(),
+      signal: result.signal,
+      confidence: result.confidence,
+      summary: result.summary,
+    }
+    const newHistory = [entry, ...history].slice(0, 20)
+    setHistory(newHistory)
+    try { localStorage.setItem('cf_ai_history', JSON.stringify(newHistory)) } catch {}
+  }
 
   const runAnalysis = async () => {
     if (!selectedTicker) return
@@ -3641,6 +3676,7 @@ function AIAnalysisView({ user }: { user: any }) {
 
       const data = await res.json()
       setAnalysis(data)
+      saveToHistory(selectedTicker, token?.name || selectedTicker, data)
     } catch (err: any) {
       setError(err.message || 'Erreur lors de l\'analyse IA')
     } finally {
@@ -3656,11 +3692,11 @@ function AIAnalysisView({ user }: { user: any }) {
     }
   }
 
-  const signalIcon = (signal: string) => {
+  const signalIcon = (signal: string, size = 8) => {
     switch (signal) {
-      case 'ACHAT': return <ArrowUpCircle className="w-8 h-8 text-emerald-400" />
-      case 'VENTE': return <ArrowDownCircle className="w-8 h-8 text-red-400" />
-      default: return <Gauge className="w-8 h-8 text-amber-400" />
+      case 'ACHAT': return <ArrowUpCircle className={`w-${size} h-${size} text-emerald-400`} />
+      case 'VENTE': return <ArrowDownCircle className={`w-${size} h-${size} text-red-400`} />
+      default: return <Gauge className={`w-${size} h-${size} text-amber-400`} />
     }
   }
 
@@ -3668,16 +3704,57 @@ function AIAnalysisView({ user }: { user: any }) {
     <div className="space-y-6">
       {/* Header */}
       <ScrollReveal>
-        <div className="flex items-center gap-3 mb-2">
-          <div className="w-12 h-12 rounded-2xl flex items-center justify-center relative breathe" style={{ background: 'linear-gradient(135deg, rgba(124,92,252,0.2), rgba(6,182,212,0.2))', border: '1px solid rgba(124,92,252,0.2)', boxShadow: '0 0 20px rgba(124,92,252,0.1)' }}>
-            <Sparkles className="w-6 h-6 text-violet-400" />
+        <div className="flex items-center justify-between mb-2">
+          <div className="flex items-center gap-3">
+            <div className="w-12 h-12 rounded-2xl flex items-center justify-center relative breathe" style={{ background: 'linear-gradient(135deg, rgba(124,92,252,0.2), rgba(6,182,212,0.2))', border: '1px solid rgba(124,92,252,0.2)', boxShadow: '0 0 20px rgba(124,92,252,0.1)' }}>
+              <Sparkles className="w-6 h-6 text-violet-400" />
+            </div>
+            <div>
+              <h1 className="text-2xl font-bold gradient-text">Analyse IA</h1>
+              <p className="text-sm" style={{ color: 'rgba(255,255,255,0.35)' }}>L&apos;IA analyse le marché pour vous aider à décider</p>
+            </div>
           </div>
-          <div>
-            <h1 className="text-2xl font-bold gradient-text">Analyse IA</h1>
-            <p className="text-sm" style={{ color: 'rgba(255,255,255,0.35)' }}>L&apos;IA analyse le marché pour vous aider à décider</p>
-          </div>
+          {history.length > 0 && (
+            <Button variant="ghost" size="sm" onClick={() => setShowHistory(!showHistory)} className="text-white/30 hover:text-white/60 hover:bg-white/5 rounded-xl">
+              <Activity className="w-4 h-4 mr-1" />
+              <span className="text-xs">Historique ({history.length})</span>
+            </Button>
+          )}
         </div>
       </ScrollReveal>
+
+      {/* History panel */}
+      {showHistory && history.length > 0 && (
+        <ScrollReveal>
+          <div className="rounded-2xl p-4 relative overflow-hidden" style={{ background: 'rgba(6,6,10,0.7)', backdropFilter: 'blur(20px)', border: '1px solid rgba(255,255,255,0.04)' }}>
+            <div className="absolute top-0 left-0 right-0 h-px" style={{ background: 'linear-gradient(90deg, transparent, rgba(124,92,252,0.2), transparent)' }} />
+            <div className="flex items-center justify-between mb-3">
+              <h3 className="text-xs font-semibold text-white/60 uppercase tracking-wider">Historique des analyses</h3>
+              <Button variant="ghost" size="sm" onClick={() => { setHistory([]); try { localStorage.removeItem('cf_ai_history') } catch {} }} className="text-red-400/50 hover:text-red-400 h-6 text-[10px] hover:bg-red-500/10">
+                Effacer
+              </Button>
+            </div>
+            <div className="space-y-2 max-h-48 overflow-y-auto custom-scrollbar">
+              {history.map((h, i) => (
+                <button key={i} onClick={() => { setSelectedTicker(h.ticker); setShowHistory(false) }} className="w-full flex items-center gap-3 p-2.5 rounded-xl border transition-all text-left group hover:border-violet-500/20" style={{ background: 'rgba(255,255,255,0.02)', borderColor: 'rgba(255,255,255,0.04)' }}>
+                  <TokenLogo ticker={h.ticker} size={24} />
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center gap-2">
+                      <span className="text-xs font-medium text-white/70">{h.ticker}</span>
+                      <Badge className={`${signalConfig(h.signal).bg} ${signalConfig(h.signal).text} text-[9px] px-1.5 py-0`}>{h.signal}</Badge>
+                    </div>
+                    <p className="text-[10px] text-white/25 truncate mt-0.5">{h.summary}</p>
+                  </div>
+                  <div className="text-right shrink-0">
+                    <p className={`text-xs font-bold ${signalConfig(h.signal).text}`}>{h.confidence}%</p>
+                    <p className="text-[9px] text-white/20">{new Date(h.timestamp).toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' })}</p>
+                  </div>
+                </button>
+              ))}
+            </div>
+          </div>
+        </ScrollReveal>
+      )}
 
       {/* Disclaimer banner */}
       <ScrollReveal>
@@ -3775,6 +3852,48 @@ function AIAnalysisView({ user }: { user: any }) {
       {/* Analysis Results */}
       {analysis && !loading && (
         <div className="space-y-4 fade-in-up">
+          {/* 24h Price Chart */}
+          {analysis.chartData && analysis.chartData.length > 0 && (
+            <ScrollReveal>
+              <div className="rounded-2xl p-5 relative overflow-hidden" style={{ background: 'rgba(6,6,10,0.7)', backdropFilter: 'blur(20px)', border: '1px solid rgba(255,255,255,0.04)' }}>
+                <div className="absolute top-0 left-0 right-0 h-px" style={{ background: 'linear-gradient(90deg, transparent, rgba(124,92,252,0.3), rgba(6,182,212,0.2), transparent)' }} />
+                <div className="flex items-center justify-between mb-3">
+                  <div className="flex items-center gap-2">
+                    <Activity className="w-4 h-4 text-violet-400" />
+                    <h3 className="text-sm font-semibold text-white/80">Prix 24h</h3>
+                  </div>
+                  {(analysis.currentPrice || analysis.priceChangePct24h !== undefined) && (
+                    <div className="flex items-center gap-2">
+                      {analysis.currentPrice && <span className="text-sm font-bold text-white">${fmtPrice(analysis.currentPrice)}</span>}
+                      {analysis.priceChangePct24h !== undefined && (
+                        <Badge className={`${analysis.priceChangePct24h >= 0 ? 'bg-emerald-500/15 text-emerald-400' : 'bg-red-500/15 text-red-400'} text-[10px] px-1.5 py-0`}>
+                          {analysis.priceChangePct24h >= 0 ? '+' : ''}{analysis.priceChangePct24h.toFixed(2)}%
+                        </Badge>
+                      )}
+                    </div>
+                  )}
+                </div>
+                <div className="h-48">
+                  <ResponsiveContainer width="100%" height="100%">
+                    <AreaChart data={analysis.chartData} margin={{ top: 5, right: 5, bottom: 5, left: 5 }}>
+                      <defs>
+                        <linearGradient id="aiChartGradient" x1="0" y1="0" x2="0" y2="1">
+                          <stop offset="5%" stopColor={analysis.priceChangePct24h !== undefined && analysis.priceChangePct24h < 0 ? "#ef4444" : "#7c5cfc"} stopOpacity={0.3} />
+                          <stop offset="95%" stopColor={analysis.priceChangePct24h !== undefined && analysis.priceChangePct24h < 0 ? "#ef4444" : "#7c5cfc"} stopOpacity={0} />
+                        </linearGradient>
+                      </defs>
+                      <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.03)" />
+                      <XAxis dataKey="time" tick={{ fontSize: 10, fill: 'rgba(255,255,255,0.25)' }} axisLine={false} tickLine={false} interval="preserveStartEnd" />
+                      <YAxis domain={['auto', 'auto']} tick={{ fontSize: 10, fill: 'rgba(255,255,255,0.25)' }} axisLine={false} tickLine={false} width={60} tickFormatter={(v: number) => '$' + fmtPrice(v)} />
+                      <Tooltip contentStyle={{ background: 'rgba(10,10,16,0.95)', border: '1px solid rgba(255,255,255,0.08)', borderRadius: '12px', fontSize: '11px', color: '#fff' }} formatter={(value: number) => ['$' + fmtPrice(value), 'Prix']} labelStyle={{ color: 'rgba(255,255,255,0.4)' }} />
+                      <Area type="monotone" dataKey="price" stroke={analysis.priceChangePct24h !== undefined && analysis.priceChangePct24h < 0 ? "#ef4444" : "#7c5cfc"} strokeWidth={2} fill="url(#aiChartGradient)" />
+                    </AreaChart>
+                  </ResponsiveContainer>
+                </div>
+              </div>
+            </ScrollReveal>
+          )}
+
           {/* Signal Card */}
           <ScrollReveal direction="scale">
             <div className={`rounded-2xl p-6 border relative overflow-hidden ${signalConfig(analysis.signal).glow}`} style={{ background: 'rgba(6,6,10,0.7)', borderColor: 'rgba(255,255,255,0.04)' }}>
@@ -3847,7 +3966,7 @@ function AIAnalysisView({ user }: { user: any }) {
                 <div className="absolute top-0 left-0 right-0 h-px" style={{ background: 'linear-gradient(90deg, transparent, rgba(6,182,212,0.2), transparent)' }} />
                 <div className="flex items-center gap-2 mb-4">
                   <Gauge className="w-4 h-4 text-cyan-400" />
-                  <h3 className="text-sm font-semibold text-white/80">Sentiment du Marché</h3>
+                  <h3 className="text-sm font-semibold text-white/80">Sentiment du Marche</h3>
                 </div>
                 <div className="flex items-center justify-center mb-4">
                   <div className="relative w-24 h-24">
@@ -3871,6 +3990,42 @@ function AIAnalysisView({ user }: { user: any }) {
             </ScrollReveal>
           </div>
 
+          {/* News Impact + News Items */}
+          {(analysis.newsImpact || (analysis.newsItems && analysis.newsItems.length > 0)) && (
+            <ScrollReveal>
+              <div className="rounded-2xl p-5 relative overflow-hidden" style={{ background: 'rgba(6,6,10,0.7)', backdropFilter: 'blur(20px)', border: '1px solid rgba(255,255,255,0.04)' }}>
+                <div className="absolute top-0 left-0 right-0 h-px" style={{ background: 'linear-gradient(90deg, transparent, rgba(6,182,212,0.3), rgba(124,92,252,0.2), transparent)' }} />
+                <div className="flex items-center gap-2 mb-3">
+                  <MessageSquare className="w-4 h-4 text-cyan-400" />
+                  <h3 className="text-sm font-semibold text-white/80">Impact des Actualites</h3>
+                </div>
+                {analysis.newsImpact && (
+                  <p className="text-sm leading-relaxed mb-4" style={{ color: 'rgba(255,255,255,0.55)' }}>{analysis.newsImpact}</p>
+                )}
+                {analysis.newsItems && analysis.newsItems.length > 0 && (
+                  <div className="space-y-2">
+                    <p className="text-[10px] font-semibold uppercase tracking-wider mb-2" style={{ color: 'rgba(255,255,255,0.25)' }}>Dernieres actualites</p>
+                    {analysis.newsItems.map((news, i) => (
+                      <div key={i} className="rounded-xl p-3 border" style={{ background: 'rgba(255,255,255,0.02)', borderColor: 'rgba(255,255,255,0.04)' }}>
+                        <div className="flex items-start gap-2">
+                          <div className="w-5 h-5 rounded-md flex items-center justify-center shrink-0 mt-0.5 text-[10px] font-bold" style={{ background: 'rgba(6,182,212,0.1)', color: 'rgba(6,182,212,0.8)' }}>{i + 1}</div>
+                          <div className="min-w-0">
+                            <p className="text-xs font-medium text-white/60 truncate">{news.title}</p>
+                            <p className="text-[10px] mt-0.5 leading-relaxed" style={{ color: 'rgba(255,255,255,0.35)' }}>{news.snippet}</p>
+                            <div className="flex items-center gap-2 mt-1">
+                              {news.source && <span className="text-[9px]" style={{ color: 'rgba(255,255,255,0.2)' }}>{news.source}</span>}
+                              {news.date && <span className="text-[9px]" style={{ color: 'rgba(255,255,255,0.15)' }}>{news.date}</span>}
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+            </ScrollReveal>
+          )}
+
           {/* Key Factors & Risks */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             {/* Key Factors */}
@@ -3879,7 +4034,7 @@ function AIAnalysisView({ user }: { user: any }) {
                 <div className="absolute top-0 left-0 right-0 h-px" style={{ background: 'linear-gradient(90deg, transparent, rgba(16,185,129,0.2), transparent)' }} />
                 <div className="flex items-center gap-2 mb-4">
                   <Eye className="w-4 h-4 text-emerald-400" />
-                  <h3 className="text-sm font-semibold text-white/80">Facteurs Clés à Suivre</h3>
+                  <h3 className="text-sm font-semibold text-white/80">Facteurs Cles a Suivre</h3>
                 </div>
                 <div className="space-y-2">
                   {analysis.keyFactors.map((factor, i) => (
@@ -3898,7 +4053,7 @@ function AIAnalysisView({ user }: { user: any }) {
                 <div className="absolute top-0 left-0 right-0 h-px" style={{ background: 'linear-gradient(90deg, transparent, rgba(239,68,68,0.2), transparent)' }} />
                 <div className="flex items-center gap-2 mb-4">
                   <AlertTriangle className="w-4 h-4 text-red-400" />
-                  <h3 className="text-sm font-semibold text-white/80">Risques Identifiés</h3>
+                  <h3 className="text-sm font-semibold text-white/80">Risques Identifies</h3>
                 </div>
                 <div className="space-y-2">
                   {analysis.risks.map((risk, i) => (
@@ -3928,9 +4083,9 @@ function AIAnalysisView({ user }: { user: any }) {
             <div className="w-20 h-20 rounded-2xl flex items-center justify-center mb-4 breathe" style={{ background: 'rgba(124,92,252,0.08)', border: '1px solid rgba(124,92,252,0.15)' }}>
               <Brain className="w-10 h-10 text-violet-400/50" />
             </div>
-            <h3 className="text-lg font-semibold text-white/60 mb-2">L&apos;IA est prête à analyser</h3>
+            <h3 className="text-lg font-semibold text-white/60 mb-2">L&apos;IA est prete a analyser</h3>
             <p className="text-sm max-w-md" style={{ color: 'rgba(255,255,255,0.3)' }}>
-              Sélectionnez un token et lancez l&apos;analyse. L&apos;IA étudiera les indicateurs techniques, le sentiment du marché et les facteurs clés pour vous fournir une analyse claire.
+              Selectionnez un token et lancez l&apos;analyse. L&apos;IA etudiera les indicateurs techniques, le sentiment du marche, les actualites et les facteurs cles pour vous fournir une analyse claire.
             </p>
             <div className="flex items-center gap-4 mt-6">
               <div className="flex items-center gap-2 text-xs" style={{ color: 'rgba(255,255,255,0.2)' }}>
@@ -3942,8 +4097,12 @@ function AIAnalysisView({ user }: { user: any }) {
                 <span>Sentiment</span>
               </div>
               <div className="flex items-center gap-2 text-xs" style={{ color: 'rgba(255,255,255,0.2)' }}>
+                <MessageSquare className="w-3.5 h-3.5" />
+                <span>Actualites</span>
+              </div>
+              <div className="flex items-center gap-2 text-xs" style={{ color: 'rgba(255,255,255,0.2)' }}>
                 <Eye className="w-3.5 h-3.5" />
-                <span>Facteurs clés</span>
+                <span>Facteurs cles</span>
               </div>
             </div>
           </div>
