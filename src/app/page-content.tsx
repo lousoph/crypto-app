@@ -9,7 +9,7 @@ import {
   LogOut, LogIn, TrendingUp, TrendingDown, DollarSign, Wallet,
   Plus, Trash2, Edit3, ChevronDown, ChevronUp, RefreshCw,
   BarChart3, Crown, AlertTriangle, Check, X, Menu,
-  Search, Activity, Zap, Eye, Gauge, ShoppingCart, Tag, ArrowUpCircle, ArrowDownCircle
+  Search, Activity, Zap, Eye, Gauge, ShoppingCart, Tag, ArrowUpCircle, ArrowDownCircle, Sparkles, Brain, MessageSquare
 } from 'lucide-react'
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
@@ -34,7 +34,7 @@ import { signIn, signOut, useSession } from 'next-auth/react'
 // ============================================================
 // TYPES
 // ============================================================
-type View = 'dashboard' | 'transactions' | 'profile' | 'admin-users' | 'admin-tokens' | 'admin-exchanges'
+type View = 'dashboard' | 'transactions' | 'ai-analysis' | 'profile' | 'admin-users' | 'admin-tokens' | 'admin-exchanges'
 
 interface TokenData {
   id: string
@@ -766,6 +766,7 @@ function BottomNav({ currentView, setView, user }: {
   const items: { id: View; label: string; icon: any }[] = [
     { id: 'dashboard', label: 'Accueil', icon: LayoutDashboard },
     { id: 'transactions', label: 'Transactions', icon: ArrowLeftRight },
+    { id: 'ai-analysis', label: 'IA', icon: Sparkles },
     { id: 'profile', label: 'Profil', icon: User },
     ...(isAdmin ? [{ id: 'admin-users' as View, label: 'Admin', icon: Shield }] : []),
   ]
@@ -811,6 +812,7 @@ function Sidebar({ currentView, setView, user, onLogout }: {
   const userItems = [
     { id: 'dashboard' as View, label: 'Tableau de bord', icon: LayoutDashboard },
     { id: 'transactions' as View, label: 'Transactions', icon: ArrowLeftRight },
+    { id: 'ai-analysis' as View, label: 'Analyse IA', icon: Sparkles },
     { id: 'profile' as View, label: 'Profil & Abonnement', icon: User },
   ]
 
@@ -3559,6 +3561,399 @@ function AdminExchangesView() {
 }
 
 // ============================================================
+// AI ANALYSIS VIEW — AI-POWERED MARKET ANALYSIS
+// ============================================================
+interface AIAnalysisResult {
+  signal: 'ACHAT' | 'VENTE' | 'NEUTRE'
+  confidence: number
+  summary: string
+  technicalAnalysis: {
+    trend: string
+    supportLevel: string
+    resistanceLevel: string
+    rsiApprox: string
+    volume24h: string
+  }
+  sentiment: {
+    fearGreedIndex: number
+    fearGreedLabel: string
+    interpretation: string
+  }
+  keyFactors: string[]
+  risks: string[]
+  disclaimer: string
+}
+
+function AIAnalysisView({ user }: { user: any }) {
+  const [tokens, setTokens] = useState<TokenData[]>([])
+  const [selectedTicker, setSelectedTicker] = useState<string>('')
+  const [loading, setLoading] = useState(false)
+  const [analysis, setAnalysis] = useState<AIAnalysisResult | null>(null)
+  const [error, setError] = useState('')
+  const [prices, setPrices] = useState<Record<string, number>>({})
+
+  // Load tokens and prices
+  useEffect(() => {
+    const loadData = async () => {
+      try {
+        const [tokensRes, pricesRes] = await Promise.all([
+          fetch('/api/tokens'),
+          fetch('/api/prices'),
+        ])
+        if (tokensRes.ok) {
+          const tokensData = await tokensRes.json()
+          setTokens(tokensData.filter((t: TokenData) => t.active))
+          if (tokensData.length > 0 && !selectedTicker) {
+            setSelectedTicker(tokensData[0].ticker)
+          }
+        }
+        if (pricesRes.ok) {
+          setPrices(await pricesRes.json())
+        }
+      } catch (err) {
+        console.error('Failed to load data:', err)
+      }
+    }
+    loadData()
+  }, [])
+
+  const runAnalysis = async () => {
+    if (!selectedTicker) return
+    setLoading(true)
+    setError('')
+    setAnalysis(null)
+
+    try {
+      const token = tokens.find(t => t.ticker === selectedTicker)
+      const res = await fetch('/api/ai-analysis', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          ticker: selectedTicker,
+          name: token?.name || selectedTicker,
+        }),
+      })
+
+      if (!res.ok) {
+        const errData = await res.json()
+        throw new Error(errData.error || 'Erreur lors de l\'analyse')
+      }
+
+      const data = await res.json()
+      setAnalysis(data)
+    } catch (err: any) {
+      setError(err.message || 'Erreur lors de l\'analyse IA')
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  const signalConfig = (signal: string) => {
+    switch (signal) {
+      case 'ACHAT': return { bg: 'bg-emerald-500/15', border: 'border-emerald-500/30', text: 'text-emerald-400', glow: 'shadow-[0_0_30px_rgba(16,185,129,0.15)]' }
+      case 'VENTE': return { bg: 'bg-red-500/15', border: 'border-red-500/30', text: 'text-red-400', glow: 'shadow-[0_0_30px_rgba(239,68,68,0.15)]' }
+      default: return { bg: 'bg-amber-500/15', border: 'border-amber-500/30', text: 'text-amber-400', glow: 'shadow-[0_0_30px_rgba(245,158,11,0.15)]' }
+    }
+  }
+
+  const signalIcon = (signal: string) => {
+    switch (signal) {
+      case 'ACHAT': return <ArrowUpCircle className="w-8 h-8 text-emerald-400" />
+      case 'VENTE': return <ArrowDownCircle className="w-8 h-8 text-red-400" />
+      default: return <Gauge className="w-8 h-8 text-amber-400" />
+    }
+  }
+
+  return (
+    <div className="space-y-6">
+      {/* Header */}
+      <ScrollReveal>
+        <div className="flex items-center gap-3 mb-2">
+          <div className="w-12 h-12 rounded-2xl flex items-center justify-center relative breathe" style={{ background: 'linear-gradient(135deg, rgba(124,92,252,0.2), rgba(6,182,212,0.2))', border: '1px solid rgba(124,92,252,0.2)', boxShadow: '0 0 20px rgba(124,92,252,0.1)' }}>
+            <Sparkles className="w-6 h-6 text-violet-400" />
+          </div>
+          <div>
+            <h1 className="text-2xl font-bold gradient-text">Analyse IA</h1>
+            <p className="text-sm" style={{ color: 'rgba(255,255,255,0.35)' }}>L&apos;IA analyse le marché pour vous aider à décider</p>
+          </div>
+        </div>
+      </ScrollReveal>
+
+      {/* Disclaimer banner */}
+      <ScrollReveal>
+        <div className="rounded-xl p-4 border flex items-start gap-3" style={{ background: 'rgba(245,158,11,0.06)', borderColor: 'rgba(245,158,11,0.15)' }}>
+          <AlertTriangle className="w-5 h-5 text-amber-400 shrink-0 mt-0.5" />
+          <div>
+            <p className="text-sm font-medium text-amber-400">Assistance, pas conseil financier</p>
+            <p className="text-xs mt-1" style={{ color: 'rgba(255,255,255,0.4)' }}>L&apos;IA vous aide à analyser les données techniques et l&apos;actualité du marché. Vous prenez la décision finale. Ceci ne constitue pas un conseil en investissement.</p>
+          </div>
+        </div>
+      </ScrollReveal>
+
+      {/* Token selector */}
+      <ScrollReveal>
+        <div className="rounded-2xl p-5 relative overflow-hidden" style={{ background: 'rgba(6,6,10,0.7)', backdropFilter: 'blur(20px)', border: '1px solid rgba(255,255,255,0.04)' }}>
+          <div className="absolute top-0 left-0 right-0 h-px" style={{ background: 'linear-gradient(90deg, transparent, rgba(124,92,252,0.3), rgba(6,182,212,0.2), transparent)' }} />
+
+          <Label className="text-xs font-medium mb-3 block" style={{ color: 'rgba(255,255,255,0.5)' }}>Sélectionnez un token à analyser</Label>
+
+          <div className="flex gap-3 items-end">
+            <div className="flex-1">
+              <Select value={selectedTicker} onValueChange={setSelectedTicker}>
+                <SelectTrigger className="w-full border rounded-xl h-11 text-white" style={{ background: 'rgba(255,255,255,0.03)', borderColor: 'rgba(255,255,255,0.06)' }}>
+                  <SelectValue placeholder="Choisir un token" />
+                </SelectTrigger>
+                <SelectContent style={{ background: 'rgba(10,10,16,0.98)', border: '1px solid rgba(255,255,255,0.08)' }}>
+                  {tokens.map(t => (
+                    <SelectItem key={t.ticker} value={t.ticker} className="text-white/80 focus:text-white focus:bg-violet-500/10">
+                      <div className="flex items-center gap-2">
+                        <TokenLogo ticker={t.ticker} size={20} />
+                        <span>{t.ticker}</span>
+                        <span className="text-white/30 text-xs">{t.name}</span>
+                        {prices[t.ticker] && (
+                          <span className="text-white/20 text-xs ml-auto">${fmtPrice(prices[t.ticker])}</span>
+                        )}
+                      </div>
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+            <Button
+              onClick={runAnalysis}
+              disabled={loading || !selectedTicker}
+              className="btn-primary-glow btn-ripple text-white rounded-xl h-11 px-6 font-medium transition-all active:scale-[0.98]"
+              style={{ background: 'linear-gradient(135deg, #7c5cfc, #06b6d4)', boxShadow: '0 4px 20px rgba(124,92,252,0.25)' }}
+            >
+              {loading ? <RefreshCw className="w-4 h-4 animate-spin mr-2" /> : <Sparkles className="w-4 h-4 mr-2" />}
+              {loading ? 'Analyse en cours...' : 'Analyser'}
+            </Button>
+          </div>
+
+          {/* Selected token quick info */}
+          {selectedTicker && prices[selectedTicker] && (
+            <div className="mt-3 flex items-center gap-2 text-xs" style={{ color: 'rgba(255,255,255,0.3)' }}>
+              <TokenLogo ticker={selectedTicker} size={16} />
+              <span>{selectedTicker}</span>
+              <span className="text-white/50 font-medium">${fmtPrice(prices[selectedTicker])}</span>
+            </div>
+          )}
+        </div>
+      </ScrollReveal>
+
+      {/* Loading animation */}
+      {loading && (
+        <div className="fade-in-up">
+          <div className="rounded-2xl p-8 relative overflow-hidden flex flex-col items-center justify-center gap-4" style={{ background: 'rgba(6,6,10,0.7)', backdropFilter: 'blur(20px)', border: '1px solid rgba(255,255,255,0.04)' }}>
+            <div className="relative">
+              <div className="w-16 h-16 rounded-2xl flex items-center justify-center" style={{ background: 'rgba(124,92,252,0.1)' }}>
+                <Brain className="w-8 h-8 text-violet-400 animate-pulse" />
+              </div>
+              <div className="absolute inset-0 rounded-2xl orbit" style={{ animationDuration: '3s', border: '2px solid transparent', borderTopColor: 'rgba(124,92,252,0.5)', borderRightColor: 'rgba(6,182,212,0.3)' }} />
+            </div>
+            <div className="text-center">
+              <p className="text-sm font-medium text-white/60">L&apos;IA analyse le marché...</p>
+              <p className="text-xs text-white/25 mt-1">Données techniques, sentiment, actualités</p>
+            </div>
+            <div className="flex gap-1.5">
+              <div className="w-2 h-2 rounded-full bg-violet-400 animate-bounce" style={{ animationDelay: '0ms' }} />
+              <div className="w-2 h-2 rounded-full bg-cyan-400 animate-bounce" style={{ animationDelay: '150ms' }} />
+              <div className="w-2 h-2 rounded-full bg-violet-400 animate-bounce" style={{ animationDelay: '300ms' }} />
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Error */}
+      {error && (
+        <div className="fade-in-up flex items-center gap-2 text-red-400 text-sm p-4 rounded-xl border" style={{ background: 'rgba(239,68,68,0.08)', borderColor: 'rgba(239,68,68,0.2)' }}>
+          <AlertTriangle className="w-4 h-4 shrink-0" />
+          {error}
+        </div>
+      )}
+
+      {/* Analysis Results */}
+      {analysis && !loading && (
+        <div className="space-y-4 fade-in-up">
+          {/* Signal Card */}
+          <ScrollReveal direction="scale">
+            <div className={`rounded-2xl p-6 border relative overflow-hidden ${signalConfig(analysis.signal).glow}`} style={{ background: 'rgba(6,6,10,0.7)', borderColor: 'rgba(255,255,255,0.04)' }}>
+              <div className="absolute top-0 left-0 right-0 h-px" style={{ background: 'linear-gradient(90deg, transparent, rgba(124,92,252,0.3), rgba(6,182,212,0.2), transparent)' }} />
+
+              <div className="flex items-center justify-between mb-4">
+                <div className="flex items-center gap-3">
+                  {signalIcon(analysis.signal)}
+                  <div>
+                    <p className="text-xs font-medium" style={{ color: 'rgba(255,255,255,0.4)' }}>Signal</p>
+                    <p className={`text-2xl font-bold ${signalConfig(analysis.signal).text}`}>
+                      {analysis.signal}
+                    </p>
+                  </div>
+                </div>
+                <div className="text-right">
+                  <p className="text-xs font-medium" style={{ color: 'rgba(255,255,255,0.4)' }}>Confiance</p>
+                  <p className={`text-2xl font-bold ${signalConfig(analysis.signal).text}`}>
+                    {analysis.confidence}%
+                  </p>
+                </div>
+              </div>
+
+              {/* Confidence bar */}
+              <div className="w-full h-2 rounded-full mb-4" style={{ background: 'rgba(255,255,255,0.05)' }}>
+                <div
+                  className="h-2 rounded-full transition-all duration-1000"
+                  style={{
+                    width: `${analysis.confidence}%`,
+                    background: analysis.signal === 'ACHAT' ? 'linear-gradient(90deg, #10b981, #34d399)' : analysis.signal === 'VENTE' ? 'linear-gradient(90deg, #ef4444, #f87171)' : 'linear-gradient(90deg, #f59e0b, #fbbf24)',
+                    boxShadow: `0 0 10px ${analysis.signal === 'ACHAT' ? 'rgba(16,185,129,0.3)' : analysis.signal === 'VENTE' ? 'rgba(239,68,68,0.3)' : 'rgba(245,158,11,0.3)'}`
+                  }}
+                />
+              </div>
+
+              <p className="text-sm leading-relaxed" style={{ color: 'rgba(255,255,255,0.6)' }}>{analysis.summary}</p>
+            </div>
+          </ScrollReveal>
+
+          {/* Technical Analysis + Sentiment */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            {/* Technical */}
+            <ScrollReveal direction="left">
+              <div className="rounded-2xl p-5 relative overflow-hidden h-full" style={{ background: 'rgba(6,6,10,0.7)', backdropFilter: 'blur(20px)', border: '1px solid rgba(255,255,255,0.04)' }}>
+                <div className="absolute top-0 left-0 right-0 h-px" style={{ background: 'linear-gradient(90deg, transparent, rgba(124,92,252,0.2), transparent)' }} />
+                <div className="flex items-center gap-2 mb-4">
+                  <BarChart3 className="w-4 h-4 text-violet-400" />
+                  <h3 className="text-sm font-semibold text-white/80">Analyse Technique</h3>
+                </div>
+                <div className="space-y-3">
+                  {[
+                    { label: 'Tendance', value: analysis.technicalAnalysis.trend },
+                    { label: 'Support', value: analysis.technicalAnalysis.supportLevel },
+                    { label: 'Resistance', value: analysis.technicalAnalysis.resistanceLevel },
+                    { label: 'RSI (approx.)', value: analysis.technicalAnalysis.rsiApprox },
+                    { label: 'Volume 24h', value: analysis.technicalAnalysis.volume24h },
+                  ].map(item => (
+                    <div key={item.label} className="flex items-center justify-between">
+                      <span className="text-xs" style={{ color: 'rgba(255,255,255,0.35)' }}>{item.label}</span>
+                      <span className="text-xs font-medium text-white/70">{item.value}</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </ScrollReveal>
+
+            {/* Sentiment */}
+            <ScrollReveal direction="left">
+              <div className="rounded-2xl p-5 relative overflow-hidden h-full" style={{ background: 'rgba(6,6,10,0.7)', backdropFilter: 'blur(20px)', border: '1px solid rgba(255,255,255,0.04)' }}>
+                <div className="absolute top-0 left-0 right-0 h-px" style={{ background: 'linear-gradient(90deg, transparent, rgba(6,182,212,0.2), transparent)' }} />
+                <div className="flex items-center gap-2 mb-4">
+                  <Gauge className="w-4 h-4 text-cyan-400" />
+                  <h3 className="text-sm font-semibold text-white/80">Sentiment du Marché</h3>
+                </div>
+                <div className="flex items-center justify-center mb-4">
+                  <div className="relative w-24 h-24">
+                    <svg className="w-24 h-24 transform -rotate-90" viewBox="0 0 100 100">
+                      <circle cx="50" cy="50" r="40" fill="none" stroke="rgba(255,255,255,0.05)" strokeWidth="8" />
+                      <circle cx="50" cy="50" r="40" fill="none" stroke={analysis.sentiment.fearGreedIndex <= 25 ? '#ef4444' : analysis.sentiment.fearGreedIndex <= 45 ? '#f97316' : analysis.sentiment.fearGreedIndex <= 55 ? '#f59e0b' : analysis.sentiment.fearGreedIndex <= 75 ? '#10b981' : '#06b6d4'} strokeWidth="8" strokeLinecap="round" strokeDasharray={`${(analysis.sentiment.fearGreedIndex / 100) * 251.3} 251.3`} />
+                    </svg>
+                    <div className="absolute inset-0 flex flex-col items-center justify-center">
+                      <span className="text-xl font-bold text-white">{analysis.sentiment.fearGreedIndex}</span>
+                      <span className="text-[9px]" style={{ color: 'rgba(255,255,255,0.35)' }}>F&amp;G</span>
+                    </div>
+                  </div>
+                  <div className="ml-4">
+                    <Badge className={`${analysis.sentiment.fearGreedIndex <= 25 ? 'bg-red-500/15 text-red-400 border-red-500/30' : analysis.sentiment.fearGreedIndex <= 45 ? 'bg-orange-500/15 text-orange-400 border-orange-500/30' : analysis.sentiment.fearGreedIndex <= 55 ? 'bg-amber-500/15 text-amber-400 border-amber-500/30' : analysis.sentiment.fearGreedIndex <= 75 ? 'bg-emerald-500/15 text-emerald-400 border-emerald-500/30' : 'bg-cyan-500/15 text-cyan-400 border-cyan-500/30'} text-xs`}>
+                      {analysis.sentiment.fearGreedLabel}
+                    </Badge>
+                    <p className="text-xs mt-2" style={{ color: 'rgba(255,255,255,0.4)' }}>{analysis.sentiment.interpretation}</p>
+                  </div>
+                </div>
+              </div>
+            </ScrollReveal>
+          </div>
+
+          {/* Key Factors & Risks */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            {/* Key Factors */}
+            <ScrollReveal>
+              <div className="rounded-2xl p-5 relative overflow-hidden h-full" style={{ background: 'rgba(6,6,10,0.7)', backdropFilter: 'blur(20px)', border: '1px solid rgba(255,255,255,0.04)' }}>
+                <div className="absolute top-0 left-0 right-0 h-px" style={{ background: 'linear-gradient(90deg, transparent, rgba(16,185,129,0.2), transparent)' }} />
+                <div className="flex items-center gap-2 mb-4">
+                  <Eye className="w-4 h-4 text-emerald-400" />
+                  <h3 className="text-sm font-semibold text-white/80">Facteurs Clés à Suivre</h3>
+                </div>
+                <div className="space-y-2">
+                  {analysis.keyFactors.map((factor, i) => (
+                    <div key={i} className="flex items-start gap-2">
+                      <div className="w-5 h-5 rounded-md flex items-center justify-center shrink-0 mt-0.5 text-[10px] font-bold" style={{ background: 'rgba(16,185,129,0.1)', color: 'rgba(16,185,129,0.8)' }}>{i + 1}</div>
+                      <p className="text-xs leading-relaxed" style={{ color: 'rgba(255,255,255,0.5)' }}>{factor}</p>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </ScrollReveal>
+
+            {/* Risks */}
+            <ScrollReveal>
+              <div className="rounded-2xl p-5 relative overflow-hidden h-full" style={{ background: 'rgba(6,6,10,0.7)', backdropFilter: 'blur(20px)', border: '1px solid rgba(255,255,255,0.04)' }}>
+                <div className="absolute top-0 left-0 right-0 h-px" style={{ background: 'linear-gradient(90deg, transparent, rgba(239,68,68,0.2), transparent)' }} />
+                <div className="flex items-center gap-2 mb-4">
+                  <AlertTriangle className="w-4 h-4 text-red-400" />
+                  <h3 className="text-sm font-semibold text-white/80">Risques Identifiés</h3>
+                </div>
+                <div className="space-y-2">
+                  {analysis.risks.map((risk, i) => (
+                    <div key={i} className="flex items-start gap-2">
+                      <div className="w-5 h-5 rounded-md flex items-center justify-center shrink-0 mt-0.5 text-[10px] font-bold" style={{ background: 'rgba(239,68,68,0.1)', color: 'rgba(239,68,68,0.8)' }}>{i + 1}</div>
+                      <p className="text-xs leading-relaxed" style={{ color: 'rgba(255,255,255,0.5)' }}>{risk}</p>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </ScrollReveal>
+          </div>
+
+          {/* Disclaimer */}
+          <ScrollReveal>
+            <div className="rounded-xl p-4 border text-center" style={{ background: 'rgba(255,255,255,0.02)', borderColor: 'rgba(255,255,255,0.04)' }}>
+              <p className="text-[11px] leading-relaxed" style={{ color: 'rgba(255,255,255,0.25)' }}>{analysis.disclaimer}</p>
+            </div>
+          </ScrollReveal>
+        </div>
+      )}
+
+      {/* Empty state */}
+      {!analysis && !loading && !error && (
+        <ScrollReveal direction="scale">
+          <div className="rounded-2xl p-10 relative overflow-hidden flex flex-col items-center justify-center text-center" style={{ background: 'rgba(6,6,10,0.5)', backdropFilter: 'blur(20px)', border: '1px solid rgba(255,255,255,0.04)' }}>
+            <div className="w-20 h-20 rounded-2xl flex items-center justify-center mb-4 breathe" style={{ background: 'rgba(124,92,252,0.08)', border: '1px solid rgba(124,92,252,0.15)' }}>
+              <Brain className="w-10 h-10 text-violet-400/50" />
+            </div>
+            <h3 className="text-lg font-semibold text-white/60 mb-2">L&apos;IA est prête à analyser</h3>
+            <p className="text-sm max-w-md" style={{ color: 'rgba(255,255,255,0.3)' }}>
+              Sélectionnez un token et lancez l&apos;analyse. L&apos;IA étudiera les indicateurs techniques, le sentiment du marché et les facteurs clés pour vous fournir une analyse claire.
+            </p>
+            <div className="flex items-center gap-4 mt-6">
+              <div className="flex items-center gap-2 text-xs" style={{ color: 'rgba(255,255,255,0.2)' }}>
+                <BarChart3 className="w-3.5 h-3.5" />
+                <span>Technique</span>
+              </div>
+              <div className="flex items-center gap-2 text-xs" style={{ color: 'rgba(255,255,255,0.2)' }}>
+                <Gauge className="w-3.5 h-3.5" />
+                <span>Sentiment</span>
+              </div>
+              <div className="flex items-center gap-2 text-xs" style={{ color: 'rgba(255,255,255,0.2)' }}>
+                <Eye className="w-3.5 h-3.5" />
+                <span>Facteurs clés</span>
+              </div>
+            </div>
+          </div>
+        </ScrollReveal>
+      )}
+    </div>
+  )
+}
+
+// ============================================================
 // MAIN APP
 // ============================================================
 export function CryptoApp() {
@@ -3660,6 +4055,7 @@ export function CryptoApp() {
     switch (currentView) {
       case 'dashboard': return <DashboardView user={user} onUpgrade={() => setShowUpgrade(true)} />
       case 'transactions': return <TransactionsView user={user} onUpgrade={() => setShowUpgrade(true)} />
+      case 'ai-analysis': return <AIAnalysisView user={user} />
       case 'profile': return <ProfileView user={user} onUpgrade={refreshSession} />
       default: return <DashboardView user={user} onUpgrade={() => setShowUpgrade(true)} />
     }
