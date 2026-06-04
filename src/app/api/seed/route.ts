@@ -5,14 +5,37 @@ import { NextResponse } from "next/server"
 // Seed initial data from Excel file
 export async function POST(req: Request) {
   try {
-    // 1. Create admin user
-    const existingAdmin = await db.user.findUnique({ where: { email: "admin@cryptotracker.com" } })
+    // 1. Create admin user (real admin account)
+    const adminEmail = "unibus93@gmail.com"
+    const adminPassword = "#@769891506Fs#@"
+    const existingAdmin = await db.user.findUnique({ where: { email: adminEmail } })
     if (!existingAdmin) {
+      const hashedPassword = await bcrypt.hash(adminPassword, 10)
+      await db.user.create({
+        data: {
+          email: adminEmail,
+          name: "Admin",
+          passwordHash: hashedPassword,
+          role: "admin",
+        },
+      })
+    } else {
+      // Ensure existing admin has correct role and password
+      const hashedPassword = await bcrypt.hash(adminPassword, 10)
+      await db.user.update({
+        where: { email: adminEmail },
+        data: { role: "admin", passwordHash: hashedPassword },
+      })
+    }
+
+    // 1b. Also keep a demo admin for quick testing
+    const existingDemoAdmin = await db.user.findUnique({ where: { email: "admin@cryptotracker.com" } })
+    if (!existingDemoAdmin) {
       const hashedPassword = await bcrypt.hash("admin123", 10)
       await db.user.create({
         data: {
           email: "admin@cryptotracker.com",
-          name: "Admin",
+          name: "Admin (Demo)",
           passwordHash: hashedPassword,
           role: "admin",
         },

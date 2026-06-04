@@ -2081,6 +2081,204 @@ input:focus, select:focus, textarea:focus {
   animation: progressGradient 2s linear infinite;
 }
 
+/* ============================================================
+   TYPEWRITER EFFECT — CHARACTER-BY-CHARACTER REVEAL
+   ============================================================ */
+.typewriter {
+  overflow: hidden;
+  white-space: nowrap;
+  border-right: 2px solid #7c5cfc;
+  animation: typewriterReveal 2.5s steps(44, end) forwards, blink 0.8s step-end infinite;
+  width: 0;
+  display: inline-block;
+}
+
+@keyframes typewriterReveal {
+  from { width: 0; }
+  to { width: 100%; }
+}
+
+/* ============================================================
+   CINEMATIC VIEW ENTER — BLUR + FADE + SLIDE
+   ============================================================ */
+.view-enter-cinematic {
+  animation: viewCinematic 0.7s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+@keyframes viewCinematic {
+  0% { opacity: 0; transform: translateY(16px) scale(0.98); filter: blur(6px); }
+  100% { opacity: 1; transform: translateY(0) scale(1); filter: blur(0px); }
+}
+
+/* ============================================================
+   GLASSMORPHISM CHART TOOLTIP — FROSTED GLASS
+   ============================================================ */
+.chart-tooltip-glass {
+  background: rgba(6, 6, 10, 0.92) !important;
+  backdrop-filter: blur(20px) !important;
+  -webkit-backdrop-filter: blur(20px) !important;
+  border: 1px solid rgba(124, 92, 252, 0.15) !important;
+  border-radius: 12px !important;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5), 0 0 20px rgba(124, 92, 252, 0.08) !important;
+  padding: 10px 14px !important;
+  animation: tooltipPop 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards !important;
+}
+
+@keyframes tooltipPop {
+  from { opacity: 0; transform: scale(0.92) translateY(4px); }
+  to { opacity: 1; transform: scale(1) translateY(0); }
+}
+
+/* ============================================================
+   LIVE INDICATOR — BREATHING GLOW RING
+   ============================================================ */
+.live-breathe {
+  animation: liveBreathe 2s ease-in-out infinite;
+}
+
+@keyframes liveBreathe {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.4); opacity: 1; }
+  50% { box-shadow: 0 0 8px 3px rgba(16, 185, 129, 0.2); opacity: 0.7; }
+}
+
+/* ============================================================
+   TX ROW HOVER LIFT — SUBTLE ELEVATION
+   ============================================================ */
+.tx-row-hover {
+  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.tx-row-hover:hover {
+  transform: translateX(4px);
+  box-shadow: -4px 0 0 0 rgba(124, 92, 252, 0.3), 0 2px 8px rgba(0, 0, 0, 0.3);
+  background: linear-gradient(90deg, rgba(124, 92, 252, 0.05), transparent 60%);
+}
+
+/* ============================================================
+   SIDEBAR ACTIVE GRADIENT SWEEP
+   ============================================================ */
+.nav-active-sweep {
+  position: relative;
+  overflow: hidden;
+}
+
+.nav-active-sweep::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(90deg, rgba(124, 92, 252, 0.12), rgba(6, 182, 212, 0.06), transparent);
+  animation: navSweep 2s ease-in-out infinite alternate;
+  border-radius: inherit;
+  pointer-events: none;
+}
+
+@keyframes navSweep {
+  0% { opacity: 0.5; }
+  100% { opacity: 1; }
+}
+
+/* ============================================================
+   STAGGERED CARD ENTRANCE — SCALE + FADE
+   ============================================================ */
+.card-stagger > *:nth-child(1) { animation: cardStaggerIn 0.6s cubic-bezier(0.16, 1, 0.3, 1) 0s forwards; opacity: 0; }
+.card-stagger > *:nth-child(2) { animation: cardStaggerIn 0.6s cubic-bezier(0.16, 1, 0.3, 1) 0.1s forwards; opacity: 0; }
+.card-stagger > *:nth-child(3) { animation: cardStaggerIn 0.6s cubic-bezier(0.16, 1, 0.3, 1) 0.2s forwards; opacity: 0; }
+.card-stagger > *:nth-child(4) { animation: cardStaggerIn 0.6s cubic-bezier(0.16, 1, 0.3, 1) 0.3s forwards; opacity: 0; }
+.card-stagger > *:nth-child(5) { animation: cardStaggerIn 0.6s cubic-bezier(0.16, 1, 0.3, 1) 0.4s forwards; opacity: 0; }
+.card-stagger > *:nth-child(6) { animation: cardStaggerIn 0.6s cubic-bezier(0.16, 1, 0.3, 1) 0.5s forwards; opacity: 0; }
+
+@keyframes cardStaggerIn {
+  from { opacity: 0; transform: translateY(16px) scale(0.96); }
+  to { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+/* ============================================================
+   CHART GRADIENT BACKGROUND — SLOW SHIFT
+   ============================================================ */
+.chart-bg-grad {
+  position: relative;
+}
+
+.chart-bg-grad::before {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 60%;
+  background: linear-gradient(0deg, rgba(124, 92, 252, 0.03), transparent);
+  border-radius: inherit;
+  pointer-events: none;
+  animation: chartBgPulse 6s ease-in-out infinite alternate;
+}
+
+@keyframes chartBgPulse {
+  0% { opacity: 0.4; }
+  100% { opacity: 1; }
+}
+
+/* ============================================================
+   AMOUNT FLASH — COLOR BLINK ON VALUE CHANGE
+   ============================================================ */
+.amount-flash-up {
+  animation: amountFlashUp 1s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+@keyframes amountFlashUp {
+  0% { color: inherit; }
+  30% { color: #10b981; text-shadow: 0 0 12px rgba(16, 185, 129, 0.4); }
+  100% { color: inherit; text-shadow: none; }
+}
+
+.amount-flash-down {
+  animation: amountFlashDown 1s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+@keyframes amountFlashDown {
+  0% { color: inherit; }
+  30% { color: #ef4444; text-shadow: 0 0 12px rgba(239, 68, 68, 0.4); }
+  100% { color: inherit; text-shadow: none; }
+}
+
+/* ============================================================
+   SIDEBAR ACCORDION — SMOOTH EXPAND
+   ============================================================ */
+.admin-accordion {
+  overflow: hidden;
+  transition: max-height 0.4s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.3s ease;
+  max-height: 0;
+  opacity: 0;
+}
+
+.admin-accordion.expanded {
+  max-height: 300px;
+  opacity: 1;
+}
+
+/* ============================================================
+   PARALLAX ORB — SLOW DRIFT ON MOUSE
+   ============================================================ */
+.parallax-orb {
+  transition: transform 0.8s cubic-bezier(0.16, 1, 0.3, 1);
+  will-change: transform;
+}
+
+/* ============================================================
+   NOISE OVERLAY — ENHANCED TEXTURE
+   ============================================================ */
+.noise-overlay::after {
+  content: '';
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 9999;
+  opacity: 0.015;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E");
+  background-repeat: repeat;
+  background-size: 128px 128px;
+  mix-blend-mode: overlay;
+}
+
 @keyframes progressGradient {
   0% { background-position: 0% 0%; }
   100% { background-position: 200% 0%; }
