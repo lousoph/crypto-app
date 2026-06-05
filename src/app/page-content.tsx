@@ -914,7 +914,7 @@ function BottomNav({ currentView, setView, user }: {
 
   return (
     <nav className="bottom-nav fixed bottom-0 left-0 right-0 z-50 md:hidden safe-area-bottom">
-      <div className="flex items-center justify-around h-16 px-2">
+      <div className="flex items-center justify-around h-16 px-1 sm:px-2 max-w-lg mx-auto">
         {items.map(item => {
           const active = currentView === item.id ||
             (item.id === 'admin-users' && (currentView === 'admin-tokens' || currentView === 'admin-exchanges'))
@@ -923,22 +923,22 @@ function BottomNav({ currentView, setView, user }: {
             <button
               key={item.id}
               onClick={() => setView(item.id)}
-              className={`bottom-nav-item flex flex-col items-center justify-center gap-1 px-3 py-2 rounded-xl min-w-[56px] relative ${
+              className={`bottom-nav-item flex flex-col items-center justify-center gap-0.5 px-1 sm:px-3 py-2 rounded-xl min-w-[48px] sm:min-w-[56px] relative ${
                 active ? 'active' : locked ? 'text-foreground/20' : 'text-foreground/40'
               }`}
             >
-              {locked && <Crown className="w-2.5 h-2.5 text-amber-400 absolute -top-0.5 right-1" />}
-              <item.icon className="w-5 h-5" />
-              <span className="text-[10px] font-medium">{item.label}</span>
+              {locked && <Crown className="w-2.5 h-2.5 text-amber-400 absolute -top-0.5 right-0.5 sm:right-1" />}
+              <item.icon className="w-4.5 h-4.5 sm:w-5 sm:h-5" />
+              <span className="text-[9px] sm:text-[10px] font-medium leading-tight truncate max-w-[56px] sm:max-w-none">{item.label}</span>
             </button>
           )
         })}
         <button
           onClick={() => setTheme(resolvedTheme === 'dark' ? 'light' : 'dark')}
-          className="bottom-nav-item flex flex-col items-center justify-center gap-1 px-2 py-2 rounded-xl min-w-[44px] text-foreground/40"
+          className="bottom-nav-item flex flex-col items-center justify-center gap-0.5 px-1 sm:px-2 py-2 rounded-xl min-w-[40px] sm:min-w-[44px] text-foreground/40"
           title={resolvedTheme === 'dark' ? 'Mode clair' : 'Mode sombre'}
         >
-          {resolvedTheme === 'dark' ? <Sun className="w-5 h-5" /> : <Moon className="w-5 h-5" />}
+          {resolvedTheme === 'dark' ? <Sun className="w-4.5 h-4.5 sm:w-5 sm:h-5" /> : <Moon className="w-4.5 h-4.5 sm:w-5 sm:h-5" />}
         </button>
       </div>
     </nav>
@@ -2291,15 +2291,15 @@ function TransactionsView({ user, onUpgrade }: { user: any; onUpgrade: () => voi
       {/* Freemium notice */}
       {user?.role === 'user_free' && (
         <Card className="glass-card rounded-2xl fade-in-up stagger-1" style={{ borderColor: 'rgba(245,158,11,0.2)', background: 'rgba(245,158,11,0.04)' }}>
-          <CardContent className="p-4 flex items-center gap-3">
+          <CardContent className="p-3 sm:p-4 flex flex-col sm:flex-row items-start sm:items-center gap-3">
             <div className="w-9 h-9 rounded-xl flex items-center justify-center shrink-0" style={{ background: 'rgba(245,158,11,0.1)' }}>
               <AlertTriangle className="w-4 h-4 text-amber-400" />
             </div>
             <div className="flex-1 text-sm">
               <p className="font-medium text-amber-400">Plan Gratuit — Limité à 3 tokens et 10 transactions</p>
-              <p className="text-muted-foreground">Passez en Premium pour débloquer l&apos;accès illimité.</p>
+              <p className="text-muted-foreground text-xs sm:text-sm">Passez en Premium pour débloquer l&apos;accès illimité.</p>
             </div>
-            <div className="flex items-center gap-2 shrink-0">
+            <div className="flex items-center gap-2 shrink-0 w-full sm:w-auto justify-between sm:justify-end">
               <Badge className="border" style={{ background: 'rgba(245,158,11,0.12)', color: '#f59e0b', borderColor: 'rgba(245,158,11,0.2)' }}>
                 {transactions.length}/10
               </Badge>
@@ -2622,7 +2622,7 @@ function AdminPricingView() {
 
       <Card className="glass-card rounded-2xl fade-in-up stagger-1">
         <CardContent className="p-6 space-y-4">
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
             {plans.map((plan, idx) => (
               <div
                 key={idx}
@@ -3534,8 +3534,8 @@ function ProfileView({ user, onUpgrade }: { user: any; onUpgrade: () => void }) 
   return (
     <div className="space-y-6 max-w-2xl view-enter-cinematic">
       <div className="fade-in-up">
-        <h1 className="text-2xl font-bold gradient-shimmer-text">Profil & Abonnement</h1>
-        <p className="mt-1 text-muted-foreground">Gérez votre compte et votre abonnement</p>
+        <h1 className="text-xl sm:text-2xl font-bold gradient-shimmer-text">Profil & Abonnement</h1>
+        <p className="mt-1 text-sm text-muted-foreground">Gérez votre compte et votre abonnement</p>
       </div>
 
       {/* User Info */}
@@ -3544,8 +3544,8 @@ function ProfileView({ user, onUpgrade }: { user: any; onUpgrade: () => void }) 
           <CardTitle className="text-sm font-medium text-muted-foreground">Informations du compte</CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
-          <div className="flex items-center gap-4">
-            <div className="avatar-ring relative group cursor-pointer" onClick={() => !avatarUploading && avatarInputRef.current?.click()}>
+          <div className="flex items-center gap-3 sm:gap-4">
+            <div className="avatar-ring relative group cursor-pointer shrink-0" onClick={() => !avatarUploading && avatarInputRef.current?.click()}>
               {displayAvatarUrl ? (
                 <img src={displayAvatarUrl} alt="Avatar" className="w-16 h-16 rounded-full object-cover" style={{ background: 'linear-gradient(135deg, #7c5cfc, #06b6d4)' }} />
               ) : (
@@ -4753,7 +4753,7 @@ function AIAnalysisView({ user }: { user: any }) {
 
           <Label className="text-xs font-medium text-muted-foreground mb-3 block">Sélectionnez un token à analyser</Label>
 
-          <div className="flex gap-3 items-end">
+          <div className="flex flex-col sm:flex-row gap-3 items-stretch sm:items-end">
             <div className="flex-1 relative" ref={tokenSearchRef}>
               {selectedToken && !showTokenDropdown ? (
                 <div
@@ -4826,7 +4826,7 @@ function AIAnalysisView({ user }: { user: any }) {
             <Button
               onClick={runAnalysis}
               disabled={loading || !selectedTicker}
-              className="btn-primary-glow btn-ripple text-foreground rounded-xl h-12 px-6 font-medium transition-all active:scale-[0.98]"
+              className="btn-primary-glow btn-ripple text-foreground rounded-xl h-12 px-6 w-full sm:w-auto font-medium transition-all active:scale-[0.98]"
               style={{ background: 'linear-gradient(135deg, #7c5cfc, #06b6d4)', boxShadow: '0 4px 20px rgba(124,92,252,0.25)' }}
             >
               {loading ? <RefreshCw className="w-4 h-4 animate-spin mr-2" /> : <Sparkles className="w-4 h-4 mr-2" />}
@@ -4965,7 +4965,7 @@ function AIAnalysisView({ user }: { user: any }) {
           </ScrollReveal>
 
           {/* Technical Analysis + Sentiment */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             {/* Technical */}
             <ScrollReveal direction="left">
               <div className="rounded-2xl p-5 relative overflow-hidden h-full" style={{ background: 'var(--popover)', backdropFilter: 'blur(20px)', border: '1px solid var(--border)' }}>
@@ -5058,7 +5058,7 @@ function AIAnalysisView({ user }: { user: any }) {
           )}
 
           {/* Key Factors & Risks */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             {/* Key Factors */}
             <ScrollReveal>
               <div className="rounded-2xl p-5 relative overflow-hidden h-full" style={{ background: 'var(--popover)', backdropFilter: 'blur(20px)', border: '1px solid var(--border)' }}>
