@@ -1207,7 +1207,7 @@ function Sidebar({ currentView, setView, user, onLogout }: {
       </aside>
 
       {/* Desktop sidebar */}
-      <aside className={`hidden md:flex flex-col h-screen glass-sidebar sticky top-0 transition-all duration-300 shrink-0 ${
+      <aside className={`hidden md:flex flex-col h-screen glass-sidebar sticky top-0 transition-all duration-300 shrink-0 min-w-0 ${
         collapsed ? 'w-[68px]' : 'w-64'
       }`}>
         {sidebarContent}
@@ -1765,7 +1765,7 @@ function DashboardView({ user, onUpgrade }: { user: any; onUpgrade: () => void }
             </Card>
           ))}
         </div>
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
           <Card className="glass-card rounded-2xl skeleton-wave" style={{ height: '350px' }} />
           <Card className="glass-card rounded-2xl skeleton-wave" style={{ height: '350px' }} />
         </div>
@@ -1880,7 +1880,7 @@ function DashboardView({ user, onUpgrade }: { user: any; onUpgrade: () => void }
       <LivePriceTicker />
 
       {/* Fear & Greed Index + Market Signals */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-5 fade-in-up">
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-5 fade-in-up">
         <FearGreedWidget />
         {/* Token Buy/Sell Signals */}
         <TokenSignals />
@@ -1941,7 +1941,7 @@ function DashboardView({ user, onUpgrade }: { user: any; onUpgrade: () => void }
 
       {/* Charts */}
       <ScrollReveal direction="scale">
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-5">
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-5">
         {/* Portfolio Distribution - Dynamic Pie Chart */}
         <Card className="glass-card rounded-2xl card-hover-3d gradient-border spotlight-card fade-in-up stagger-5 chart-enter chart-bg-grad">
           <CardHeader className="pb-2">
@@ -1949,7 +1949,7 @@ function DashboardView({ user, onUpgrade }: { user: any; onUpgrade: () => void }
           </CardHeader>
           <CardContent>
             <div className="flex flex-col items-center">
-              <ResponsiveContainer width="100%" height={220}>
+              <ResponsiveContainer width="100%" height={220} className="sm:h-[250px]">
                 <PieChart>
                   <Pie
                     data={sortedTokens.map((t, i) => ({
@@ -2010,7 +2010,7 @@ function DashboardView({ user, onUpgrade }: { user: any; onUpgrade: () => void }
             <CardTitle className="text-sm font-medium text-muted-foreground" >Investissement vs Valeur Actuelle</CardTitle>
           </CardHeader>
           <CardContent>
-            <ResponsiveContainer width="100%" height={280} className="sm:h-[300px]">
+            <ResponsiveContainer width="100%" height={250} className="sm:h-[280px]">
               <BarChart data={barData} barCategoryGap="20%">
                 <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" vertical={false} />
                 <XAxis dataKey="name" stroke="var(--muted-foreground)" fontSize={11} tickLine={false} axisLine={false} />
@@ -2577,7 +2577,7 @@ function TransactionsView({ user, onUpgrade }: { user: any; onUpgrade: () => voi
       {/* FAB Button on Mobile */}
       <button
         onClick={openNew}
-        className="fab-button fab-pulse-ring fixed bottom-20 right-4 sm:hidden w-14 h-14 rounded-2xl flex items-center justify-center text-foreground z-40 active:scale-95"
+        className="fab-button fab-pulse-ring fixed bottom-24 right-4 sm:hidden w-14 h-14 rounded-2xl flex items-center justify-center text-foreground z-40 active:scale-95"
         style={{ background: 'linear-gradient(135deg, #7c5cfc, #06b6d4)' }}
       >
         <Plus className="w-6 h-6" />
@@ -3009,7 +3009,7 @@ function UpgradePremiumModal({ open, onOpenChange, onSuccess }: {
 
   return (
     <Dialog open={open} onOpenChange={handleOpenChange}>
-      <DialogContent className="glass-card border-0 max-w-md" style={{ background: 'rgba(20,22,35,0.98)', backdropFilter: 'blur(30px)' }}>
+      <DialogContent className="glass-card border-0 max-w-md dialog-mobile-fullscreen" style={{ background: 'rgba(20,22,35,0.98)', backdropFilter: 'blur(30px)' }}>
         {celebrating && (
           <div className="upgrade-celebration fixed inset-0 z-[100] flex items-center justify-center pointer-events-none">
             <div className="flex flex-col items-center gap-4">
@@ -3468,7 +3468,7 @@ function ExplorerView() {
 
       {/* Global Market Stats */}
       {globalMetrics && (
-        <div className="fade-in-up stagger-1 grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-2 sm:gap-3">
+        <div className="fade-in-up stagger-1 grid grid-cols-2 sm:grid-cols-3 md:grid-cols-6 gap-2 sm:gap-3">
           <div className="rounded-xl p-3 border kpi-bar-violet" style={{ background: 'var(--popover)', borderColor: 'var(--border)' }}>
             <div className="flex items-center gap-2">
               <Coins className="w-4 h-4 text-violet-400" />
@@ -3519,7 +3519,7 @@ function ExplorerView() {
 
       {/* Fear & Greed + Market Cap Chart */}
       {fearGreed && (
-        <div className="fade-in-up stagger-2 grid grid-cols-1 lg:grid-cols-2 gap-4">
+        <div className="fade-in-up stagger-2 grid grid-cols-1 sm:grid-cols-2 gap-4">
           {/* Fear & Greed Gauge */}
           <div className="rounded-2xl p-5 border" style={{ background: 'var(--popover)', borderColor: 'var(--border)' }}>
             <div className="flex items-center gap-2 mb-4">
@@ -3664,7 +3664,7 @@ function ExplorerView() {
           {/* Token Table — scrollable on mobile */}
           <div className="rounded-2xl border overflow-hidden" style={{ borderColor: 'var(--border)' }}>
             <div className="overflow-x-auto custom-scrollbar">
-              <table className="w-full min-w-[700px]">
+              <table className="w-full">
                 <thead>
                   <tr style={{ background: 'var(--input)' }}>
                     <th className="text-left text-[11px] font-semibold text-muted-foreground px-3 py-3 cursor-pointer hover:text-foreground transition-colors" onClick={() => toggleSort('cmc_rank')}>
@@ -3776,7 +3776,7 @@ function ExplorerView() {
 
           <div className="rounded-2xl border overflow-hidden" style={{ borderColor: 'var(--border)' }}>
             <div className="overflow-x-auto custom-scrollbar">
-              <table className="w-full min-w-[500px]">
+              <table className="w-full">
                 <thead>
                   <tr style={{ background: 'var(--input)' }}>
                     <th className="text-left text-[11px] font-semibold text-muted-foreground px-3 py-3">#</th>
@@ -4044,7 +4044,7 @@ function ProfileView({ user, onUpgrade }: { user: any; onUpgrade: () => void }) 
   }
 
   return (
-    <div className="space-y-4 sm:space-y-6 max-w-2xl view-enter-cinematic">
+    <div className="space-y-4 sm:space-y-6 max-w-2xl w-full view-enter-cinematic">
       <div className="fade-in-up">
         <h1 className="text-xl sm:text-2xl font-bold gradient-shimmer-text">Profil & Abonnement</h1>
         <p className="mt-1 text-sm text-muted-foreground">Gérez votre compte et votre abonnement</p>
@@ -4442,7 +4442,7 @@ function AdminUsersView() {
   return (
     <div className="space-y-6 page-transition">
       <div className="fade-in-up">
-        <h1 className="text-2xl font-bold text-foreground/90">Gestion Utilisateurs</h1>
+        <h1 className="text-lg sm:text-2xl font-bold text-foreground/90">Gestion Utilisateurs</h1>
         <p className="mt-1 text-muted-foreground" >{users.length} comptes enregistrés</p>
       </div>
 
@@ -4661,7 +4661,7 @@ function AdminTokensView() {
     <div className="space-y-6 page-transition">
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 fade-in-up">
         <div>
-          <h1 className="text-2xl font-bold text-foreground/90">Gestion des Tokens</h1>
+          <h1 className="text-lg sm:text-2xl font-bold text-foreground/90">Gestion des Tokens</h1>
           <p className="mt-1 text-muted-foreground" >{tokens.length} tokens configurés</p>
         </div>
         <Dialog open={addOpen} onOpenChange={setAddOpen}>
@@ -4897,7 +4897,7 @@ function AdminExchangesView() {
     <div className="space-y-6 page-transition">
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 fade-in-up">
         <div>
-          <h1 className="text-2xl font-bold text-foreground/90">Gestion des Exchanges</h1>
+          <h1 className="text-lg sm:text-2xl font-bold text-foreground/90">Gestion des Exchanges</h1>
           <p className="mt-1 text-muted-foreground" >{exchanges.length} plateformes configurées</p>
         </div>
         <Dialog open={addOpen} onOpenChange={setAddOpen}>
@@ -5204,7 +5204,7 @@ function AIAnalysisView({ user }: { user: any }) {
     : 'bg-cyan-500/15 text-cyan-400 border-cyan-500/30'
 
   return (
-    <div className="space-y-4 sm:space-y-6 overflow-hidden">
+    <div className="space-y-4 sm:space-y-6 overflow-hidden w-full">
       {/* Header */}
       <ScrollReveal>
         <div className="flex items-start sm:items-center justify-between gap-2 mb-2">
@@ -5428,7 +5428,7 @@ function AIAnalysisView({ user }: { user: any }) {
                     </div>
                   )}
                 </div>
-                <div className="h-[200px] sm:h-[300px]">
+                <div className="h-[180px] sm:h-[250px] lg:h-[300px]">
                   <ResponsiveContainer width="100%" height="100%">
                     <AreaChart data={analysis.chartData} margin={{ top: 5, right: 5, bottom: 5, left: 5 }}>
                       <defs>
@@ -5507,7 +5507,7 @@ function AIAnalysisView({ user }: { user: any }) {
           </ScrollReveal>
 
           {/* Technical Analysis + Sentiment */}
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-3 sm:gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
             {/* Technical */}
             <ScrollReveal direction="left">
               <div className="rounded-xl sm:rounded-2xl p-3 sm:p-5 relative overflow-hidden h-full" style={{ background: 'var(--popover)', backdropFilter: 'blur(20px)', border: '1px solid var(--border)' }}>
@@ -5601,7 +5601,7 @@ function AIAnalysisView({ user }: { user: any }) {
           )}
 
           {/* Key Factors & Risks */}
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-3 sm:gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
             {/* Key Factors */}
             <ScrollReveal>
               <div className="rounded-xl sm:rounded-2xl p-3 sm:p-5 relative overflow-hidden h-full" style={{ background: 'var(--popover)', backdropFilter: 'blur(20px)', border: '1px solid var(--border)' }}>
@@ -5768,10 +5768,10 @@ export function CryptoApp() {
           </div>
           <Tabs value={currentView} onValueChange={(v) => setCurrentView(v as View)} className="fade-in-up stagger-1">
             <TabsList className="w-full justify-start rounded-xl p-1 h-auto flex-wrap overflow-x-auto" style={{ background: 'var(--input)', border: '1px solid var(--border)' }}>
-              <TabsTrigger value="admin-users" className="rounded-lg px-4 py-2 text-sm data-[state=active]:text-foreground data-[state=active]:shadow-sm text-muted-foreground">Utilisateurs</TabsTrigger>
-              <TabsTrigger value="admin-tokens" className="rounded-lg px-4 py-2 text-sm data-[state=active]:text-foreground data-[state=active]:shadow-sm text-muted-foreground">Tokens</TabsTrigger>
-              <TabsTrigger value="admin-exchanges" className="rounded-lg px-4 py-2 text-sm data-[state=active]:text-foreground data-[state=active]:shadow-sm text-muted-foreground">Exchanges</TabsTrigger>
-              <TabsTrigger value="admin-pricing" className="rounded-lg px-4 py-2 text-sm data-[state=active]:text-foreground data-[state=active]:shadow-sm text-muted-foreground">Tarifs</TabsTrigger>
+              <TabsTrigger value="admin-users" className="rounded-lg px-3 sm:px-4 py-2 text-xs sm:text-sm data-[state=active]:text-foreground data-[state=active]:shadow-sm text-muted-foreground">Utilisateurs</TabsTrigger>
+              <TabsTrigger value="admin-tokens" className="rounded-lg px-3 sm:px-4 py-2 text-xs sm:text-sm data-[state=active]:text-foreground data-[state=active]:shadow-sm text-muted-foreground">Tokens</TabsTrigger>
+              <TabsTrigger value="admin-exchanges" className="rounded-lg px-3 sm:px-4 py-2 text-xs sm:text-sm data-[state=active]:text-foreground data-[state=active]:shadow-sm text-muted-foreground">Exchanges</TabsTrigger>
+              <TabsTrigger value="admin-pricing" className="rounded-lg px-3 sm:px-4 py-2 text-xs sm:text-sm data-[state=active]:text-foreground data-[state=active]:shadow-sm text-muted-foreground">Tarifs</TabsTrigger>
             </TabsList>
             <TabsContent value="admin-users" className="mt-6">
               <AdminUsersView />
@@ -5824,7 +5824,7 @@ export function CryptoApp() {
   }
 
   return (
-    <div className="flex min-h-screen relative noise-overlay mesh-gradient bg-background overflow-x-hidden">
+    <div className="flex min-h-screen w-full relative noise-overlay mesh-gradient bg-background overflow-x-hidden overflow-y-auto">
       <AmbientBackground />
       <ParticleField />
       <MouseGlow />
@@ -5834,7 +5834,7 @@ export function CryptoApp() {
         user={user}
         onLogout={logout}
       />
-      <main className="flex-1 min-w-0 p-3 sm:p-4 md:p-8 overflow-auto pb-20 md:pb-8">
+      <main className="flex-1 min-w-0 overflow-x-hidden p-3 sm:p-4 md:p-8 pb-24 md:pb-8">
         <div className="max-w-7xl w-full mx-auto view-enter-cinematic" key={currentView}>
           {renderView()}
         </div>
