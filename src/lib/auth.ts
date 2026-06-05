@@ -26,17 +26,16 @@ const providers: NextAuthOptions["providers"] = [
       const isValid = await bcrypt.compare(credentials.password, user.passwordHash)
       if (!isValid) return null
 
-      // Check if email is verified
-      if (!user.emailVerified) {
-        throw new Error("EMAIL_NOT_VERIFIED")
-      }
-
+      // Return user even if email not verified - we handle this client-side
+      // NextAuth v4 doesn't propagate custom error messages from authorize(),
+      // so we pass the emailVerified flag through the token instead
       return {
         id: user.id,
         email: user.email,
         name: user.name,
         role: user.role,
         image: user.image,
+        emailVerified: !!user.emailVerified,
       }
     },
   }),
@@ -99,7 +98,7 @@ export const authOptions: NextAuthOptions = {
     },
 
     async jwt({ token, user, account }) {
-      // On initial sign-in (including OAuth), look up user in DB
+      // On initial sign-in, populate token with user data
       if (user) {
         // For OAuth users, find by email since id might not be from our DB
         if (account?.type === "oauth" && user.email) {
@@ -109,21 +108,24 @@ export const authOptions: NextAuthOptions = {
           if (dbUser) {
             token.role = dbUser.role
             token.id = dbUser.id
+            token.emailVerified = !!dbUser.emailVerified
           }
         } else {
           // Credentials sign-in
           token.role = (user as any).role
           token.id = user.id
+          token.emailVerified = (user as any).emailVerified ?? false
         }
       }
 
-      // Refresh role from DB on each JWT refresh
+      // Refresh role and emailVerified from DB on each JWT refresh
       if (token.id) {
         const dbUser = await db.user.findUnique({
           where: { id: token.id as string },
         })
         if (dbUser) {
           token.role = dbUser.role
+          token.emailVerified = !!dbUser.emailVerified
         }
       } else if (token.email) {
         // Fallback: look up by email if id is missing
@@ -133,6 +135,7 @@ export const authOptions: NextAuthOptions = {
         if (dbUser) {
           token.role = dbUser.role
           token.id = dbUser.id
+          token.emailVerified = !!dbUser.emailVerified
         }
       }
 
@@ -143,6 +146,7 @@ export const authOptions: NextAuthOptions = {
       if (session.user) {
         (session.user as any).role = token.role
         ;(session.user as any).id = token.id
+        ;(session.user as any).emailVerified = token.emailVerified ?? false
       }
       return session
     },

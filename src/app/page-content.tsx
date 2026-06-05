@@ -321,22 +321,22 @@ function MouseGlow() {
   const [mounted, setMounted] = useState(false)
 
   useEffect(() => {
-    setMounted(true)
-    const handleMove = (e: MouseEvent) => {
-      if (glowRef.current) {
-        glowRef.current.style.left = `${e.clientX}px`
-        glowRef.current.style.top = `${e.clientY}px`
-        if (!glowRef.current.classList.contains('active')) {
-          glowRef.current.classList.add('active')
+    // Only show mouse glow on desktop (non-touch devices)
+    if (typeof window !== 'undefined' && window.matchMedia('(hover: hover)').matches) {
+      setMounted(true)
+      const handleMove = (e: MouseEvent) => {
+        if (glowRef.current) {
+          glowRef.current.style.left = `${e.clientX}px`
+          glowRef.current.style.top = `${e.clientY}px`
         }
       }
+      window.addEventListener('mousemove', handleMove)
+      return () => window.removeEventListener('mousemove', handleMove)
     }
-    window.addEventListener('mousemove', handleMove)
-    return () => window.removeEventListener('mousemove', handleMove)
   }, [])
 
   if (!mounted) return null
-  return <div ref={glowRef} className="mouse-glow" />
+  return <div ref={glowRef} className="mouse-glow hidden md:block" />
 }
 
 // ============================================================
@@ -520,6 +520,7 @@ function useAuth() {
   const { data: session, status } = useSession()
   const loading = status === 'loading'
   const user = session?.user ?? null
+  const emailVerified = (session?.user as any)?.emailVerified ?? true
 
   const login = async (email: string, password: string) => {
     const result = await signIn('credentials', {
@@ -527,10 +528,15 @@ function useAuth() {
       email,
       password,
     })
-    if (result?.error === 'EMAIL_NOT_VERIFIED') {
-      throw new Error('EMAIL_NOT_VERIFIED')
+    if (result?.ok) {
+      // Check if email is not verified - we'll handle this in the CryptoApp component
+      // by reading emailVerified from the session
+      return true
     }
-    return result?.ok ?? false
+    if (result?.error) {
+      throw new Error(result.error === 'CredentialsSignin' ? 'Email ou mot de passe incorrect' : result.error)
+    }
+    return false
   }
 
   const register = async (email: string, password: string, name: string) => {
@@ -560,7 +566,7 @@ function useAuth() {
     await signOut({ redirect: false })
   }
 
-  return { user, loading, login, register, logout, refetch: async () => {} }
+  return { user, loading, login, register, logout, refetch: async () => {}, emailVerified }
 }
 
 // ============================================================
@@ -5690,12 +5696,86 @@ function AIAnalysisView({ user }: { user: any }) {
 // MAIN APP
 // ============================================================
 export function CryptoApp() {
-  const { user, loading, login, register, logout } = useAuth()
+  const { user, loading, login, register, logout, emailVerified } = useAuth()
   const { update: updateSession } = useSession()
   const [currentView, setCurrentView] = useState<View>('dashboard')
   const [showUpgrade, setShowUpgrade] = useState(false)
   const [seeded, setSeeded] = useState(false)
+  const [showEmailVerification, setShowEmailVerification] = useState(false)
+  const [verifyCode, setVerifyCode] = useState('')
+  const [verifyLoading, setVerifyLoading] = useState(false)
+  const [verifyError, setVerifyError] = useState('')
+  const [resendCooldown, setResendCooldown] = useState(0)
   const ts = useThemeStyles()
+
+  // Show email verification screen if user is logged in but email not verified
+  useEffect(() => {
+    if (user && !emailVerified) {
+      setShowEmailVerification(true)
+    } else {
+      setShowEmailVerification(false)
+    }
+  }, [user, emailVerified])
+
+  // Cooldown timer for resend
+  useEffect(() => {
+    if (resendCooldown > 0) {
+      const timer = setTimeout(() => setResendCooldown(resendCooldown - 1), 1000)
+      return () => clearTimeout(timer)
+    }
+  }, [resendCooldown])
+
+  const handleVerifyCode = async () => {
+    if (!verifyCode || verifyCode.length !== 6) {
+      setVerifyError('Veuillez entrer le code à 6 chiffres')
+      return
+    }
+    setVerifyLoading(true)
+    setVerifyError('')
+    try {
+      const res = await fetch('/api/auth/verify', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email: user?.email, code: verifyCode }),
+      })
+      const data = await res.json()
+      if (res.ok) {
+        toast.success('Email vérifié avec succès !')
+        setShowEmailVerification(false)
+        setVerifyCode('')
+        await updateSession({})
+      } else {
+        setVerifyError(data.error || 'Code invalide')
+      }
+    } catch {
+      setVerifyError('Erreur réseau')
+    } finally {
+      setVerifyLoading(false)
+    }
+  }
+
+  const handleResendCode = async () => {
+    if (resendCooldown > 0) return
+    try {
+      const res = await fetch('/api/auth/resend-verification', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email: user?.email }),
+      })
+      const data = await res.json()
+      if (res.ok) {
+        if (data.verificationCode) {
+          setVerifyCode(data.verificationCode)
+        }
+        toast.success('Nouveau code envoyé !')
+        setResendCooldown(60)
+      } else {
+        toast.error(data.error || 'Erreur lors de l\'envoi')
+      }
+    } catch {
+      toast.error('Erreur réseau')
+    }
+  }
 
   const refreshSession = useCallback(async () => {
     await updateSession({})
@@ -5752,6 +5832,94 @@ export function CryptoApp() {
 
   if (!user) {
     return <LoginScreen onLogin={login} onRegister={register} />
+  }
+
+  // Email verification overlay — show if logged in but email not verified
+  if (showEmailVerification && !emailVerified) {
+    return (
+      <div className="min-h-screen flex items-center justify-center p-4 relative overflow-hidden bg-background">
+        <div className="absolute inset-0 overflow-hidden pointer-events-none">
+          <div className="absolute top-[-20%] left-[15%] w-[60%] h-[60%] rounded-full" style={{ background: `radial-gradient(ellipse, ${ts.orbBg1} 0%, transparent 70%)`, animation: 'ambientDrift1 20s ease-in-out infinite' }} />
+          <div className="absolute bottom-[-20%] right-[10%] w-[50%] h-[50%] rounded-full" style={{ background: `radial-gradient(ellipse, ${ts.orbBg2} 0%, transparent 70%)`, animation: 'ambientDrift2 25s ease-in-out infinite' }} />
+        </div>
+        <ParticleField />
+        <div className="w-full max-w-md space-y-7 fade-in-up relative z-10">
+          <div className="text-center space-y-3">
+            <div className="float-animation inline-flex items-center justify-center w-20 h-20 rounded-2xl border relative" style={{ background: ts.logoBg, borderColor: ts.logoBorder, boxShadow: `${ts.logoShadow}, 0 0 80px ${ts.isDark ? 'rgba(124,92,252,0.04)' : 'rgba(109,77,224,0.04)'}` }}>
+              <Mail className="w-10 h-10 text-violet-400" />
+              <div className="absolute inset-0 rounded-2xl" style={{ background: ts.logoGradientOverlay, opacity: 0.5 }} />
+            </div>
+            <h1 className="text-3xl font-bold gradient-text">Vérification requise</h1>
+            <p className="text-sm text-muted-foreground">Vérifiez votre adresse email pour accéder à CryptoFolio</p>
+          </div>
+
+          <div className="rounded-2xl p-6 sm:p-8 shadow-2xl relative overflow-hidden glass-strong" style={{ boxShadow: ts.authCardShadow }}>
+            <div className="absolute top-0 left-0 right-0 h-px" style={{ background: ts.authGradientLine }} />
+            <div className="mb-6">
+              <p className="text-sm text-muted-foreground">
+                Un code de vérification a été envoyé à <span className="text-foreground/80 font-medium">{user.email}</span>
+              </p>
+            </div>
+
+            <div className="space-y-5">
+              <div className="space-y-2">
+                <Label className="text-xs font-medium text-muted-foreground">Code de vérification</Label>
+                <Input
+                  value={verifyCode}
+                  onChange={(e) => { const val = e.target.value.replace(/\D/g, '').slice(0, 6); setVerifyCode(val); setVerifyError('') }}
+                  placeholder="000000"
+                  className="border text-foreground text-center text-2xl tracking-[0.5em] font-mono placeholder:text-muted-foreground/30 rounded-xl h-14 transition-all duration-300"
+                  style={{ background: 'var(--input)', borderColor: 'var(--border)', boxShadow: 'none' }}
+                  onFocus={(e) => { e.target.style.boxShadow = ts.inputFocusShadow }}
+                  onBlur={(e) => { e.target.style.boxShadow = 'none' }}
+                  maxLength={6}
+                />
+              </div>
+
+              {verifyError && (
+                <div className="flex items-center gap-2 text-red-400 text-sm p-3 rounded-xl border" style={{ background: ts.errorBg, borderColor: ts.errorBorder }}>
+                  <AlertTriangle className="w-4 h-4 shrink-0" />
+                  {verifyError}
+                </div>
+              )}
+
+              <Button
+                onClick={handleVerifyCode}
+                className="btn-primary-glow btn-ripple w-full text-foreground rounded-xl h-11 font-medium shadow-lg transition-all active:scale-[0.98]"
+                style={{ background: ts.primaryGradient, boxShadow: ts.primaryBtnShadow }}
+                disabled={verifyLoading || verifyCode.length !== 6}
+              >
+                {verifyLoading ? <RefreshCw className="w-4 h-4 animate-spin mr-2" /> : <Check className="w-4 h-4 mr-2" />}
+                Vérifier mon email
+              </Button>
+
+              <div className="text-center">
+                <button
+                  onClick={handleResendCode}
+                  disabled={resendCooldown > 0}
+                  className="text-sm text-violet-400 hover:text-violet-300 transition-colors font-medium disabled:text-muted-foreground/30 disabled:cursor-not-allowed"
+                >
+                  {resendCooldown > 0 ? `Renvoyer le code (${resendCooldown}s)` : 'Renvoyer le code'}
+                </button>
+              </div>
+
+              <div className="text-center">
+                <button
+                  onClick={async () => { await logout() }}
+                  className="text-xs text-muted-foreground/50 hover:text-muted-foreground transition-colors"
+                >
+                  Se déconnecter
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <p className="text-center text-[11px] text-muted-foreground/40">
+            Données sécurisées · Chiffrement de bout en bout · Conformité RGPD
+          </p>
+        </div>
+      </div>
+    )
   }
 
   const isAdmin = user?.role === 'admin'
@@ -5824,7 +5992,7 @@ export function CryptoApp() {
   }
 
   return (
-    <div className="flex min-h-screen w-full relative noise-overlay mesh-gradient bg-background overflow-x-hidden overflow-y-auto">
+    <div className="flex min-h-screen w-full relative bg-background overflow-x-hidden overflow-y-auto">
       <AmbientBackground />
       <ParticleField />
       <MouseGlow />
@@ -5834,8 +6002,8 @@ export function CryptoApp() {
         user={user}
         onLogout={logout}
       />
-      <main className="flex-1 min-w-0 overflow-x-hidden p-3 sm:p-4 md:p-8 pb-24 md:pb-8">
-        <div className="max-w-7xl w-full mx-auto view-enter-cinematic" key={currentView}>
+      <main className="flex-1 min-w-0 overflow-x-hidden p-2 sm:p-4 md:p-6 lg:p-8 pb-24 md:pb-8">
+        <div className="w-full mx-auto md:max-w-7xl" key={currentView}>
           {renderView()}
         </div>
       </main>

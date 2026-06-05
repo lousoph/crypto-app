@@ -145,3 +145,31 @@ Stage Summary:
 - CSS globals updated with mobile-first responsive table, flex, and overflow fixes
 - CoinMarketCap API routes already existed (no changes needed)
 - Dev server running successfully with no compilation errors
+---
+Task ID: 1
+Agent: Main Agent
+Task: Fix login/register authentication bug and improve mobile responsiveness
+
+Work Log:
+- Diagnosed auth bug: NextAuth v4 doesn't propagate custom error messages from authorize() - the throw new Error("EMAIL_NOT_VERIFIED") was being converted to generic "CredentialsSignin" error
+- Fixed auth.ts: Removed the throw in authorize(), instead pass emailVerified flag through the JWT/session token
+- Updated useAuth() hook in page-content.tsx to handle emailVerified from session
+- Added email verification overlay in CryptoApp component for users who logged in without verified email
+- Added NEXTAUTH_URL and NEXTAUTH_SECRET to .env
+- Fixed MouseGlow component to only activate on desktop (hover: hover media query)
+- Fixed main layout container: removed noise-overlay/mesh-gradient classes, adjusted padding for mobile
+- Fixed max-w-7xl to only apply on md+ screens
+- Added comprehensive mobile CSS fixes in globals.css:
+  - Disable hover transforms on mobile (glass-card, card-hover, card-hover-3d)
+  - Reduce particles on mobile
+  - Make charts responsive
+  - Fix dialog max-width on mobile
+  - Add global max-width: 100vw to prevent overflow
+  - Tablet-specific 3D transform adjustments
+- Verified auth API works: register → verify → login flow tested successfully
+
+Stage Summary:
+- Auth bug fixed: users can now register and login properly
+- Email verification now works through session token instead of NextAuth error
+- Mobile/tablet responsiveness significantly improved with CSS fixes
+- All existing features preserved

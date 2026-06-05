@@ -910,6 +910,40 @@ html:not(.dark) .nav-item-hover::before {
     text-overflow: ellipsis;
     white-space: nowrap;
   }
+
+  /* Disable hover transforms on mobile — they cause visual glitches */
+  .glass-card:hover,
+  .card-hover:hover,
+  .card-hover-3d:hover {
+    transform: none !important;
+  }
+
+  /* Disable 3D card transforms on mobile */
+  .card-hover-3d:hover {
+    transform: none !important;
+  }
+
+  /* Reduce particle count on mobile */
+  .particle-field .particle:nth-child(n+15) {
+    display: none;
+  }
+
+  /* Make charts responsive */
+  .recharts-wrapper,
+  .recharts-surface {
+    width: 100% !important;
+  }
+
+  /* Fix dialog max width on mobile */
+  [role="dialog"] {
+    max-width: 100vw !important;
+    max-height: 100vh !important;
+  }
+
+  /* Ensure all text is readable */
+  body {
+    -webkit-text-size-adjust: 100%;
+  }
 }
 
 /* Tablet-specific adjustments */
@@ -928,6 +962,21 @@ html:not(.dark) .nav-item-hover::before {
   .flex-1 {
     min-width: 0;
   }
+
+  /* Disable 3D transforms on tablet too */
+  .card-hover-3d:hover {
+    transform: translateY(-4px) !important;
+  }
+}
+
+/* Global fix: prevent ALL elements from overflowing horizontally */
+*, *::before, *::after {
+  max-width: 100vw;
+}
+
+/* But allow certain elements to be wider (for fixed/absolute positioned overlays) */
+.fixed, .absolute, [data-radix-popper-content-wrapper] {
+  max-width: none;
 }
 
 /* Large desktop — enhance animations */
