@@ -43,9 +43,11 @@ export async function POST(req: NextRequest) {
     })
 
     // In production, send email here. For now, log it.
+    // DEVELOPMENT: Return the verification code in the response so the UI can auto-fill it.
+    // In production, remove verificationCode from the response and send via email service.
     console.log(`[VERIFICATION] Code for ${email}: ${code}`)
 
-    return NextResponse.json({ id: user.id, email: user.email, role: user.role, requiresVerification: true }, { status: 201 })
+    return NextResponse.json({ id: user.id, email: user.email, role: user.role, requiresVerification: true, verificationCode: code }, { status: 201 })
   } catch (error: any) {
     return NextResponse.json({ error: error.message }, { status: 500 })
   }

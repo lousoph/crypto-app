@@ -7,7 +7,9 @@ const UPLOAD_DIR = "/home/z/my-project/upload"
 export async function GET(req: NextRequest, { params }: { params: Promise<{ path: string[] }> }) {
   try {
     const { path: pathParts } = await params
-    const filePath = path.join(UPLOAD_DIR, ...pathParts)
+    // The route is /api/upload/avatars/[...path], so pathParts contains the file name(s) after /avatars/
+    // We need to prepend "avatars" to correctly resolve the file path within UPLOAD_DIR
+    const filePath = path.join(UPLOAD_DIR, "avatars", ...pathParts)
 
     // Security: ensure the resolved path is within UPLOAD_DIR
     const resolved = path.resolve(filePath)

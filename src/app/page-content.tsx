@@ -349,12 +349,21 @@ const TOKEN_LOGO_URL = (symbol: string) =>
   `https://cdn.jsdelivr.net/gh/atomiclabs/cryptocurrency-icons@1a63530be6e374711a8554f31b17e4cb92c25fa5/128/color/${symbol.toLowerCase()}.png`
 
 // Exchange brand styles
-const EXCHANGE_STYLES: Record<string, { bg: string; text: string; icon: string }> = {
-  BINANCE:  { bg: '#F0B90B', text: '#1E1E1E', icon: 'BN' },
-  BYBIT:   { bg: '#F7A600', text: '#1E1E1E', icon: 'BY' },
-  COINBASE:{ bg: '#0052FF', text: '#FFFFFF', icon: 'CB' },
-  KRAKEN:  { bg: '#7B61FF', text: '#FFFFFF', icon: 'KR' },
-  OKX:     { bg: '#1A1A2E', text: '#FFFFFF', icon: 'OK' },
+const EXCHANGE_STYLES: Record<string, { bg: string; text: string; icon: string; gradient: string }> = {
+  BINANCE:  { bg: '#F0B90B', text: '#1E1E1E', icon: 'BN', gradient: 'linear-gradient(135deg, rgba(240,185,11,0.08), rgba(240,185,11,0.02))' },
+  BYBIT:   { bg: '#F7A600', text: '#1E1E1E', icon: 'BY', gradient: 'linear-gradient(135deg, rgba(247,166,0,0.08), rgba(247,166,0,0.02))' },
+  COINBASE:{ bg: '#0052FF', text: '#FFFFFF', icon: 'CB', gradient: 'linear-gradient(135deg, rgba(0,82,255,0.08), rgba(0,82,255,0.02))' },
+  KRAKEN:  { bg: '#7B61FF', text: '#FFFFFF', icon: 'KR', gradient: 'linear-gradient(135deg, rgba(123,97,255,0.08), rgba(123,97,255,0.02))' },
+  OKX:     { bg: '#1A1A2E', text: '#FFFFFF', icon: 'OK', gradient: 'linear-gradient(135deg, rgba(26,26,46,0.12), rgba(26,26,46,0.03))' },
+}
+
+// Exchange logo URLs from CoinGecko CDN
+const EXCHANGE_LOGO_URLS: Record<string, string> = {
+  BINANCE:  'https://assets.coingecko.com/markets/images/52/small/binance.jpg?1704720022',
+  BYBIT:    'https://assets.coingecko.com/markets/images/502/small/bybit.jpg?1704720023',
+  COINBASE: 'https://assets.coingecko.com/markets/images/19/small/coinbase.jpg?1704720022',
+  KRAKEN:   'https://assets.coingecko.com/markets/images/23/small/kraken.jpg?1704720022',
+  OKX:      'https://assets.coingecko.com/markets/images/363/small/okex.jpg?1704720023',
 }
 
 // ============================================================
@@ -393,7 +402,25 @@ function TokenLogo({ ticker, size = 24, className = '' }: { ticker: string; size
 // EXCHANGE LOGO COMPONENT
 // ============================================================
 function ExchangeLogo({ name, size = 24, className = '' }: { name: string; size?: number; className?: string }) {
-  const style = EXCHANGE_STYLES[name.toUpperCase()] || { bg: '#7c5cfc', text: '#FFFFFF', icon: name.slice(0, 2) }
+  const [imgError, setImgError] = useState(false)
+  const logoUrl = EXCHANGE_LOGO_URLS[name.toUpperCase()]
+  const style = EXCHANGE_STYLES[name.toUpperCase()] || { bg: '#7c5cfc', text: '#FFFFFF', icon: name.slice(0, 2), gradient: 'linear-gradient(135deg, rgba(124,92,252,0.08), rgba(124,92,252,0.02))' }
+
+  if (logoUrl && !imgError) {
+    return (
+      <img
+        src={logoUrl}
+        alt={name}
+        width={size}
+        height={size}
+        className={`rounded-lg shrink-0 object-cover ${className}`}
+        style={{ width: size, height: size }}
+        onError={() => setImgError(true)}
+        loading="lazy"
+      />
+    )
+  }
+
   return (
     <div
       className={`flex items-center justify-center font-bold shrink-0 ${className}`}
@@ -433,7 +460,7 @@ function useAuth() {
     const data = await res.json()
     if (res.ok) {
       if (data.requiresVerification) {
-        return { requiresVerification: true, email }
+        return { requiresVerification: true, email, verificationCode: data.verificationCode }
       }
       // Fallback: auto-sign in if no verification needed
       const result = await signIn('credentials', {
@@ -495,6 +522,11 @@ function LoginScreen({ onLogin, onRegister }: {
         if (result?.requiresVerification) {
           setVerifyEmail(email)
           setShowVerification(true)
+          // DEVELOPMENT: Auto-fill verification code from server response
+          // In production, this would be sent via email and not returned in the API response
+          if (result.verificationCode) {
+            setVerifyCode(result.verificationCode)
+          }
           toast.success('Compte créé ! Vérifiez votre email.')
         } else {
           toast.success('Compte créé avec succès !')
@@ -559,6 +591,11 @@ function LoginScreen({ onLogin, onRegister }: {
       })
       const data = await res.json()
       if (res.ok) {
+        // DEVELOPMENT: Auto-fill verification code from server response
+        // In production, this would be sent via email and not returned in the API response
+        if (data.verificationCode) {
+          setVerifyCode(data.verificationCode)
+        }
         toast.success('Nouveau code envoyé !')
         setResendCooldown(60)
       } else {
@@ -869,7 +906,7 @@ function BottomNav({ currentView, setView, user }: {
   const items: { id: View; label: string; icon: any; premium?: boolean }[] = [
     { id: 'dashboard', label: 'Accueil', icon: LayoutDashboard },
     { id: 'transactions', label: 'Transactions', icon: ArrowLeftRight },
-    { id: 'ai-analysis', label: 'CryptoSense', icon: Sparkles, premium: true },
+    { id: 'ai-analysis', label: 'Prédict AI', icon: Sparkles, premium: true },
     { id: 'explorer', label: 'Explorer', icon: Search },
     { id: 'profile', label: 'Profil', icon: User },
     ...(isAdmin ? [{ id: 'admin-users' as View, label: 'Admin', icon: Shield }] : []),
@@ -927,7 +964,7 @@ function Sidebar({ currentView, setView, user, onLogout }: {
   const userItems = [
     { id: 'dashboard' as View, label: 'Tableau de bord', icon: LayoutDashboard, premium: false },
     { id: 'transactions' as View, label: 'Transactions', icon: ArrowLeftRight, premium: false },
-    { id: 'ai-analysis' as View, label: 'CryptoSense AI', icon: Sparkles, premium: true },
+    { id: 'ai-analysis' as View, label: 'Prédict AI', icon: Sparkles, premium: true },
     { id: 'explorer' as View, label: 'Explorateur', icon: Search, premium: false },
     { id: 'profile' as View, label: 'Profil & Abonnement', icon: User, premium: false },
   ]
@@ -2915,7 +2952,7 @@ function UpgradePremiumModal({ open, onOpenChange, onSuccess }: {
                 <div className="flex items-center gap-2"><Check className="w-4 h-4 text-emerald-400 shrink-0" /> <span className="text-muted-foreground">Transactions illimitées</span></div>
                 <div className="flex items-center gap-2"><Check className="w-4 h-4 text-emerald-400 shrink-0" /> <span className="text-muted-foreground">Graphiques d&apos;évolution</span></div>
                 <div className="flex items-center gap-2"><Check className="w-4 h-4 text-emerald-400 shrink-0" /> <span className="text-muted-foreground">Métriques avancées</span></div>
-                <div className="flex items-center gap-2"><Sparkles className="w-4 h-4 text-violet-400 shrink-0" /> <span className="text-violet-400 font-medium">CryptoSense AI</span></div>
+                <div className="flex items-center gap-2"><Sparkles className="w-4 h-4 text-violet-400 shrink-0" /> <span className="text-violet-400 font-medium">Prédict AI</span></div>
               </div>
 
               {/* Duration selector */}
@@ -3124,6 +3161,7 @@ function ExplorerView() {
   const [loading, setLoading] = useState(true)
   const [activeTab, setActiveTab] = useState('tokens')
   const [tokenSearch, setTokenSearch] = useState('')
+  const [exchangeSearch, setExchangeSearch] = useState('')
 
   useEffect(() => {
     const loadData = async () => {
@@ -3151,10 +3189,23 @@ function ExplorerView() {
     return t.ticker.toLowerCase().includes(q) || t.name.toLowerCase().includes(q)
   })
 
+  const filteredExchanges = exchanges.filter(e => {
+    if (!exchangeSearch) return true
+    const q = exchangeSearch.toLowerCase()
+    return e.name.toLowerCase().includes(q)
+  })
+
+  // Compute stats
+  const activeTokenCount = tokens.filter(t => t.active).length
+  const tokensWithPrice = tokens.filter(t => prices[t.ticker] != null)
+  const totalMarketCapApprox = tokensWithPrice.reduce((sum, t) => sum + (prices[t.ticker] || 0), 0)
+  const activeExchangeCount = exchanges.filter(e => e.active).length
+
   if (loading) return <div className="flex items-center justify-center py-20"><RefreshCw className="w-8 h-8 animate-spin text-violet-400/50" /></div>
 
   return (
     <div className="space-y-6 view-enter-cinematic">
+      {/* Header */}
       <div className="fade-in-up">
         <div className="flex items-center gap-3">
           <div className="w-12 h-12 rounded-2xl flex items-center justify-center relative" style={{ background: 'linear-gradient(135deg, rgba(6,182,212,0.15), rgba(16,185,129,0.1))', border: '1px solid rgba(6,182,212,0.2)' }}>
@@ -3167,7 +3218,44 @@ function ExplorerView() {
         </div>
       </div>
 
-      <Tabs value={activeTab} onValueChange={setActiveTab} className="fade-in-up stagger-1">
+      {/* Stat bar */}
+      <div className="fade-in-up stagger-1 grid grid-cols-2 sm:grid-cols-4 gap-3">
+        <div className="rounded-xl p-3 border" style={{ background: 'var(--popover)', borderColor: 'var(--border)' }}>
+          <div className="flex items-center gap-2">
+            <Coins className="w-4 h-4 text-violet-400" />
+            <span className="text-xs text-muted-foreground">Tokens</span>
+          </div>
+          <p className="text-lg font-bold text-foreground mt-1">{tokens.length}</p>
+          <p className="text-[10px] text-emerald-400">{activeTokenCount} actifs</p>
+        </div>
+        <div className="rounded-xl p-3 border" style={{ background: 'var(--popover)', borderColor: 'var(--border)' }}>
+          <div className="flex items-center gap-2">
+            <DollarSign className="w-4 h-4 text-cyan-400" />
+            <span className="text-xs text-muted-foreground">Prix disponibles</span>
+          </div>
+          <p className="text-lg font-bold text-foreground mt-1">{tokensWithPrice.length}</p>
+          <p className="text-[10px] text-muted-foreground">sur {tokens.length} tokens</p>
+        </div>
+        <div className="rounded-xl p-3 border" style={{ background: 'var(--popover)', borderColor: 'var(--border)' }}>
+          <div className="flex items-center gap-2">
+            <Building2 className="w-4 h-4 text-amber-400" />
+            <span className="text-xs text-muted-foreground">Exchanges</span>
+          </div>
+          <p className="text-lg font-bold text-foreground mt-1">{exchanges.length}</p>
+          <p className="text-[10px] text-emerald-400">{activeExchangeCount} actifs</p>
+        </div>
+        <div className="rounded-xl p-3 border" style={{ background: 'var(--popover)', borderColor: 'var(--border)' }}>
+          <div className="flex items-center gap-2">
+            <TrendingUp className="w-4 h-4 text-emerald-400" />
+            <span className="text-xs text-muted-foreground">Somme des prix</span>
+          </div>
+          <p className="text-lg font-bold text-foreground mt-1">${fmtPrice(totalMarketCapApprox)}</p>
+          <p className="text-[10px] text-muted-foreground">approximatif</p>
+        </div>
+      </div>
+
+      {/* Tabs */}
+      <Tabs value={activeTab} onValueChange={setActiveTab} className="fade-in-up stagger-2">
         <TabsList className="w-full justify-start rounded-xl p-1 h-auto" style={{ background: 'var(--input)', border: '1px solid var(--border)' }}>
           <TabsTrigger value="tokens" className="rounded-lg px-4 py-2 text-sm data-[state=active]:text-foreground data-[state=active]:shadow-sm text-muted-foreground">
             <Coins className="w-4 h-4 mr-2" /> Tokens ({tokens.length})
@@ -3177,64 +3265,112 @@ function ExplorerView() {
           </TabsTrigger>
         </TabsList>
 
-        <TabsContent value="tokens" className="mt-4">
-          <div className="mb-4">
-            <div className="relative max-w-sm">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-foreground/30" />
-              <Input
-                value={tokenSearch}
-                onChange={(e) => setTokenSearch(e.target.value)}
-                placeholder="Rechercher un token..."
-                className="border rounded-xl h-10 pl-10 text-foreground placeholder:text-muted-foreground/50"
-                style={{ background: 'var(--input)', borderColor: 'var(--border)' }}
-              />
-            </div>
+        {/* Tokens Tab */}
+        <TabsContent value="tokens" className="mt-4 space-y-4">
+          {/* Search */}
+          <div className="relative max-w-md">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-foreground/30" />
+            <Input
+              value={tokenSearch}
+              onChange={(e) => setTokenSearch(e.target.value)}
+              placeholder="Rechercher un token par ticker ou nom..."
+              className="border rounded-xl h-11 pl-10 pr-4 text-foreground placeholder:text-muted-foreground/50"
+              style={{ background: 'var(--input)', borderColor: 'var(--border)' }}
+            />
+            {tokenSearch && (
+              <button onClick={() => setTokenSearch('')} className="absolute right-3 top-1/2 -translate-y-1/2 text-foreground/30 hover:text-foreground/60 transition-colors">
+                <X className="w-4 h-4" />
+              </button>
+            )}
           </div>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3">
-            {filteredTokens.map((t) => (
-              <div key={t.id} className="rounded-xl p-4 border transition-all hover:border-violet-500/20 hover:shadow-lg" style={{ background: 'var(--popover)', borderColor: 'var(--border)' }}>
-                <div className="flex items-center gap-3 mb-2">
-                  <TokenLogo ticker={t.ticker} size={32} />
-                  <div className="flex-1 min-w-0">
-                    <p className="font-semibold text-foreground/80 text-sm">{t.ticker}</p>
-                    <p className="text-xs text-muted-foreground truncate">{t.name}</p>
+
+          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
+            {filteredTokens.map((t) => {
+              const price = prices[t.ticker]
+              return (
+                <div key={t.id} className="rounded-2xl p-4 border transition-all hover:border-violet-500/20 hover:shadow-lg hover:scale-[1.02] group" style={{ background: 'var(--popover)', borderColor: 'var(--border)' }}>
+                  <div className="flex items-start gap-3 mb-3">
+                    <TokenLogo ticker={t.ticker} size={48} />
+                    <div className="flex-1 min-w-0">
+                      <p className="font-bold text-foreground text-base">{t.ticker}</p>
+                      <p className="text-xs text-muted-foreground truncate">{t.name}</p>
+                    </div>
                   </div>
-                  {t.active && (
-                    <Badge className="text-[9px] bg-emerald-500/10 text-emerald-400 border-emerald-500/20 border">Actif</Badge>
-                  )}
-                </div>
-                {prices[t.ticker] != null && (
-                  <div className="flex items-center justify-between mt-2 pt-2 border-t" style={{ borderColor: 'var(--border)' }}>
+                  <div className="flex items-center justify-between">
                     <span className="text-xs text-muted-foreground">Prix</span>
-                    <span className="text-sm font-semibold text-foreground/80">${fmtPrice(prices[t.ticker])}</span>
+                    <span className="text-sm font-semibold text-foreground/90">
+                      {price != null ? `$${fmtPrice(price)}` : '—'}
+                    </span>
                   </div>
-                )}
-              </div>
-            ))}
+                  <div className="mt-2 flex justify-end">
+                    <Badge className={`text-[10px] border px-2 py-0.5 ${t.active ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20' : 'bg-foreground/5 text-foreground/30 border-foreground/10'}`}>
+                      {t.active ? 'Actif' : 'Inactif'}
+                    </Badge>
+                  </div>
+                </div>
+              )
+            })}
             {filteredTokens.length === 0 && (
-              <div className="col-span-full text-center py-12 text-muted-foreground/50">
-                <Search className="w-10 h-10 mx-auto mb-3 opacity-30" />
-                <p className="text-sm">Aucun token trouvé</p>
+              <div className="col-span-full text-center py-16 text-muted-foreground/50">
+                <Search className="w-12 h-12 mx-auto mb-3 opacity-30" />
+                <p className="text-sm font-medium">Aucun token trouvé</p>
+                <p className="text-xs mt-1">Essayez un autre terme de recherche</p>
               </div>
             )}
           </div>
         </TabsContent>
 
-        <TabsContent value="exchanges" className="mt-4">
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3">
-            {exchanges.map((e) => (
-              <div key={e.id} className="rounded-xl p-4 border transition-all hover:border-cyan-500/20 hover:shadow-lg" style={{ background: 'var(--popover)', borderColor: 'var(--border)' }}>
-                <div className="flex items-center gap-3">
-                  <ExchangeLogo name={e.name} size={36} />
-                  <div className="flex-1 min-w-0">
-                    <p className="font-semibold text-foreground/80 text-sm">{e.name}</p>
-                    <Badge className={`text-[9px] border ${e.active ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20' : 'bg-foreground/5 text-foreground/30 border-foreground/10'}`}>
+        {/* Exchanges Tab */}
+        <TabsContent value="exchanges" className="mt-4 space-y-4">
+          {/* Search */}
+          <div className="relative max-w-md">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-foreground/30" />
+            <Input
+              value={exchangeSearch}
+              onChange={(e) => setExchangeSearch(e.target.value)}
+              placeholder="Rechercher un exchange..."
+              className="border rounded-xl h-11 pl-10 pr-4 text-foreground placeholder:text-muted-foreground/50"
+              style={{ background: 'var(--input)', borderColor: 'var(--border)' }}
+            />
+            {exchangeSearch && (
+              <button onClick={() => setExchangeSearch('')} className="absolute right-3 top-1/2 -translate-y-1/2 text-foreground/30 hover:text-foreground/60 transition-colors">
+                <X className="w-4 h-4" />
+              </button>
+            )}
+          </div>
+
+          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
+            {filteredExchanges.map((e) => {
+              const style = EXCHANGE_STYLES[e.name.toUpperCase()] || { bg: '#7c5cfc', text: '#FFFFFF', icon: e.name.slice(0, 2), gradient: 'linear-gradient(135deg, rgba(124,92,252,0.06), rgba(124,92,252,0.02))' }
+              return (
+                <div
+                  key={e.id}
+                  className="rounded-2xl p-4 border transition-all hover:shadow-lg hover:scale-[1.02] group relative overflow-hidden"
+                  style={{ background: style.gradient, borderColor: e.active ? style.bg + '30' : 'var(--border)' }}
+                >
+                  <div className="flex items-start gap-3 mb-3">
+                    <ExchangeLogo name={e.name} size={48} />
+                    <div className="flex-1 min-w-0">
+                      <p className="font-bold text-foreground text-base">{e.name}</p>
+                    </div>
+                  </div>
+                  <div className="mt-2 flex justify-end">
+                    <Badge className={`text-[10px] border px-2 py-0.5 ${e.active ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20' : 'bg-foreground/5 text-foreground/30 border-foreground/10'}`}>
                       {e.active ? 'Actif' : 'Inactif'}
                     </Badge>
                   </div>
+                  {/* Subtle brand color accent line at bottom */}
+                  <div className="absolute bottom-0 left-0 right-0 h-0.5 opacity-40 group-hover:opacity-80 transition-opacity" style={{ background: style.bg }} />
                 </div>
+              )
+            })}
+            {filteredExchanges.length === 0 && (
+              <div className="col-span-full text-center py-16 text-muted-foreground/50">
+                <Search className="w-12 h-12 mx-auto mb-3 opacity-30" />
+                <p className="text-sm font-medium">Aucun exchange trouvé</p>
+                <p className="text-xs mt-1">Essayez un autre terme de recherche</p>
               </div>
-            ))}
+            )}
           </div>
         </TabsContent>
       </Tabs>
@@ -3463,7 +3599,7 @@ function ProfileView({ user, onUpgrade }: { user: any; onUpgrade: () => void }) 
                 <li className="flex items-center gap-2.5"><Check className="w-4 h-4 text-emerald-400 shrink-0" /> <span className="text-muted-foreground">10 transactions maximum</span></li>
                 <li className="flex items-center gap-2.5"><X className="w-4 h-4 text-red-400/60 shrink-0" /> <span className="text-muted-foreground/50">Pas de graphiques avancés</span></li>
                 <li className="flex items-center gap-2.5"><X className="w-4 h-4 text-red-400/60 shrink-0" /> <span className="text-muted-foreground/50">Pas de métriques avancées</span></li>
-                <li className="flex items-center gap-2.5"><X className="w-4 h-4 text-red-400/60 shrink-0" /> <span className="text-muted-foreground/50">Pas de CryptoSense AI</span></li>
+                <li className="flex items-center gap-2.5"><X className="w-4 h-4 text-red-400/60 shrink-0" /> <span className="text-muted-foreground/50">Pas de Prédict AI</span></li>
               </ul>
               {!isPremium && !isAdmin && (
                 <Badge className="mt-4 text-foreground border-0" style={{ background: 'linear-gradient(135deg, #7c5cfc, #06b6d4)' }}>Plan actuel</Badge>
@@ -3489,7 +3625,7 @@ function ProfileView({ user, onUpgrade }: { user: any; onUpgrade: () => void }) 
                 <li className="flex items-center gap-2.5"><Check className="w-4 h-4 text-emerald-400 shrink-0" /> <span className="text-muted-foreground">Transactions illimitées</span></li>
                 <li className="flex items-center gap-2.5"><Check className="w-4 h-4 text-emerald-400 shrink-0" /> <span className="text-muted-foreground">Graphiques d&apos;évolution</span></li>
                 <li className="flex items-center gap-2.5"><Check className="w-4 h-4 text-emerald-400 shrink-0" /> <span className="text-muted-foreground">Métriques avancées</span></li>
-                <li className="flex items-center gap-2.5"><Sparkles className="w-4 h-4 text-violet-400 shrink-0" /> <span className="text-violet-400 font-medium">CryptoSense AI</span></li>
+                <li className="flex items-center gap-2.5"><Sparkles className="w-4 h-4 text-violet-400 shrink-0" /> <span className="text-violet-400 font-medium">Prédict AI</span></li>
               </ul>
               {isPremium ? (
                 <Badge className="mt-4 bg-amber-500 text-black border-0">Plan actuel</Badge>
@@ -4521,7 +4657,7 @@ function AIAnalysisView({ user }: { user: any }) {
       setAnalysis(data)
       saveToHistory(selectedTicker, token?.name || selectedTicker, data)
     } catch (err: any) {
-      setError(err.message || 'Erreur lors de l\'analyse CryptoSense AI')
+      setError(err.message || 'Erreur lors de l\'analyse Prédict AI')
     } finally {
       setLoading(false)
     }
@@ -4553,8 +4689,8 @@ function AIAnalysisView({ user }: { user: any }) {
               <Sparkles className="w-6 h-6 text-violet-400" />
             </div>
             <div>
-              <h1 className="text-2xl font-bold gradient-text">CryptoSense AI</h1>
-              <p className="text-sm" className="text-muted-foreground">L&apos;IA analyse le marché pour vous aider à décider</p>
+              <h1 className="text-2xl font-bold gradient-text">Prédict AI</h1>
+              <p className="text-sm text-muted-foreground">L&apos;IA analyse le marché pour vous aider à décider</p>
             </div>
           </div>
           {history.length > 0 && (
@@ -4605,7 +4741,7 @@ function AIAnalysisView({ user }: { user: any }) {
           <AlertTriangle className="w-5 h-5 text-amber-400 shrink-0 mt-0.5" />
           <div>
             <p className="text-sm font-medium text-amber-400">Assistance, pas conseil financier</p>
-            <p className="text-xs mt-1" className="text-muted-foreground">L&apos;IA vous aide à analyser les données techniques et l&apos;actualité du marché. Vous prenez la décision finale. Ceci ne constitue pas un conseil en investissement.</p>
+            <p className="text-xs mt-1 text-muted-foreground">L&apos;IA vous aide à analyser les données techniques et l&apos;actualité du marché. Vous prenez la décision finale. Ceci ne constitue pas un conseil en investissement.</p>
           </div>
         </div>
       </ScrollReveal>
@@ -4620,14 +4756,26 @@ function AIAnalysisView({ user }: { user: any }) {
           <div className="flex gap-3 items-end">
             <div className="flex-1 relative" ref={tokenSearchRef}>
               {selectedToken && !showTokenDropdown ? (
-                <div className="flex items-center gap-2 border rounded-xl h-11 px-3 cursor-pointer" style={{ background: 'var(--input)', borderColor: 'var(--border)' }} onClick={() => { setShowTokenDropdown(true); setSearchQuery('') }}>
-                  <TokenLogo ticker={selectedToken.ticker} size={22} />
-                  <span className="font-medium text-foreground/90">{selectedToken.ticker}</span>
-                  <span className="text-foreground/40 text-xs">{selectedToken.name}</span>
-                  {prices[selectedToken.ticker] && (
-                    <span className="text-foreground/30 text-xs ml-1">${fmtPrice(prices[selectedToken.ticker])}</span>
-                  )}
-                  <button className="ml-auto text-foreground/30 hover:text-foreground/60 transition-colors" onClick={(e) => { e.stopPropagation(); setSelectedTicker(''); setSearchQuery(''); setShowTokenDropdown(true) }}>
+                <div
+                  className="flex items-center gap-3 border rounded-xl h-12 px-4 cursor-pointer transition-colors hover:border-violet-500/30"
+                  style={{ background: 'var(--input)', borderColor: 'var(--border)' }}
+                  onClick={() => { setShowTokenDropdown(true); setSearchQuery('') }}
+                >
+                  <TokenLogo ticker={selectedToken.ticker} size={28} />
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center gap-2">
+                      <span className="font-semibold text-foreground/90">{selectedToken.ticker}</span>
+                      <span className="text-foreground/35 text-xs truncate">{selectedToken.name}</span>
+                    </div>
+                    {prices[selectedToken.ticker] != null && (
+                      <span className="text-foreground/50 text-xs">${fmtPrice(prices[selectedToken.ticker])}</span>
+                    )}
+                  </div>
+                  <button
+                    className="ml-2 p-1 rounded-lg text-foreground/25 hover:text-foreground/60 hover:bg-foreground/5 transition-all"
+                    onClick={(e) => { e.stopPropagation(); setSelectedTicker(''); setSearchQuery(''); setShowTokenDropdown(true) }}
+                    title="Désélectionner"
+                  >
                     <X className="w-4 h-4" />
                   </button>
                 </div>
@@ -4639,28 +4787,36 @@ function AIAnalysisView({ user }: { user: any }) {
                     onChange={(e) => { setSearchQuery(e.target.value); setShowTokenDropdown(true) }}
                     onFocus={() => setShowTokenDropdown(true)}
                     placeholder="Rechercher un token (ticker ou nom)..."
-                    className="w-full border rounded-xl h-11 pl-10 pr-3 text-foreground placeholder:text-muted-foreground/50"
+                    className="w-full border rounded-xl h-12 pl-10 pr-3 text-foreground placeholder:text-muted-foreground/50"
                     style={{ background: 'var(--input)', borderColor: 'var(--border)' }}
+                    autoFocus
                   />
                 </div>
               )}
               {showTokenDropdown && (
-                <div className="absolute z-50 top-12 left-0 right-0 max-h-64 overflow-y-auto rounded-xl border shadow-xl custom-scrollbar" style={{ background: 'var(--popover)', borderColor: 'var(--border)' }}>
+                <div className="absolute z-50 top-14 left-0 right-0 max-h-72 overflow-y-auto rounded-xl border shadow-xl custom-scrollbar" style={{ background: 'var(--popover)', borderColor: 'var(--border)' }}>
                   {filteredTokens.length === 0 ? (
-                    <div className="px-4 py-3 text-sm text-muted-foreground/50 text-center">Aucun token trouvé</div>
+                    <div className="px-4 py-6 text-sm text-muted-foreground/50 text-center">
+                      <Search className="w-6 h-6 mx-auto mb-2 opacity-30" />
+                      Aucun token trouvé
+                    </div>
                   ) : (
                     filteredTokens.map(t => (
                       <button
                         key={t.ticker}
                         onClick={() => { setSelectedTicker(t.ticker); setShowTokenDropdown(false); setSearchQuery('') }}
-                        className={`w-full flex items-center gap-3 px-4 py-2.5 text-left transition-colors hover:bg-violet-500/10 ${selectedTicker === t.ticker ? 'bg-violet-500/5' : ''}`}
+                        className={`w-full flex items-center gap-3 px-4 py-3 text-left transition-colors hover:bg-violet-500/10 ${selectedTicker === t.ticker ? 'bg-violet-500/5' : ''}`}
                       >
-                        <TokenLogo ticker={t.ticker} size={22} />
-                        <span className="font-medium text-foreground/80">{t.ticker}</span>
-                        <span className="text-foreground/30 text-xs">{t.name}</span>
-                        {prices[t.ticker] && (
-                          <span className="text-foreground/20 text-xs ml-auto">${fmtPrice(prices[t.ticker])}</span>
-                        )}
+                        <TokenLogo ticker={t.ticker} size={28} />
+                        <div className="flex-1 min-w-0">
+                          <div className="flex items-center gap-2">
+                            <span className="font-semibold text-foreground/90 text-sm">{t.ticker}</span>
+                            <span className="text-foreground/35 text-xs truncate">{t.name}</span>
+                          </div>
+                        </div>
+                        <span className="text-foreground/30 text-xs font-medium shrink-0">
+                          {prices[t.ticker] != null ? `$${fmtPrice(prices[t.ticker])}` : '—'}
+                        </span>
                       </button>
                     ))
                   )}
@@ -4670,20 +4826,24 @@ function AIAnalysisView({ user }: { user: any }) {
             <Button
               onClick={runAnalysis}
               disabled={loading || !selectedTicker}
-              className="btn-primary-glow btn-ripple text-foreground rounded-xl h-11 px-6 font-medium transition-all active:scale-[0.98]"
+              className="btn-primary-glow btn-ripple text-foreground rounded-xl h-12 px-6 font-medium transition-all active:scale-[0.98]"
               style={{ background: 'linear-gradient(135deg, #7c5cfc, #06b6d4)', boxShadow: '0 4px 20px rgba(124,92,252,0.25)' }}
             >
               {loading ? <RefreshCw className="w-4 h-4 animate-spin mr-2" /> : <Sparkles className="w-4 h-4 mr-2" />}
-              {loading ? 'Analyse en cours...' : 'Analyser'}
+              {loading ? 'Analyse...' : 'Analyser'}
             </Button>
           </div>
 
           {/* Selected token quick info */}
-          {selectedTicker && prices[selectedTicker] && (
+          {selectedTicker && (
             <div className="mt-3 flex items-center gap-2 text-xs text-muted-foreground">
               <TokenLogo ticker={selectedTicker} size={16} />
-              <span>{selectedTicker}</span>
-              <span className="text-foreground/50 font-medium">${fmtPrice(prices[selectedTicker])}</span>
+              <span className="font-medium">{selectedTicker}</span>
+              {prices[selectedTicker] != null ? (
+                <span className="text-foreground/50 font-medium">${fmtPrice(prices[selectedTicker])}</span>
+              ) : (
+                <span className="text-foreground/25">Prix non disponible</span>
+              )}
             </div>
           )}
         </div>
@@ -5098,8 +5258,8 @@ export function CryptoApp() {
                 <Crown className="w-10 h-10 text-amber-400" />
               </div>
               <div className="text-center space-y-2">
-                <h2 className="text-xl font-bold text-foreground/80">CryptoSense AI — Premium</h2>
-                <p className="text-sm text-muted-foreground max-w-md">CryptoSense AI est réservé aux membres Premium. Passez en Premium pour débloquer cette fonctionnalité.</p>
+                <h2 className="text-xl font-bold text-foreground/80">Prédict AI — Premium</h2>
+                <p className="text-sm text-muted-foreground max-w-md">Prédict AI est réservé aux membres Premium. Passez en Premium pour débloquer cette fonctionnalité.</p>
               </div>
               <Button
                 className="rounded-xl text-black font-semibold shadow-lg transition-all active:scale-[0.98]"
