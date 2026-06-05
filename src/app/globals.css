@@ -45,41 +45,41 @@
 
 /* ============================================================
    DESIGN TOKENS — LIGHT THEME (default)
-   Clean white/gray with vivid violet/cyan gradient accents
+   Vivid violet-cyan-orange gradient with rich, convivial colors
    ============================================================ */
 :root {
   --radius: 0.75rem;
-  --background: #f5f3ff;
+  --background: #faf8ff;
   --foreground: #0f172a;
   --card: #ffffff;
   --card-foreground: #0f172a;
   --popover: #ffffff;
   --popover-foreground: #0f172a;
-  --primary: #7c5cfc;
+  --primary: #6d4de0;
   --primary-foreground: #ffffff;
   --secondary: #ede9fe;
-  --secondary-foreground: #0f172a;
-  --muted: #ede9fe;
-  --muted-foreground: #64748b;
+  --secondary-foreground: #1e1b4b;
+  --muted: #f0ecfe;
+  --muted-foreground: #5b21b6;
   --accent: #ecfeff;
   --accent-foreground: #0f172a;
   --destructive: #ef4444;
-  --border: rgba(124,92,252,0.12);
-  --input: rgba(124,92,252,0.06);
-  --ring: #7c5cfc;
-  --chart-1: #7c5cfc;
-  --chart-2: #06b6d4;
-  --chart-3: #10b981;
-  --chart-4: #f59e0b;
-  --chart-5: #ef4444;
+  --border: rgba(109, 77, 224, 0.18);
+  --input: rgba(109, 77, 224, 0.08);
+  --ring: #6d4de0;
+  --chart-1: #6d4de0;
+  --chart-2: #0891b2;
+  --chart-3: #059669;
+  --chart-4: #d97706;
+  --chart-5: #dc2626;
   --sidebar: #ffffff;
   --sidebar-foreground: #0f172a;
-  --sidebar-primary: #7c5cfc;
+  --sidebar-primary: #6d4de0;
   --sidebar-primary-foreground: #ffffff;
   --sidebar-accent: #ede9fe;
-  --sidebar-accent-foreground: #0f172a;
-  --sidebar-border: rgba(124,92,252,0.10);
-  --sidebar-ring: #7c5cfc;
+  --sidebar-accent-foreground: #1e1b4b;
+  --sidebar-border: rgba(109, 77, 224, 0.14);
+  --sidebar-ring: #6d4de0;
 }
 
 /* ============================================================
@@ -146,7 +146,7 @@
   pointer-events: none;
 }
 
-/* Light theme ambient — vivid aurora blobs */
+/* Light theme ambient — vivid colorful aurora blobs */
 .ambient-bg::before {
   content: '';
   position: absolute;
@@ -154,7 +154,7 @@
   left: 20%;
   width: 60%;
   height: 60%;
-  background: radial-gradient(ellipse, rgba(124, 92, 252, 0.25) 0%, transparent 70%);
+  background: radial-gradient(ellipse, rgba(109, 77, 224, 0.35) 0%, rgba(6, 182, 212, 0.12) 50%, transparent 70%);
   animation: ambientDrift1 20s ease-in-out infinite;
 }
 
@@ -165,7 +165,7 @@
   right: 10%;
   width: 50%;
   height: 50%;
-  background: radial-gradient(ellipse, rgba(6, 182, 212, 0.15) 0%, transparent 70%);
+  background: radial-gradient(ellipse, rgba(6, 182, 212, 0.25) 0%, rgba(245, 158, 11, 0.08) 50%, transparent 70%);
   animation: ambientDrift2 25s ease-in-out infinite;
 }
 
@@ -654,6 +654,257 @@
     height: 100%;
     display: flex;
     flex-direction: column;
+  }
+}
+
+/* ============================================================
+   LIGHT MODE ENHANCEMENTS — VIVID COLORS & ANIMATIONS
+   ============================================================ */
+
+/* Light mode cards — subtle gradient background with vivid border */
+:root .glass-card {
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.95), rgba(237, 233, 254, 0.7), rgba(236, 254, 255, 0.6));
+  border: 1px solid rgba(109, 77, 224, 0.15);
+  box-shadow: 0 4px 24px rgba(109, 77, 224, 0.12), 0 0 0 1px rgba(109, 77, 224, 0.06);
+}
+
+:root .glass-card:hover {
+  border-color: rgba(109, 77, 224, 0.35);
+  box-shadow: 0 12px 48px rgba(109, 77, 224, 0.20), 0 0 24px rgba(109, 77, 224, 0.15), 0 0 0 1px rgba(109, 77, 224, 0.16);
+  transform: translateY(-3px);
+}
+
+/* Light mode card hover — more vivid glow */
+:root .card-hover:hover {
+  transform: translateY(-6px);
+  box-shadow: 0 16px 48px rgba(109, 77, 224, 0.25),
+              0 0 0 1px rgba(109, 77, 224, 0.20),
+              0 0 30px rgba(109, 77, 224, 0.15);
+  border-color: rgba(109, 77, 224, 0.35);
+}
+
+/* Light mode 3D card — stronger glow */
+:root .card-hover-3d:hover {
+  transform: translateY(-8px) rotateX(2deg);
+  box-shadow:
+    0 24px 60px rgba(109, 77, 224, 0.28),
+    0 0 0 1px rgba(109, 77, 224, 0.22),
+    0 0 50px rgba(109, 77, 224, 0.14),
+    inset 0 1px 0 rgba(255, 255, 255, 0.95);
+  border-color: rgba(109, 77, 224, 0.35);
+}
+
+/* Light mode button glow — vivid */
+:root .btn-primary-glow:hover {
+  box-shadow: 0 6px 30px rgba(109, 77, 224, 0.40), 0 0 16px rgba(109, 77, 224, 0.20);
+}
+
+/* Light mode input focus — stronger violet glow */
+:root input:focus, :root select:focus, :root textarea:focus {
+  box-shadow: 0 0 0 3px rgba(109, 77, 224, 0.22), 0 0 24px rgba(109, 77, 224, 0.15), 0 0 48px rgba(109, 77, 224, 0.08);
+  border-color: rgba(109, 77, 224, 0.55);
+}
+
+/* Light mode data rows — vivid gradient */
+:root .data-row-hover:hover {
+  background: linear-gradient(90deg, rgba(109, 77, 224, 0.14), rgba(6, 182, 212, 0.08), transparent);
+}
+
+/* Light mode shimmer — more vivid */
+:root .shimmer::after {
+  background: linear-gradient(90deg, transparent, rgba(109, 77, 224, 0.10), rgba(6, 182, 212, 0.06), transparent);
+}
+
+:root .shimmer-vivid::after {
+  background: linear-gradient(
+    105deg,
+    transparent 20%,
+    rgba(109, 77, 224, 0.08) 35%,
+    rgba(6, 182, 212, 0.10) 42%,
+    rgba(167, 139, 250, 0.08) 50%,
+    transparent 65%
+  );
+}
+
+/* Light mode gradient text — more vivid */
+:root .gradient-text {
+  background: linear-gradient(135deg, #4c1d95, #6d4de0, #0891b2, #7c3aed, #d97706);
+  background-size: 400% 400%;
+  animation: gradientShift 4s ease infinite;
+}
+
+/* Light mode bottom nav — stronger gradient line */
+:root .bottom-nav::before {
+  opacity: 0.6;
+  background: linear-gradient(90deg, transparent, #6d4de0, #0891b2, #d97706, #6d4de0, transparent);
+}
+
+/* Light mode pulse glow — more visible */
+:root .pulse-glow {
+  animation: pulseGlowLight 2.5s ease-in-out infinite;
+}
+
+@keyframes pulseGlowLight {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(109, 77, 224, 0.35); }
+  50% { box-shadow: 0 0 24px 6px rgba(109, 77, 224, 0.18); }
+}
+
+/* Light mode FAB — vivid glow */
+:root .fab-button {
+  box-shadow: 0 4px 30px rgba(109, 77, 224, 0.45),
+              0 0 0 1px rgba(109, 77, 224, 0.15);
+}
+
+:root .fab-button:hover {
+  box-shadow: 0 6px 40px rgba(109, 77, 224, 0.55),
+              0 0 0 1px rgba(109, 77, 224, 0.25);
+}
+
+/* Light mode mouse glow — more vivid */
+:root .mouse-glow {
+  background: radial-gradient(circle, rgba(109, 77, 224, 0.12) 0%, rgba(6, 182, 212, 0.06) 40%, transparent 70%);
+}
+
+/* Light mode nav indicator — stronger glow */
+:root .nav-active-indicator::before {
+  background: linear-gradient(180deg, #6d4de0, #0891b2);
+  box-shadow: 0 0 12px rgba(109, 77, 224, 0.5);
+}
+
+/* Light mode bottom nav active indicator */
+:root .bottom-nav-item.active {
+  color: #6d4de0;
+}
+
+:root .bottom-nav-item.active::before {
+  background: linear-gradient(90deg, #6d4de0, #0891b2);
+  box-shadow: 0 0 12px rgba(109, 77, 224, 0.6);
+}
+
+/* ============================================================
+   LIGHT MODE ANIMATION ENHANCEMENTS
+   ============================================================ */
+
+/* Light mode entrance animations — more bouncy */
+:root .fade-in-up {
+  animation: fadeInUpVivid 0.7s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+}
+
+@keyframes fadeInUpVivid {
+  from { opacity: 0; transform: translateY(24px) scale(0.98); }
+  to { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+/* Light mode scale entrance */
+:root .fade-in-scale {
+  animation: fadeInScaleVivid 0.6s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+}
+
+@keyframes fadeInScaleVivid {
+  from { opacity: 0; transform: scale(0.92); }
+  60% { transform: scale(1.02); }
+  to { opacity: 1; transform: scale(1); }
+}
+
+/* Light mode page transition — more dynamic */
+:root .page-transition {
+  animation: pageEnterVivid 0.6s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+}
+
+@keyframes pageEnterVivid {
+  from { opacity: 0; transform: translateY(16px) scale(0.97); }
+  60% { transform: translateY(-2px) scale(1.01); }
+  to { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+/* Light mode KPI value animation — pop with color */
+:root .kpi-value-animate {
+  animation: kpiCountUpVivid 0.8s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+}
+
+@keyframes kpiCountUpVivid {
+  from { opacity: 0; transform: translateY(12px) scale(0.95); }
+  60% { transform: translateY(-3px) scale(1.03); }
+  to { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+/* ============================================================
+   LIGHT MODE HOVER MICRO-INTERACTIONS
+   ============================================================ */
+
+/* Light mode hover lift — subtle shadow + scale */
+@media (hover: hover) {
+  :root .glass-card:hover {
+    transform: translateY(-3px) scale(1.01);
+  }
+}
+
+/* Light mode badge pop on hover */
+:root .kpi-icon-glow:hover {
+  filter: drop-shadow(0 0 16px currentColor);
+  transform: scale(1.2);
+}
+
+/* Light mode nav item hover — gradient fill */
+:root .nav-item-hover::before {
+  background: linear-gradient(90deg, rgba(109, 77, 224, 0.10), transparent);
+}
+
+/* ============================================================
+   RESPONSIVE IMPROVEMENTS — ALL SCREEN SIZES
+   ============================================================ */
+
+/* Mobile-specific adjustments */
+@media (max-width: 639px) {
+  /* Reduce animation intensity on mobile for performance */
+  .ambient-bg::before,
+  .ambient-bg::after {
+    animation-duration: 30s !important;
+  }
+  
+  .aurora-blob {
+    filter: blur(60px) !important;
+    animation-duration: 20s !important;
+  }
+  
+  /* Smaller KPI text on mobile */
+  .kpi-value-animate {
+    animation-duration: 0.6s;
+  }
+  
+  /* Full-width cards on mobile */
+  .glass-card {
+    border-radius: 16px;
+  }
+  
+  /* Touch-friendly buttons */
+  button, [role="button"] {
+    min-height: 44px;
+  }
+  
+  /* Prevent horizontal overflow */
+  html, body {
+    overflow-x: hidden;
+  }
+}
+
+/* Tablet-specific adjustments */
+@media (min-width: 640px) and (max-width: 1023px) {
+  .ambient-bg::before,
+  .ambient-bg::after {
+    animation-duration: 22s !important;
+  }
+}
+
+/* Large desktop — enhance animations */
+@media (min-width: 1440px) {
+  .ambient-bg::before {
+    width: 50%;
+    height: 50%;
+  }
+  .ambient-bg::after {
+    width: 40%;
+    height: 40%;
   }
 }
 

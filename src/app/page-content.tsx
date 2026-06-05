@@ -3152,28 +3152,148 @@ function UpgradePremiumModal({ open, onOpenChange, onSuccess }: {
 }
 
 // ============================================================
-// EXPLORER VIEW
+// EXPLORER VIEW — CoinMarketCap Powered (Top 500)
 // ============================================================
+
+// CMC Token interface
+interface CMCToken {
+  id: number
+  name: string
+  symbol: string
+  slug: string
+  cmc_rank: number
+  circulating_supply: number
+  total_supply: number
+  max_supply: number | null
+  quote: {
+    USD: {
+      price: number
+      volume_24h: number
+      volume_change_24h: number
+      percent_change_1h: number
+      percent_change_24h: number
+      percent_change_7d: number
+      percent_change_30d: number
+      market_cap: number
+      market_cap_dominance: number
+      fully_diluted_market_cap: number
+    }
+  }
+}
+
+// CMC Exchange interface
+interface CMCExchange {
+  id: number
+  name: string
+  slug: string
+  rank: number
+  logo: string
+  description: string | null
+  urls: { website: string[]; fee: string[]; twitter: string[] }
+  market_pairs: number
+  volume_24h: number
+  volume_7d: number
+  volume_30d: number
+  quote: {
+    USD: {
+      volume_24h: number
+      volume_7d: number
+      volume_30d: number
+    }
+  }
+}
+
+// Global metrics interface
+interface GlobalMetrics {
+  total_cryptocurrencies: number
+  total_exchanges: number
+  total_market_cap: number
+  total_volume_24h: number
+  btc_dominance: number
+  eth_dominance: number
+  market_cap_change_24h: number
+  volume_change_24h: number
+}
+
+// Fear & Greed interface
+interface FearGreedData {
+  value: number
+  classification: string
+  history: Array<{ value: number; classification: string; date: string }>
+}
+
+// Number formatting for large values
+const fmtMarketCap = (n: number) => {
+  if (n >= 1e12) return `$${(n / 1e12).toFixed(2)}T`
+  if (n >= 1e9) return `$${(n / 1e9).toFixed(2)}B`
+  if (n >= 1e6) return `$${(n / 1e6).toFixed(2)}M`
+  if (n >= 1e3) return `$${(n / 1e3).toFixed(2)}K`
+  return `$${n.toFixed(2)}`
+}
+
+const fmtVolume = (n: number) => fmtMarketCap(n)
+
+const fmtChangePercent = (n: number) => {
+  const sign = n >= 0 ? '+' : ''
+  return `${sign}${n.toFixed(2)}%`
+}
+
+const changeColor = (n: number) => n >= 0 ? 'text-emerald-500 dark:text-emerald-400' : 'text-red-500 dark:text-red-400'
+const changeBg = (n: number) => n >= 0 ? 'bg-emerald-500/10 dark:bg-emerald-500/15' : 'bg-red-500/10 dark:bg-red-500/15'
+
+// CMC Logo URL helper
+const CMC_LOGO_URL = (id: number) => `https://s2.coinmarketcap.com/static/img/coins/64x64/${id}.png`
+
 function ExplorerView() {
-  const [tokens, setTokens] = useState<TokenData[]>([])
-  const [exchanges, setExchanges] = useState<ExchangeData[]>([])
-  const [prices, setPrices] = useState<Record<string, number>>({})
+  const [cmcTokens, setCmcTokens] = useState<CMCToken[]>([])
+  const [cmcExchanges, setCmcExchanges] = useState<CMCExchange[]>([])
+  const [globalMetrics, setGlobalMetrics] = useState<GlobalMetrics | null>(null)
+  const [fearGreed, setFearGreed] = useState<FearGreedData | null>(null)
   const [loading, setLoading] = useState(true)
-  const [activeTab, setActiveTab] = useState('tokens')
+  const [activeTab, setActiveTab] = useState('market')
   const [tokenSearch, setTokenSearch] = useState('')
   const [exchangeSearch, setExchangeSearch] = useState('')
+  const [sortField, setSortField] = useState<string>('cmc_rank')
+  const [sortDir, setSortDir] = useState<'asc' | 'desc'>('asc')
+  const [page, setPage] = useState(1)
+  const PER_PAGE = 50
 
+  // Load all data from CMC
   useEffect(() => {
     const loadData = async () => {
       try {
-        const [tokensRes, exchangesRes, pricesRes] = await Promise.all([
-          fetch('/api/tokens'),
-          fetch('/api/exchanges'),
-          fetch('/api/prices'),
+        const [tokensRes, exchangesRes, globalRes, fearRes] = await Promise.all([
+          fetch('/api/cmc/listings?limit=500'),
+          fetch('/api/cmc/exchanges?limit=100'),
+          fetch('/api/cmc/global'),
+          fetch('/api/fear-greed'),
         ])
-        if (tokensRes.ok) setTokens(await tokensRes.json())
-        if (exchangesRes.ok) setExchanges(await exchangesRes.json())
-        if (pricesRes.ok) setPrices(await pricesRes.json())
+
+        if (tokensRes.ok) {
+          const tokensData = await tokensRes.json()
+          setCmcTokens(tokensData.data || [])
+        }
+        if (exchangesRes.ok) {
+          const exchangesData = await exchangesRes.json()
+          setCmcExchanges(exchangesData.data || [])
+        }
+        if (globalRes.ok) {
+          const globalData = await globalRes.json()
+          setGlobalMetrics({
+            total_cryptocurrencies: globalData.total_cryptocurrencies || 0,
+            total_exchanges: globalData.total_exchanges || 0,
+            total_market_cap: globalData.quote?.USD?.total_market_cap || 0,
+            total_volume_24h: globalData.quote?.USD?.total_volume_24h || 0,
+            btc_dominance: globalData.btc_dominance || 0,
+            eth_dominance: globalData.eth_dominance || 0,
+            market_cap_change_24h: globalData.quote?.USD?.total_market_cap_yesterday_percentage_change || 0,
+            volume_change_24h: globalData.quote?.USD?.total_volume_24h_yesterday_percentage_change || 0,
+          })
+        }
+        if (fearRes.ok) {
+          const fearData = await fearRes.json()
+          setFearGreed(fearData)
+        }
       } catch (err) {
         console.error('Failed to load explorer data:', err)
       } finally {
@@ -3183,25 +3303,65 @@ function ExplorerView() {
     loadData()
   }, [])
 
-  const filteredTokens = tokens.filter(t => {
+  // Filter tokens
+  const filteredTokens = cmcTokens.filter(t => {
     if (!tokenSearch) return true
     const q = tokenSearch.toLowerCase()
-    return t.ticker.toLowerCase().includes(q) || t.name.toLowerCase().includes(q)
+    return t.symbol.toLowerCase().includes(q) || t.name.toLowerCase().includes(q)
   })
 
-  const filteredExchanges = exchanges.filter(e => {
+  // Sort tokens
+  const sortedTokens = [...filteredTokens].sort((a, b) => {
+    let aVal: number, bVal: number
+    switch (sortField) {
+      case 'cmc_rank': aVal = a.cmc_rank; bVal = b.cmc_rank; break
+      case 'price': aVal = a.quote.USD.price; bVal = b.quote.USD.price; break
+      case 'change_1h': aVal = a.quote.USD.percent_change_1h; bVal = b.quote.USD.percent_change_1h; break
+      case 'change_24h': aVal = a.quote.USD.percent_change_24h; bVal = b.quote.USD.percent_change_24h; break
+      case 'change_7d': aVal = a.quote.USD.percent_change_7d; bVal = b.quote.USD.percent_change_7d; break
+      case 'market_cap': aVal = a.quote.USD.market_cap; bVal = b.quote.USD.market_cap; break
+      case 'volume_24h': aVal = a.quote.USD.volume_24h; bVal = b.quote.USD.volume_24h; break
+      default: aVal = a.cmc_rank; bVal = b.cmc_rank
+    }
+    return sortDir === 'asc' ? aVal - bVal : bVal - aVal
+  })
+
+  // Paginate tokens
+  const totalPages = Math.ceil(sortedTokens.length / PER_PAGE)
+  const paginatedTokens = sortedTokens.slice((page - 1) * PER_PAGE, page * PER_PAGE)
+
+  // Filter exchanges
+  const filteredExchanges = cmcExchanges.filter(e => {
     if (!exchangeSearch) return true
     const q = exchangeSearch.toLowerCase()
     return e.name.toLowerCase().includes(q)
   })
 
-  // Compute stats
-  const activeTokenCount = tokens.filter(t => t.active).length
-  const tokensWithPrice = tokens.filter(t => prices[t.ticker] != null)
-  const totalMarketCapApprox = tokensWithPrice.reduce((sum, t) => sum + (prices[t.ticker] || 0), 0)
-  const activeExchangeCount = exchanges.filter(e => e.active).length
+  // Sort toggle helper
+  const toggleSort = (field: string) => {
+    if (sortField === field) {
+      setSortDir(d => d === 'asc' ? 'desc' : 'asc')
+    } else {
+      setSortField(field)
+      setSortDir(field === 'cmc_rank' ? 'asc' : 'desc')
+    }
+    setPage(1)
+  }
 
-  if (loading) return <div className="flex items-center justify-center py-20"><RefreshCw className="w-8 h-8 animate-spin text-violet-400/50" /></div>
+  // Fear & Greed gauge
+  const fgValue = fearGreed?.value || 50
+  const fgClass = fgValue <= 25 ? 'text-red-500' : fgValue <= 45 ? 'text-orange-500' : fgValue <= 55 ? 'text-yellow-500' : fgValue <= 75 ? 'text-lime-500' : 'text-emerald-500'
+  const fgLabel = fearGreed?.classification || 'Neutre'
+  const fgColor = fgValue <= 25 ? '#ef4444' : fgValue <= 45 ? '#f97316' : fgValue <= 55 ? '#eab308' : fgValue <= 75 ? '#84cc16' : '#10b981'
+
+  if (loading) return (
+    <div className="flex items-center justify-center py-20">
+      <div className="text-center space-y-4">
+        <RefreshCw className="w-10 h-10 animate-spin text-violet-400/50 mx-auto" />
+        <p className="text-sm text-muted-foreground animate-pulse">Chargement des données CoinMarketCap...</p>
+      </div>
+    </div>
+  )
 
   return (
     <div className="space-y-6 view-enter-cinematic">
@@ -3213,164 +3373,428 @@ function ExplorerView() {
           </div>
           <div>
             <h1 className="text-2xl font-bold gradient-text">Explorateur</h1>
-            <p className="text-sm text-muted-foreground">Parcourez tous les tokens et exchanges</p>
+            <p className="text-sm text-muted-foreground">Données en direct CoinMarketCap — Top 500</p>
           </div>
         </div>
       </div>
 
-      {/* Stat bar */}
-      <div className="fade-in-up stagger-1 grid grid-cols-2 sm:grid-cols-4 gap-3">
-        <div className="rounded-xl p-3 border" style={{ background: 'var(--popover)', borderColor: 'var(--border)' }}>
-          <div className="flex items-center gap-2">
-            <Coins className="w-4 h-4 text-violet-400" />
-            <span className="text-xs text-muted-foreground">Tokens</span>
+      {/* Global Market Stats */}
+      {globalMetrics && (
+        <div className="fade-in-up stagger-1 grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3">
+          <div className="rounded-xl p-3 border kpi-bar-violet" style={{ background: 'var(--popover)', borderColor: 'var(--border)' }}>
+            <div className="flex items-center gap-2">
+              <Coins className="w-4 h-4 text-violet-400" />
+              <span className="text-[11px] text-muted-foreground">Crypto-monnaies</span>
+            </div>
+            <p className="text-lg font-bold text-foreground mt-1">{globalMetrics.total_cryptocurrencies.toLocaleString('fr-FR')}</p>
           </div>
-          <p className="text-lg font-bold text-foreground mt-1">{tokens.length}</p>
-          <p className="text-[10px] text-emerald-400">{activeTokenCount} actifs</p>
-        </div>
-        <div className="rounded-xl p-3 border" style={{ background: 'var(--popover)', borderColor: 'var(--border)' }}>
-          <div className="flex items-center gap-2">
-            <DollarSign className="w-4 h-4 text-cyan-400" />
-            <span className="text-xs text-muted-foreground">Prix disponibles</span>
+          <div className="rounded-xl p-3 border kpi-bar-cyan" style={{ background: 'var(--popover)', borderColor: 'var(--border)' }}>
+            <div className="flex items-center gap-2">
+              <Building2 className="w-4 h-4 text-cyan-400" />
+              <span className="text-[11px] text-muted-foreground">Exchanges</span>
+            </div>
+            <p className="text-lg font-bold text-foreground mt-1">{globalMetrics.total_exchanges.toLocaleString('fr-FR')}</p>
           </div>
-          <p className="text-lg font-bold text-foreground mt-1">{tokensWithPrice.length}</p>
-          <p className="text-[10px] text-muted-foreground">sur {tokens.length} tokens</p>
-        </div>
-        <div className="rounded-xl p-3 border" style={{ background: 'var(--popover)', borderColor: 'var(--border)' }}>
-          <div className="flex items-center gap-2">
-            <Building2 className="w-4 h-4 text-amber-400" />
-            <span className="text-xs text-muted-foreground">Exchanges</span>
+          <div className="rounded-xl p-3 border kpi-bar-emerald" style={{ background: 'var(--popover)', borderColor: 'var(--border)' }}>
+            <div className="flex items-center gap-2">
+              <DollarSign className="w-4 h-4 text-emerald-400" />
+              <span className="text-[11px] text-muted-foreground">Cap. Marché</span>
+            </div>
+            <p className="text-lg font-bold text-foreground mt-1">{fmtMarketCap(globalMetrics.total_market_cap)}</p>
           </div>
-          <p className="text-lg font-bold text-foreground mt-1">{exchanges.length}</p>
-          <p className="text-[10px] text-emerald-400">{activeExchangeCount} actifs</p>
-        </div>
-        <div className="rounded-xl p-3 border" style={{ background: 'var(--popover)', borderColor: 'var(--border)' }}>
-          <div className="flex items-center gap-2">
-            <TrendingUp className="w-4 h-4 text-emerald-400" />
-            <span className="text-xs text-muted-foreground">Somme des prix</span>
+          <div className="rounded-xl p-3 border kpi-bar-amber" style={{ background: 'var(--popover)', borderColor: 'var(--border)' }}>
+            <div className="flex items-center gap-2">
+              <Activity className="w-4 h-4 text-amber-400" />
+              <span className="text-[11px] text-muted-foreground">Vol. 24h</span>
+            </div>
+            <p className="text-lg font-bold text-foreground mt-1">{fmtVolume(globalMetrics.total_volume_24h)}</p>
           </div>
-          <p className="text-lg font-bold text-foreground mt-1">${fmtPrice(totalMarketCapApprox)}</p>
-          <p className="text-[10px] text-muted-foreground">approximatif</p>
+          <div className="rounded-xl p-3 border" style={{ background: 'var(--popover)', borderColor: 'var(--border)', borderTop: '3px solid #f59e0b' }}>
+            <div className="flex items-center gap-2">
+              <Coins className="w-4 h-4 text-amber-400" />
+              <span className="text-[11px] text-muted-foreground">Dominance BTC</span>
+            </div>
+            <p className="text-lg font-bold text-foreground mt-1">{globalMetrics.btc_dominance.toFixed(1)}%</p>
+          </div>
+          <div className="rounded-xl p-3 border" style={{ background: 'var(--popover)', borderColor: 'var(--border)', borderTop: '3px solid #627eea' }}>
+            <div className="flex items-center gap-2">
+              <Gauge className="w-4 h-4 text-blue-400" />
+              <span className="text-[11px] text-muted-foreground">Fear & Greed</span>
+            </div>
+            <div className="flex items-center gap-2 mt-1">
+              <span className={`text-lg font-bold ${fgClass}`}>{fgValue}</span>
+              <span className={`text-[10px] font-medium ${fgClass}`}>{fgLabel}</span>
+            </div>
+          </div>
         </div>
-      </div>
+      )}
+
+      {/* Fear & Greed + Market Cap Chart */}
+      {fearGreed && (
+        <div className="fade-in-up stagger-2 grid grid-cols-1 lg:grid-cols-2 gap-4">
+          {/* Fear & Greed Gauge */}
+          <div className="rounded-2xl p-5 border" style={{ background: 'var(--popover)', borderColor: 'var(--border)' }}>
+            <div className="flex items-center gap-2 mb-4">
+              <Gauge className="w-5 h-5 text-violet-400" />
+              <h3 className="text-sm font-semibold text-foreground">Indice de Peur et Cupidité</h3>
+            </div>
+            <div className="flex items-center justify-center mb-4">
+              <div className="relative w-40 h-40">
+                <svg viewBox="0 0 200 200" className="w-full h-full">
+                  <circle cx="100" cy="100" r="85" fill="none" stroke="var(--border)" strokeWidth="12" strokeDasharray="401" strokeDashoffset="100" strokeLinecap="round" transform="rotate(135 100 100)" />
+                  <circle cx="100" cy="100" r="85" fill="none" stroke={fgColor} strokeWidth="12" strokeDasharray="401" strokeDashoffset={401 - (fgValue / 100) * 301} strokeLinecap="round" transform="rotate(135 100 100)" style={{ transition: 'stroke-dashoffset 1s cubic-bezier(0.16, 1, 0.3, 1)' }} />
+                </svg>
+                <div className="absolute inset-0 flex flex-col items-center justify-center">
+                  <span className={`text-4xl font-bold ${fgClass}`}>{fgValue}</span>
+                  <span className={`text-xs font-semibold ${fgClass} mt-1`}>{fgLabel}</span>
+                </div>
+              </div>
+            </div>
+            {/* History bar */}
+            <div className="flex items-end gap-1 h-12">
+              {fearGreed.history?.slice(0, 14).reverse().map((item, i) => {
+                const h = Math.max(item.value * 0.4, 4)
+                const c = item.value <= 25 ? '#ef4444' : item.value <= 45 ? '#f97316' : item.value <= 55 ? '#eab308' : item.value <= 75 ? '#84cc16' : '#10b981'
+                return (
+                  <div key={i} className="flex-1 flex flex-col items-center gap-1">
+                    <div className="w-full rounded-sm transition-all hover:scale-y-110" style={{ height: h, background: c, minHeight: 4, opacity: 0.6 + (i / 14) * 0.4 }} title={`${item.date}: ${item.value} (${item.classification})`} />
+                    <span className="text-[8px] text-muted-foreground/50">{item.date.slice(8)}</span>
+                  </div>
+                )
+              })}
+            </div>
+          </div>
+
+          {/* Market Cap Overview */}
+          <div className="rounded-2xl p-5 border" style={{ background: 'var(--popover)', borderColor: 'var(--border)' }}>
+            <div className="flex items-center gap-2 mb-4">
+              <BarChart3 className="w-5 h-5 text-cyan-400" />
+              <h3 className="text-sm font-semibold text-foreground">Top 10 par Capitalisation</h3>
+            </div>
+            <div className="space-y-2">
+              {cmcTokens.slice(0, 10).map((t, i) => {
+                const maxCap = cmcTokens[0]?.quote.USD.market_cap || 1
+                const pct = (t.quote.USD.market_cap / maxCap) * 100
+                const change24 = t.quote.USD.percent_change_24h
+                return (
+                  <div key={t.id} className="flex items-center gap-3 group">
+                    <span className="text-[10px] text-muted-foreground w-4 text-right font-mono">{i + 1}</span>
+                    <img src={CMC_LOGO_URL(t.id)} alt={t.symbol} className="w-5 h-5 rounded-full shrink-0" onError={(e) => { (e.target as HTMLImageElement).style.display = 'none' }} />
+                    <span className="text-xs font-semibold text-foreground w-10">{t.symbol}</span>
+                    <div className="flex-1 h-4 rounded-full overflow-hidden" style={{ background: 'var(--input)' }}>
+                      <div className="h-full rounded-full transition-all duration-700" style={{ width: `${pct}%`, background: `linear-gradient(90deg, #7c5cfc, #06b6d4)` }} />
+                    </div>
+                    <span className="text-[10px] text-muted-foreground w-16 text-right">{fmtMarketCap(t.quote.USD.market_cap)}</span>
+                    <span className={`text-[10px] font-medium w-14 text-right ${changeColor(change24)}`}>{fmtChangePercent(change24)}</span>
+                  </div>
+                )
+              })}
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Tabs */}
-      <Tabs value={activeTab} onValueChange={setActiveTab} className="fade-in-up stagger-2">
-        <TabsList className="w-full justify-start rounded-xl p-1 h-auto" style={{ background: 'var(--input)', border: '1px solid var(--border)' }}>
-          <TabsTrigger value="tokens" className="rounded-lg px-4 py-2 text-sm data-[state=active]:text-foreground data-[state=active]:shadow-sm text-muted-foreground">
-            <Coins className="w-4 h-4 mr-2" /> Tokens ({tokens.length})
+      <Tabs value={activeTab} onValueChange={setActiveTab} className="fade-in-up stagger-3">
+        <TabsList className="w-full justify-start rounded-xl p-1 h-auto flex-wrap gap-1" style={{ background: 'var(--input)', border: '1px solid var(--border)' }}>
+          <TabsTrigger value="market" className="rounded-lg px-3 sm:px-4 py-2 text-xs sm:text-sm data-[state=active]:text-foreground data-[state=active]:shadow-sm text-muted-foreground">
+            <Activity className="w-4 h-4 mr-1 sm:mr-2" /> <span className="hidden sm:inline">Marché</span><span className="sm:hidden">Marché</span>
           </TabsTrigger>
-          <TabsTrigger value="exchanges" className="rounded-lg px-4 py-2 text-sm data-[state=active]:text-foreground data-[state=active]:shadow-sm text-muted-foreground">
-            <Building2 className="w-4 h-4 mr-2" /> Exchanges ({exchanges.length})
+          <TabsTrigger value="tokens" className="rounded-lg px-3 sm:px-4 py-2 text-xs sm:text-sm data-[state=active]:text-foreground data-[state=active]:shadow-sm text-muted-foreground">
+            <Coins className="w-4 h-4 mr-1 sm:mr-2" /> <span className="hidden sm:inline">Top 500</span><span className="sm:hidden">500</span>
+          </TabsTrigger>
+          <TabsTrigger value="exchanges" className="rounded-lg px-3 sm:px-4 py-2 text-xs sm:text-sm data-[state=active]:text-foreground data-[state=active]:shadow-sm text-muted-foreground">
+            <Building2 className="w-4 h-4 mr-1 sm:mr-2" /> <span className="hidden sm:inline">Exchanges</span><span className="sm:hidden">Exch.</span>
+          </TabsTrigger>
+          <TabsTrigger value="gainers" className="rounded-lg px-3 sm:px-4 py-2 text-xs sm:text-sm data-[state=active]:text-foreground data-[state=active]:shadow-sm text-muted-foreground">
+            <TrendingUp className="w-4 h-4 mr-1 sm:mr-2" /> <span className="hidden sm:inline">Hausse</span><span className="sm:hidden">+24h</span>
+          </TabsTrigger>
+          <TabsTrigger value="losers" className="rounded-lg px-3 sm:px-4 py-2 text-xs sm:text-sm data-[state=active]:text-foreground data-[state=active]:shadow-sm text-muted-foreground">
+            <TrendingDown className="w-4 h-4 mr-1 sm:mr-2" /> <span className="hidden sm:inline">Baisse</span><span className="sm:hidden">-24h</span>
           </TabsTrigger>
         </TabsList>
 
-        {/* Tokens Tab */}
-        <TabsContent value="tokens" className="mt-4 space-y-4">
-          {/* Search */}
-          <div className="relative max-w-md">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-foreground/30" />
-            <Input
-              value={tokenSearch}
-              onChange={(e) => setTokenSearch(e.target.value)}
-              placeholder="Rechercher un token par ticker ou nom..."
-              className="border rounded-xl h-11 pl-10 pr-4 text-foreground placeholder:text-muted-foreground/50"
-              style={{ background: 'var(--input)', borderColor: 'var(--border)' }}
-            />
-            {tokenSearch && (
-              <button onClick={() => setTokenSearch('')} className="absolute right-3 top-1/2 -translate-y-1/2 text-foreground/30 hover:text-foreground/60 transition-colors">
-                <X className="w-4 h-4" />
-              </button>
-            )}
-          </div>
-
-          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
-            {filteredTokens.map((t) => {
-              const price = prices[t.ticker]
+        {/* Market Overview Tab — Quick cards */}
+        <TabsContent value="market" className="mt-4 space-y-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+            {cmcTokens.slice(0, 20).map((t) => {
+              const change24 = t.quote.USD.percent_change_24h
+              const change7d = t.quote.USD.percent_change_7d
               return (
-                <div key={t.id} className="rounded-2xl p-4 border transition-all hover:border-violet-500/20 hover:shadow-lg hover:scale-[1.02] group" style={{ background: 'var(--popover)', borderColor: 'var(--border)' }}>
-                  <div className="flex items-start gap-3 mb-3">
-                    <TokenLogo ticker={t.ticker} size={48} />
+                <div key={t.id} className="rounded-2xl p-4 border transition-all hover:border-violet-500/20 hover:shadow-lg hover:scale-[1.02] group card-hover-3d" style={{ background: 'var(--popover)', borderColor: 'var(--border)' }}>
+                  <div className="flex items-center gap-3 mb-3">
+                    <img src={CMC_LOGO_URL(t.id)} alt={t.symbol} className="w-10 h-10 rounded-full shrink-0" onError={(e) => { (e.target as HTMLImageElement).style.display = 'none' }} />
                     <div className="flex-1 min-w-0">
-                      <p className="font-bold text-foreground text-base">{t.ticker}</p>
-                      <p className="text-xs text-muted-foreground truncate">{t.name}</p>
+                      <div className="flex items-center gap-2">
+                        <p className="font-bold text-foreground text-sm">{t.symbol}</p>
+                        <span className="text-[10px] text-muted-foreground/60">#{t.cmc_rank}</span>
+                      </div>
+                      <p className="text-[11px] text-muted-foreground truncate">{t.name}</p>
                     </div>
                   </div>
-                  <div className="flex items-center justify-between">
-                    <span className="text-xs text-muted-foreground">Prix</span>
-                    <span className="text-sm font-semibold text-foreground/90">
-                      {price != null ? `$${fmtPrice(price)}` : '—'}
-                    </span>
-                  </div>
-                  <div className="mt-2 flex justify-end">
-                    <Badge className={`text-[10px] border px-2 py-0.5 ${t.active ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20' : 'bg-foreground/5 text-foreground/30 border-foreground/10'}`}>
-                      {t.active ? 'Actif' : 'Inactif'}
-                    </Badge>
+                  <div className="flex items-end justify-between">
+                    <div>
+                      <p className="text-base font-bold text-foreground">${fmtPrice(t.quote.USD.price)}</p>
+                      <p className="text-[11px] text-muted-foreground mt-0.5">Cap: {fmtMarketCap(t.quote.USD.market_cap)}</p>
+                    </div>
+                    <div className="text-right">
+                      <span className={`inline-flex items-center gap-1 text-xs font-semibold px-2 py-1 rounded-lg ${changeBg(change24)} ${changeColor(change24)}`}>
+                        {change24 >= 0 ? <TrendingUp className="w-3 h-3" /> : <TrendingDown className="w-3 h-3" />}
+                        {fmtChangePercent(change24)}
+                      </span>
+                      <p className={`text-[10px] mt-1 ${changeColor(change7d)}`}>7j: {fmtChangePercent(change7d)}</p>
+                    </div>
                   </div>
                 </div>
               )
             })}
-            {filteredTokens.length === 0 && (
-              <div className="col-span-full text-center py-16 text-muted-foreground/50">
-                <Search className="w-12 h-12 mx-auto mb-3 opacity-30" />
-                <p className="text-sm font-medium">Aucun token trouvé</p>
-                <p className="text-xs mt-1">Essayez un autre terme de recherche</p>
-              </div>
-            )}
           </div>
+        </TabsContent>
+
+        {/* Top 500 Tokens Tab — Full Table */}
+        <TabsContent value="tokens" className="mt-4 space-y-4">
+          {/* Search + Count */}
+          <div className="flex flex-col sm:flex-row gap-3 items-start sm:items-center justify-between">
+            <div className="relative w-full sm:w-80">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-foreground/30" />
+              <Input
+                value={tokenSearch}
+                onChange={(e) => { setTokenSearch(e.target.value); setPage(1) }}
+                placeholder="Rechercher par ticker ou nom..."
+                className="border rounded-xl h-11 pl-10 pr-4 text-foreground placeholder:text-muted-foreground/50"
+                style={{ background: 'var(--input)', borderColor: 'var(--border)' }}
+              />
+              {tokenSearch && (
+                <button onClick={() => { setTokenSearch(''); setPage(1) }} className="absolute right-3 top-1/2 -translate-y-1/2 text-foreground/30 hover:text-foreground/60 transition-colors">
+                  <X className="w-4 h-4" />
+                </button>
+              )}
+            </div>
+            <span className="text-xs text-muted-foreground">{filteredTokens.length} cryptos trouvées</span>
+          </div>
+
+          {/* Token Table — scrollable on mobile */}
+          <div className="rounded-2xl border overflow-hidden" style={{ borderColor: 'var(--border)' }}>
+            <div className="overflow-x-auto custom-scrollbar">
+              <table className="w-full min-w-[700px]">
+                <thead>
+                  <tr style={{ background: 'var(--input)' }}>
+                    <th className="text-left text-[11px] font-semibold text-muted-foreground px-3 py-3 cursor-pointer hover:text-foreground transition-colors" onClick={() => toggleSort('cmc_rank')}>
+                      # {sortField === 'cmc_rank' && (sortDir === 'asc' ? '↑' : '↓')}
+                    </th>
+                    <th className="text-left text-[11px] font-semibold text-muted-foreground px-3 py-3">Nom</th>
+                    <th className="text-right text-[11px] font-semibold text-muted-foreground px-3 py-3 cursor-pointer hover:text-foreground transition-colors" onClick={() => toggleSort('price')}>
+                      Prix {sortField === 'price' && (sortDir === 'asc' ? '↑' : '↓')}
+                    </th>
+                    <th className="text-right text-[11px] font-semibold text-muted-foreground px-3 py-3 cursor-pointer hover:text-foreground transition-colors" onClick={() => toggleSort('change_1h')}>
+                      1h {sortField === 'change_1h' && (sortDir === 'asc' ? '↑' : '↓')}
+                    </th>
+                    <th className="text-right text-[11px] font-semibold text-muted-foreground px-3 py-3 cursor-pointer hover:text-foreground transition-colors" onClick={() => toggleSort('change_24h')}>
+                      24h {sortField === 'change_24h' && (sortDir === 'asc' ? '↑' : '↓')}
+                    </th>
+                    <th className="text-right text-[11px] font-semibold text-muted-foreground px-3 py-3 cursor-pointer hover:text-foreground transition-colors hidden md:table-cell" onClick={() => toggleSort('change_7d')}>
+                      7j {sortField === 'change_7d' && (sortDir === 'asc' ? '↑' : '↓')}
+                    </th>
+                    <th className="text-right text-[11px] font-semibold text-muted-foreground px-3 py-3 cursor-pointer hover:text-foreground transition-colors hidden lg:table-cell" onClick={() => toggleSort('market_cap')}>
+                      Cap. Marché {sortField === 'market_cap' && (sortDir === 'asc' ? '↑' : '↓')}
+                    </th>
+                    <th className="text-right text-[11px] font-semibold text-muted-foreground px-3 py-3 cursor-pointer hover:text-foreground transition-colors hidden lg:table-cell" onClick={() => toggleSort('volume_24h')}>
+                      Vol. 24h {sortField === 'volume_24h' && (sortDir === 'asc' ? '↑' : '↓')}
+                    </th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {paginatedTokens.map((t, idx) => {
+                    const q = t.quote.USD
+                    return (
+                      <tr key={t.id} className="data-row-hover border-t" style={{ borderColor: 'var(--border)', background: idx % 2 === 0 ? 'transparent' : 'var(--input)' }}>
+                        <td className="px-3 py-3 text-xs text-muted-foreground font-mono">{t.cmc_rank}</td>
+                        <td className="px-3 py-3">
+                          <div className="flex items-center gap-2">
+                            <img src={CMC_LOGO_URL(t.id)} alt={t.symbol} className="w-7 h-7 rounded-full shrink-0" onError={(e) => { (e.target as HTMLImageElement).style.display = 'none' }} />
+                            <div>
+                              <p className="text-sm font-semibold text-foreground">{t.symbol}</p>
+                              <p className="text-[10px] text-muted-foreground truncate max-w-[100px]">{t.name}</p>
+                            </div>
+                          </div>
+                        </td>
+                        <td className="px-3 py-3 text-right text-sm font-semibold text-foreground">${fmtPrice(q.price)}</td>
+                        <td className={`px-3 py-3 text-right text-xs font-medium ${changeColor(q.percent_change_1h)}`}>{fmtChangePercent(q.percent_change_1h)}</td>
+                        <td className="px-3 py-3 text-right">
+                          <span className={`inline-flex text-xs font-semibold px-2 py-0.5 rounded-md ${changeBg(q.percent_change_24h)} ${changeColor(q.percent_change_24h)}`}>
+                            {fmtChangePercent(q.percent_change_24h)}
+                          </span>
+                        </td>
+                        <td className={`px-3 py-3 text-right text-xs font-medium hidden md:table-cell ${changeColor(q.percent_change_7d)}`}>{fmtChangePercent(q.percent_change_7d)}</td>
+                        <td className="px-3 py-3 text-right text-xs text-foreground/80 hidden lg:table-cell">{fmtMarketCap(q.market_cap)}</td>
+                        <td className="px-3 py-3 text-right text-xs text-muted-foreground hidden lg:table-cell">{fmtVolume(q.volume_24h)}</td>
+                      </tr>
+                    )
+                  })}
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          {/* Pagination */}
+          {totalPages > 1 && (
+            <div className="flex items-center justify-between gap-2 pt-2">
+              <span className="text-xs text-muted-foreground">Page {page} / {totalPages}</span>
+              <div className="flex items-center gap-1">
+                <Button variant="outline" size="sm" disabled={page <= 1} onClick={() => setPage(p => p - 1)} className="h-8 text-xs">Précédent</Button>
+                {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
+                  let pageNum: number
+                  if (totalPages <= 5) {
+                    pageNum = i + 1
+                  } else if (page <= 3) {
+                    pageNum = i + 1
+                  } else if (page >= totalPages - 2) {
+                    pageNum = totalPages - 4 + i
+                  } else {
+                    pageNum = page - 2 + i
+                  }
+                  return (
+                    <Button key={pageNum} variant={page === pageNum ? "default" : "outline"} size="sm" onClick={() => setPage(pageNum)} className="h-8 w-8 text-xs p-0">
+                      {pageNum}
+                    </Button>
+                  )
+                })}
+                <Button variant="outline" size="sm" disabled={page >= totalPages} onClick={() => setPage(p => p + 1)} className="h-8 text-xs">Suivant</Button>
+              </div>
+            </div>
+          )}
         </TabsContent>
 
         {/* Exchanges Tab */}
         <TabsContent value="exchanges" className="mt-4 space-y-4">
-          {/* Search */}
-          <div className="relative max-w-md">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-foreground/30" />
-            <Input
-              value={exchangeSearch}
-              onChange={(e) => setExchangeSearch(e.target.value)}
-              placeholder="Rechercher un exchange..."
-              className="border rounded-xl h-11 pl-10 pr-4 text-foreground placeholder:text-muted-foreground/50"
-              style={{ background: 'var(--input)', borderColor: 'var(--border)' }}
-            />
-            {exchangeSearch && (
-              <button onClick={() => setExchangeSearch('')} className="absolute right-3 top-1/2 -translate-y-1/2 text-foreground/30 hover:text-foreground/60 transition-colors">
-                <X className="w-4 h-4" />
-              </button>
-            )}
+          <div className="flex flex-col sm:flex-row gap-3 items-start sm:items-center justify-between">
+            <div className="relative w-full sm:w-80">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-foreground/30" />
+              <Input
+                value={exchangeSearch}
+                onChange={(e) => setExchangeSearch(e.target.value)}
+                placeholder="Rechercher un exchange..."
+                className="border rounded-xl h-11 pl-10 pr-4 text-foreground placeholder:text-muted-foreground/50"
+                style={{ background: 'var(--input)', borderColor: 'var(--border)' }}
+              />
+              {exchangeSearch && (
+                <button onClick={() => setExchangeSearch('')} className="absolute right-3 top-1/2 -translate-y-1/2 text-foreground/30 hover:text-foreground/60 transition-colors">
+                  <X className="w-4 h-4" />
+                </button>
+              )}
+            </div>
+            <span className="text-xs text-muted-foreground">{filteredExchanges.length} exchanges</span>
           </div>
 
-          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
-            {filteredExchanges.map((e) => {
-              const style = EXCHANGE_STYLES[e.name.toUpperCase()] || { bg: '#7c5cfc', text: '#FFFFFF', icon: e.name.slice(0, 2), gradient: 'linear-gradient(135deg, rgba(124,92,252,0.06), rgba(124,92,252,0.02))' }
-              return (
-                <div
-                  key={e.id}
-                  className="rounded-2xl p-4 border transition-all hover:shadow-lg hover:scale-[1.02] group relative overflow-hidden"
-                  style={{ background: style.gradient, borderColor: e.active ? style.bg + '30' : 'var(--border)' }}
-                >
-                  <div className="flex items-start gap-3 mb-3">
-                    <ExchangeLogo name={e.name} size={48} />
-                    <div className="flex-1 min-w-0">
-                      <p className="font-bold text-foreground text-base">{e.name}</p>
+          <div className="rounded-2xl border overflow-hidden" style={{ borderColor: 'var(--border)' }}>
+            <div className="overflow-x-auto custom-scrollbar">
+              <table className="w-full min-w-[500px]">
+                <thead>
+                  <tr style={{ background: 'var(--input)' }}>
+                    <th className="text-left text-[11px] font-semibold text-muted-foreground px-3 py-3">#</th>
+                    <th className="text-left text-[11px] font-semibold text-muted-foreground px-3 py-3">Exchange</th>
+                    <th className="text-right text-[11px] font-semibold text-muted-foreground px-3 py-3 hidden sm:table-cell">Paires</th>
+                    <th className="text-right text-[11px] font-semibold text-muted-foreground px-3 py-3">Vol. 24h</th>
+                    <th className="text-right text-[11px] font-semibold text-muted-foreground px-3 py-3 hidden md:table-cell">Vol. 7j</th>
+                    <th className="text-right text-[11px] font-semibold text-muted-foreground px-3 py-3 hidden lg:table-cell">Vol. 30j</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {filteredExchanges.map((e, idx) => {
+                    const q = e.quote?.USD
+                    return (
+                      <tr key={e.id} className="data-row-hover border-t" style={{ borderColor: 'var(--border)', background: idx % 2 === 0 ? 'transparent' : 'var(--input)' }}>
+                        <td className="px-3 py-3 text-xs text-muted-foreground font-mono">{e.rank || idx + 1}</td>
+                        <td className="px-3 py-3">
+                          <div className="flex items-center gap-2">
+                            {e.logo ? (
+                              <img src={e.logo} alt={e.name} className="w-7 h-7 rounded-full shrink-0" onError={(ev) => { (ev.target as HTMLImageElement).style.display = 'none' }} />
+                            ) : (
+                              <div className="w-7 h-7 rounded-full bg-violet-500/10 flex items-center justify-center text-violet-400 text-[10px] font-bold shrink-0">
+                                {e.name.slice(0, 2).toUpperCase()}
+                              </div>
+                            )}
+                            <div>
+                              <p className="text-sm font-semibold text-foreground">{e.name}</p>
+                            </div>
+                          </div>
+                        </td>
+                        <td className="px-3 py-3 text-right text-xs text-muted-foreground hidden sm:table-cell">{e.market_pairs || '—'}</td>
+                        <td className="px-3 py-3 text-right text-xs font-medium text-foreground/80">{q ? fmtVolume(q.volume_24h) : '—'}</td>
+                        <td className="px-3 py-3 text-right text-xs text-muted-foreground hidden md:table-cell">{q ? fmtVolume(q.volume_7d) : '—'}</td>
+                        <td className="px-3 py-3 text-right text-xs text-muted-foreground hidden lg:table-cell">{q ? fmtVolume(q.volume_30d) : '—'}</td>
+                      </tr>
+                    )
+                  })}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </TabsContent>
+
+        {/* Top Gainers Tab */}
+        <TabsContent value="gainers" className="mt-4 space-y-4">
+          <p className="text-xs text-muted-foreground">Top 50 des plus fortes hausses sur 24h</p>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3">
+            {[...cmcTokens]
+              .filter(t => t.quote?.USD?.percent_change_24h != null)
+              .sort((a, b) => b.quote.USD.percent_change_24h - a.quote.USD.percent_change_24h)
+              .slice(0, 50)
+              .map((t) => {
+                const change24 = t.quote.USD.percent_change_24h
+                return (
+                  <div key={t.id} className="rounded-2xl p-4 border transition-all hover:shadow-lg hover:scale-[1.02] group" style={{ background: 'var(--popover)', borderColor: 'rgba(16,185,129,0.2)' }}>
+                    <div className="flex items-center gap-3 mb-2">
+                      <img src={CMC_LOGO_URL(t.id)} alt={t.symbol} className="w-8 h-8 rounded-full shrink-0" onError={(e) => { (e.target as HTMLImageElement).style.display = 'none' }} />
+                      <div className="flex-1 min-w-0">
+                        <p className="font-semibold text-foreground text-sm">{t.symbol}</p>
+                        <p className="text-[10px] text-muted-foreground truncate">{t.name}</p>
+                      </div>
+                      <span className="text-[10px] text-muted-foreground">#{t.cmc_rank}</span>
+                    </div>
+                    <div className="flex items-end justify-between">
+                      <span className="text-sm font-bold text-foreground">${fmtPrice(t.quote.USD.price)}</span>
+                      <span className={`inline-flex items-center gap-1 text-xs font-bold px-2 py-1 rounded-lg bg-emerald-500/10 text-emerald-500 dark:text-emerald-400`}>
+                        <TrendingUp className="w-3 h-3" />
+                        {fmtChangePercent(change24)}
+                      </span>
                     </div>
                   </div>
-                  <div className="mt-2 flex justify-end">
-                    <Badge className={`text-[10px] border px-2 py-0.5 ${e.active ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20' : 'bg-foreground/5 text-foreground/30 border-foreground/10'}`}>
-                      {e.active ? 'Actif' : 'Inactif'}
-                    </Badge>
+                )
+              })}
+          </div>
+        </TabsContent>
+
+        {/* Top Losers Tab */}
+        <TabsContent value="losers" className="mt-4 space-y-4">
+          <p className="text-xs text-muted-foreground">Top 50 des plus fortes baisses sur 24h</p>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3">
+            {[...cmcTokens]
+              .filter(t => t.quote?.USD?.percent_change_24h != null)
+              .sort((a, b) => a.quote.USD.percent_change_24h - b.quote.USD.percent_change_24h)
+              .slice(0, 50)
+              .map((t) => {
+                const change24 = t.quote.USD.percent_change_24h
+                return (
+                  <div key={t.id} className="rounded-2xl p-4 border transition-all hover:shadow-lg hover:scale-[1.02] group" style={{ background: 'var(--popover)', borderColor: 'rgba(239,68,68,0.2)' }}>
+                    <div className="flex items-center gap-3 mb-2">
+                      <img src={CMC_LOGO_URL(t.id)} alt={t.symbol} className="w-8 h-8 rounded-full shrink-0" onError={(e) => { (e.target as HTMLImageElement).style.display = 'none' }} />
+                      <div className="flex-1 min-w-0">
+                        <p className="font-semibold text-foreground text-sm">{t.symbol}</p>
+                        <p className="text-[10px] text-muted-foreground truncate">{t.name}</p>
+                      </div>
+                      <span className="text-[10px] text-muted-foreground">#{t.cmc_rank}</span>
+                    </div>
+                    <div className="flex items-end justify-between">
+                      <span className="text-sm font-bold text-foreground">${fmtPrice(t.quote.USD.price)}</span>
+                      <span className={`inline-flex items-center gap-1 text-xs font-bold px-2 py-1 rounded-lg bg-red-500/10 text-red-500 dark:text-red-400`}>
+                        <TrendingDown className="w-3 h-3" />
+                        {fmtChangePercent(change24)}
+                      </span>
+                    </div>
                   </div>
-                  {/* Subtle brand color accent line at bottom */}
-                  <div className="absolute bottom-0 left-0 right-0 h-0.5 opacity-40 group-hover:opacity-80 transition-opacity" style={{ background: style.bg }} />
-                </div>
-              )
-            })}
-            {filteredExchanges.length === 0 && (
-              <div className="col-span-full text-center py-16 text-muted-foreground/50">
-                <Search className="w-12 h-12 mx-auto mb-3 opacity-30" />
-                <p className="text-sm font-medium">Aucun exchange trouvé</p>
-                <p className="text-xs mt-1">Essayez un autre terme de recherche</p>
-              </div>
-            )}
+                )
+              })}
           </div>
         </TabsContent>
       </Tabs>
