@@ -63,3 +63,35 @@ Stage Summary:
 - Full responsiveness added across all views (mobile/tablet/desktop)
 - Light mode enhanced with more vivid colors and better separation from dark mode
 - 97 duplicate className attributes fixed programmatically
+---
+Task ID: 2b
+Agent: main
+Task: Fix deformed mobile/tablet layout and completely redo Prédict AI section
+
+Work Log:
+- Analyzed screenshot with VLM: sidebar too wide on mobile, main content nearly empty
+- Fixed main layout: added overflow-x-hidden to root container, min-w-0 to main content, w-full to inner container
+- Fixed mobile sidebar: w-72 → w-64 sm:w-72 (narrower on small phones), hamburger z-index adjusted, sidebar z-index raised to z-50
+- Desktop sidebar: added shrink-0 to prevent flex collapsing
+- Completely rewrote AIAnalysisView (lines 5070-5680):
+  - Fixed signalIcon: replaced broken w-${size} dynamic Tailwind classes with hardcoded w-8 h-8
+  - Made all text sizes responsive: text-[10px] sm:text-xs, text-xs sm:text-sm, text-lg sm:text-2xl
+  - Made all spacing responsive: p-3 sm:p-5, gap-3 sm:gap-4, space-y-3 sm:space-y-4
+  - Chart height responsive: h-[200px] sm:h-[300px]
+  - Grid breakpoints: changed sm:grid-cols-2 → lg:grid-cols-2 for better tablet experience
+  - Fixed invisible text in light mode: rgba(255,255,255,0.55) → text-foreground/55
+  - Fixed invisible gauge stroke: rgba(255,255,255,0.05) → var(--muted)
+  - Fear & Greed gauge: smaller on mobile (w-20 h-20), stacks vertically on mobile
+  - Added Re-analyser button in signal card
+  - Confidence bar now has percentage label inside
+  - Empty state: grid layout on mobile for feature pills, flex on desktop
+  - All gradient lines, backgrounds, and borders now use useThemeStyles() hook
+  - News impact, key factors, risks all use theme-aware colors
+- Build succeeds, no duplicate attribute errors, dev server returns HTTP 200
+
+Stage Summary:
+- Mobile/tablet layout deformation FIXED
+- Prédict AI section completely rewritten with mobile-first responsive design
+- Theme-aware styling applied throughout (no more invisible text in light mode)
+- Dynamic Tailwind class bug fixed (signalIcon)
+- All responsive breakpoints properly configured (mobile/tablet/desktop)

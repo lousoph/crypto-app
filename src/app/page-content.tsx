@@ -1188,7 +1188,7 @@ function Sidebar({ currentView, setView, user, onLogout }: {
       <Button
         variant="ghost"
         size="icon"
-        className="fixed top-4 left-4 z-50 md:hidden glass rounded-xl h-10 w-10"
+        className="fixed top-3 left-3 z-30 md:hidden glass rounded-xl h-10 w-10"
         onClick={() => setMobileOpen(!mobileOpen)}
       >
         <Menu className="w-5 h-5 text-foreground/60" />
@@ -1200,14 +1200,14 @@ function Sidebar({ currentView, setView, user, onLogout }: {
       )}
 
       {/* Mobile sidebar */}
-      <aside className={`fixed inset-y-0 left-0 z-40 w-72 glass-sidebar flex flex-col transform transition-transform duration-300 md:hidden ${
+      <aside className={`fixed inset-y-0 left-0 z-50 w-64 sm:w-72 glass-sidebar flex flex-col transform transition-transform duration-300 md:hidden ${
         mobileOpen ? 'translate-x-0 slide-in-left' : '-translate-x-full'
       }`}>
         {sidebarContent}
       </aside>
 
       {/* Desktop sidebar */}
-      <aside className={`hidden md:flex flex-col h-screen glass-sidebar sticky top-0 transition-all duration-300 ${
+      <aside className={`hidden md:flex flex-col h-screen glass-sidebar sticky top-0 transition-all duration-300 shrink-0 ${
         collapsed ? 'w-[68px]' : 'w-64'
       }`}>
         {sidebarContent}
@@ -5068,6 +5068,7 @@ interface AnalysisHistoryEntry {
 }
 
 function AIAnalysisView({ user }: { user: any }) {
+  const ts = useThemeStyles()
   const [tokens, setTokens] = useState<TokenData[]>([])
   const [selectedTicker, setSelectedTicker] = useState<string>('')
   const [loading, setLoading] = useState(false)
@@ -5183,32 +5184,43 @@ function AIAnalysisView({ user }: { user: any }) {
     }
   }
 
-  const signalIcon = (signal: string, size = 8) => {
+  const signalIcon = (signal: string) => {
     switch (signal) {
-      case 'ACHAT': return <ArrowUpCircle className={`w-${size} h-${size} text-emerald-400`} />
-      case 'VENTE': return <ArrowDownCircle className={`w-${size} h-${size} text-red-400`} />
-      default: return <Gauge className={`w-${size} h-${size} text-amber-400`} />
+      case 'ACHAT': return <ArrowUpCircle className="w-8 h-8 text-emerald-400" />
+      case 'VENTE': return <ArrowDownCircle className="w-8 h-8 text-red-400" />
+      default: return <Gauge className="w-8 h-8 text-amber-400" />
     }
   }
 
+  // Fear & Greed gauge color
+  const fgColor = (val: number) =>
+    val <= 25 ? '#ef4444' : val <= 45 ? '#f97316' : val <= 55 ? '#f59e0b' : val <= 75 ? '#10b981' : '#06b6d4'
+
+  const fgBadgeClass = (val: number) =>
+    val <= 25 ? 'bg-red-500/15 text-red-400 border-red-500/30'
+    : val <= 45 ? 'bg-orange-500/15 text-orange-400 border-orange-500/30'
+    : val <= 55 ? 'bg-amber-500/15 text-amber-400 border-amber-500/30'
+    : val <= 75 ? 'bg-emerald-500/15 text-emerald-400 border-emerald-500/30'
+    : 'bg-cyan-500/15 text-cyan-400 border-cyan-500/30'
+
   return (
-    <div className="space-y-6">
+    <div className="space-y-4 sm:space-y-6 overflow-hidden">
       {/* Header */}
       <ScrollReveal>
-        <div className="flex items-center justify-between mb-2">
-          <div className="flex items-center gap-3">
-            <div className="w-12 h-12 rounded-2xl flex items-center justify-center relative breathe" style={{ background: 'linear-gradient(135deg, rgba(124,92,252,0.2), rgba(6,182,212,0.2))', border: '1px solid rgba(124,92,252,0.2)', boxShadow: '0 0 20px rgba(124,92,252,0.1)' }}>
-              <Sparkles className="w-6 h-6 text-violet-400" />
+        <div className="flex items-start sm:items-center justify-between gap-2 mb-2">
+          <div className="flex items-center gap-2 sm:gap-3">
+            <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-xl sm:rounded-2xl flex items-center justify-center relative breathe shrink-0" style={{ background: `linear-gradient(135deg, ${ts.isDark ? 'rgba(124,92,252,0.2)' : 'rgba(109,77,224,0.15)'}, ${ts.isDark ? 'rgba(6,182,212,0.2)' : 'rgba(8,145,178,0.15)'})`, border: `1px solid ${ts.isDark ? 'rgba(124,92,252,0.2)' : 'rgba(109,77,224,0.15)'}`, boxShadow: ts.glowShadow }}>
+              <Sparkles className="w-5 h-5 sm:w-6 sm:h-6 text-violet-400" />
             </div>
-            <div>
-              <h1 className="text-2xl font-bold gradient-text">Prédict AI</h1>
-              <p className="text-sm text-muted-foreground">L&apos;IA analyse le marché pour vous aider à décider</p>
+            <div className="min-w-0">
+              <h1 className="text-lg sm:text-2xl font-bold gradient-text">Prédict AI</h1>
+              <p className="text-xs sm:text-sm text-muted-foreground">L&apos;IA analyse le marché pour vous aider à décider</p>
             </div>
           </div>
           {history.length > 0 && (
-            <Button variant="ghost" size="sm" onClick={() => setShowHistory(!showHistory)} className="text-foreground/30 hover:text-foreground/60 hover:bg-foreground/5 rounded-xl">
-              <Activity className="w-4 h-4 mr-1" />
-              <span className="text-xs">Historique ({history.length})</span>
+            <Button variant="ghost" size="sm" onClick={() => setShowHistory(!showHistory)} className="text-foreground/30 hover:text-foreground/60 hover:bg-foreground/5 rounded-xl shrink-0">
+              <Activity className="w-4 h-4 sm:mr-1" />
+              <span className="text-xs hidden sm:inline">Historique ({history.length})</span>
             </Button>
           )}
         </div>
@@ -5217,28 +5229,28 @@ function AIAnalysisView({ user }: { user: any }) {
       {/* History panel */}
       {showHistory && history.length > 0 && (
         <ScrollReveal>
-          <div className="rounded-2xl p-4 relative overflow-hidden" style={{ background: 'var(--popover)', backdropFilter: 'blur(20px)', border: '1px solid var(--border)' }}>
-            <div className="absolute top-0 left-0 right-0 h-px" style={{ background: 'linear-gradient(90deg, transparent, rgba(124,92,252,0.2), transparent)' }} />
+          <div className="rounded-xl sm:rounded-2xl p-3 sm:p-4 relative overflow-hidden" style={{ background: 'var(--popover)', backdropFilter: 'blur(20px)', border: '1px solid var(--border)' }}>
+            <div className="absolute top-0 left-0 right-0 h-px" style={{ background: ts.authGradientLine }} />
             <div className="flex items-center justify-between mb-3">
-              <h3 className="text-xs font-semibold text-foreground/60 uppercase tracking-wider">Historique des analyses</h3>
+              <h3 className="text-[10px] sm:text-xs font-semibold text-foreground/60 uppercase tracking-wider">Historique des analyses</h3>
               <Button variant="ghost" size="sm" onClick={() => { setHistory([]); try { localStorage.removeItem('cf_ai_history') } catch {} }} className="text-red-400/50 hover:text-red-400 h-6 text-[10px] hover:bg-red-500/10">
                 Effacer
               </Button>
             </div>
             <div className="space-y-2 max-h-48 overflow-y-auto custom-scrollbar">
               {history.map((h, i) => (
-                <button key={i} onClick={() => { setSelectedTicker(h.ticker); setShowHistory(false) }} className="w-full flex items-center gap-3 p-2.5 rounded-xl border transition-all text-left group hover:border-violet-500/20" style={{ background: 'var(--muted)', borderColor: 'var(--border)' }}>
-                  <TokenLogo ticker={h.ticker} size={24} />
+                <button key={i} onClick={() => { setSelectedTicker(h.ticker); setShowHistory(false) }} className="w-full flex items-center gap-2 sm:gap-3 p-2 sm:p-2.5 rounded-xl border transition-all text-left group hover:border-violet-500/20" style={{ background: 'var(--muted)', borderColor: 'var(--border)' }}>
+                  <TokenLogo ticker={h.ticker} size={22} />
                   <div className="flex-1 min-w-0">
-                    <div className="flex items-center gap-2">
-                      <span className="text-xs font-medium text-foreground/70">{h.ticker}</span>
-                      <Badge className={`${signalConfig(h.signal).bg} ${signalConfig(h.signal).text} text-[9px] px-1.5 py-0`}>{h.signal}</Badge>
+                    <div className="flex items-center gap-1.5 sm:gap-2">
+                      <span className="text-[10px] sm:text-xs font-medium text-foreground/70">{h.ticker}</span>
+                      <Badge className={`${signalConfig(h.signal).bg} ${signalConfig(h.signal).text} text-[8px] sm:text-[9px] px-1 sm:px-1.5 py-0`}>{h.signal}</Badge>
                     </div>
-                    <p className="text-[10px] text-foreground/25 truncate mt-0.5">{h.summary}</p>
+                    <p className="text-[9px] sm:text-[10px] text-foreground/25 truncate mt-0.5">{h.summary}</p>
                   </div>
                   <div className="text-right shrink-0">
-                    <p className={`text-xs font-bold ${signalConfig(h.signal).text}`}>{h.confidence}%</p>
-                    <p className="text-[9px] text-foreground/20">{new Date(h.timestamp).toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' })}</p>
+                    <p className={`text-[10px] sm:text-xs font-bold ${signalConfig(h.signal).text}`}>{h.confidence}%</p>
+                    <p className="text-[8px] sm:text-[9px] text-foreground/20">{new Date(h.timestamp).toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' })}</p>
                   </div>
                 </button>
               ))}
@@ -5249,42 +5261,42 @@ function AIAnalysisView({ user }: { user: any }) {
 
       {/* Disclaimer banner */}
       <ScrollReveal>
-        <div className="rounded-xl p-4 border flex items-start gap-3" style={{ background: 'rgba(245,158,11,0.06)', borderColor: 'rgba(245,158,11,0.15)' }}>
-          <AlertTriangle className="w-5 h-5 text-amber-400 shrink-0 mt-0.5" />
+        <div className="rounded-lg sm:rounded-xl p-3 sm:p-4 border flex items-start gap-2 sm:gap-3" style={{ background: 'rgba(245,158,11,0.06)', borderColor: 'rgba(245,158,11,0.15)' }}>
+          <AlertTriangle className="w-4 h-4 sm:w-5 sm:h-5 text-amber-400 shrink-0 mt-0.5" />
           <div>
-            <p className="text-sm font-medium text-amber-400">Assistance, pas conseil financier</p>
-            <p className="text-xs mt-1 text-muted-foreground">L&apos;IA vous aide à analyser les données techniques et l&apos;actualité du marché. Vous prenez la décision finale. Ceci ne constitue pas un conseil en investissement.</p>
+            <p className="text-xs sm:text-sm font-medium text-amber-400">Assistance, pas conseil financier</p>
+            <p className="text-[10px] sm:text-xs mt-1 text-muted-foreground">L&apos;IA vous aide à analyser les données techniques et l&apos;actualité du marché. Vous prenez la décision finale. Ceci ne constitue pas un conseil en investissement.</p>
           </div>
         </div>
       </ScrollReveal>
 
       {/* Token selector - Searchable Combobox */}
       <ScrollReveal>
-        <div className="rounded-2xl p-5 relative overflow-hidden" style={{ background: 'var(--popover)', backdropFilter: 'blur(20px)', border: '1px solid var(--border)' }}>
-          <div className="absolute top-0 left-0 right-0 h-px" style={{ background: 'linear-gradient(90deg, transparent, rgba(124,92,252,0.3), rgba(6,182,212,0.2), transparent)' }} />
+        <div className="rounded-xl sm:rounded-2xl p-3 sm:p-5 relative overflow-hidden" style={{ background: 'var(--popover)', backdropFilter: 'blur(20px)', border: '1px solid var(--border)' }}>
+          <div className="absolute top-0 left-0 right-0 h-px" style={{ background: ts.authGradientLine }} />
 
-          <Label className="text-xs font-medium text-muted-foreground mb-3 block">Sélectionnez un token à analyser</Label>
+          <Label className="text-[10px] sm:text-xs font-medium text-muted-foreground mb-2 sm:mb-3 block">Sélectionnez un token à analyser</Label>
 
-          <div className="flex flex-col sm:flex-row gap-3 items-stretch sm:items-end">
+          <div className="flex flex-col sm:flex-row gap-2 sm:gap-3 items-stretch sm:items-end">
             <div className="flex-1 relative" ref={tokenSearchRef}>
               {selectedToken && !showTokenDropdown ? (
                 <div
-                  className="flex items-center gap-3 border rounded-xl h-12 px-4 cursor-pointer transition-colors hover:border-violet-500/30"
+                  className="flex items-center gap-2 sm:gap-3 border rounded-xl h-11 sm:h-12 px-3 sm:px-4 cursor-pointer transition-colors hover:border-violet-500/30"
                   style={{ background: 'var(--input)', borderColor: 'var(--border)' }}
                   onClick={() => { setShowTokenDropdown(true); setSearchQuery('') }}
                 >
-                  <TokenLogo ticker={selectedToken.ticker} size={28} />
+                  <TokenLogo ticker={selectedToken.ticker} size={24} />
                   <div className="flex-1 min-w-0">
-                    <div className="flex items-center gap-2">
-                      <span className="font-semibold text-foreground/90">{selectedToken.ticker}</span>
-                      <span className="text-foreground/35 text-xs truncate">{selectedToken.name}</span>
+                    <div className="flex items-center gap-1.5 sm:gap-2">
+                      <span className="font-semibold text-sm text-foreground/90">{selectedToken.ticker}</span>
+                      <span className="text-foreground/35 text-[10px] sm:text-xs truncate">{selectedToken.name}</span>
                     </div>
                     {prices[selectedToken.ticker] != null && (
-                      <span className="text-foreground/50 text-xs">${fmtPrice(prices[selectedToken.ticker])}</span>
+                      <span className="text-foreground/50 text-[10px] sm:text-xs">${fmtPrice(prices[selectedToken.ticker])}</span>
                     )}
                   </div>
                   <button
-                    className="ml-2 p-1 rounded-lg text-foreground/25 hover:text-foreground/60 hover:bg-foreground/5 transition-all"
+                    className="ml-1 p-1 rounded-lg text-foreground/25 hover:text-foreground/60 hover:bg-foreground/5 transition-all"
                     onClick={(e) => { e.stopPropagation(); setSelectedTicker(''); setSearchQuery(''); setShowTokenDropdown(true) }}
                     title="Désélectionner"
                   >
@@ -5298,18 +5310,18 @@ function AIAnalysisView({ user }: { user: any }) {
                     value={searchQuery}
                     onChange={(e) => { setSearchQuery(e.target.value); setShowTokenDropdown(true) }}
                     onFocus={() => setShowTokenDropdown(true)}
-                    placeholder="Rechercher un token (ticker ou nom)..."
-                    className="w-full border rounded-xl h-12 pl-10 pr-3 text-foreground placeholder:text-muted-foreground/50"
+                    placeholder="Rechercher un token..."
+                    className="w-full border rounded-xl h-11 sm:h-12 pl-10 pr-3 text-sm text-foreground placeholder:text-muted-foreground/50"
                     style={{ background: 'var(--input)', borderColor: 'var(--border)' }}
                     autoFocus
                   />
                 </div>
               )}
               {showTokenDropdown && (
-                <div className="absolute z-50 top-14 left-0 right-0 max-h-72 overflow-y-auto rounded-xl border shadow-xl custom-scrollbar" style={{ background: 'var(--popover)', borderColor: 'var(--border)' }}>
+                <div className="absolute z-50 top-12 sm:top-14 left-0 right-0 max-h-64 sm:max-h-72 overflow-y-auto rounded-xl border shadow-xl custom-scrollbar" style={{ background: 'var(--popover)', borderColor: 'var(--border)' }}>
                   {filteredTokens.length === 0 ? (
                     <div className="px-4 py-6 text-sm text-muted-foreground/50 text-center">
-                      <Search className="w-6 h-6 mx-auto mb-2 opacity-30" />
+                      <Search className="w-5 h-5 sm:w-6 sm:h-6 mx-auto mb-2 opacity-30" />
                       Aucun token trouvé
                     </div>
                   ) : (
@@ -5317,16 +5329,16 @@ function AIAnalysisView({ user }: { user: any }) {
                       <button
                         key={t.ticker}
                         onClick={() => { setSelectedTicker(t.ticker); setShowTokenDropdown(false); setSearchQuery('') }}
-                        className={`w-full flex items-center gap-3 px-4 py-3 text-left transition-colors hover:bg-violet-500/10 ${selectedTicker === t.ticker ? 'bg-violet-500/5' : ''}`}
+                        className={`w-full flex items-center gap-2 sm:gap-3 px-3 sm:px-4 py-2.5 sm:py-3 text-left transition-colors hover:bg-violet-500/10 ${selectedTicker === t.ticker ? 'bg-violet-500/5' : ''}`}
                       >
-                        <TokenLogo ticker={t.ticker} size={28} />
+                        <TokenLogo ticker={t.ticker} size={24} />
                         <div className="flex-1 min-w-0">
-                          <div className="flex items-center gap-2">
-                            <span className="font-semibold text-foreground/90 text-sm">{t.ticker}</span>
-                            <span className="text-foreground/35 text-xs truncate">{t.name}</span>
+                          <div className="flex items-center gap-1.5 sm:gap-2">
+                            <span className="font-semibold text-foreground/90 text-xs sm:text-sm">{t.ticker}</span>
+                            <span className="text-foreground/35 text-[10px] sm:text-xs truncate">{t.name}</span>
                           </div>
                         </div>
-                        <span className="text-foreground/30 text-xs font-medium shrink-0">
+                        <span className="text-foreground/30 text-[10px] sm:text-xs font-medium shrink-0">
                           {prices[t.ticker] != null ? `$${fmtPrice(prices[t.ticker])}` : '—'}
                         </span>
                       </button>
@@ -5338,8 +5350,8 @@ function AIAnalysisView({ user }: { user: any }) {
             <Button
               onClick={runAnalysis}
               disabled={loading || !selectedTicker}
-              className="btn-primary-glow btn-ripple text-foreground rounded-xl h-12 px-6 w-full sm:w-auto font-medium transition-all active:scale-[0.98]"
-              style={{ background: 'linear-gradient(135deg, #7c5cfc, #06b6d4)', boxShadow: '0 4px 20px rgba(124,92,252,0.25)' }}
+              className="btn-primary-glow btn-ripple text-foreground rounded-xl h-11 sm:h-12 px-5 sm:px-6 w-full sm:w-auto font-medium transition-all active:scale-[0.98]"
+              style={{ background: ts.primaryGradient, boxShadow: ts.primaryBtnShadow }}
             >
               {loading ? <RefreshCw className="w-4 h-4 animate-spin mr-2" /> : <Sparkles className="w-4 h-4 mr-2" />}
               {loading ? 'Analyse...' : 'Analyser'}
@@ -5348,8 +5360,8 @@ function AIAnalysisView({ user }: { user: any }) {
 
           {/* Selected token quick info */}
           {selectedTicker && (
-            <div className="mt-3 flex items-center gap-2 text-xs text-muted-foreground">
-              <TokenLogo ticker={selectedTicker} size={16} />
+            <div className="mt-2 sm:mt-3 flex items-center gap-2 text-[10px] sm:text-xs text-muted-foreground">
+              <TokenLogo ticker={selectedTicker} size={14} />
               <span className="font-medium">{selectedTicker}</span>
               {prices[selectedTicker] != null ? (
                 <span className="text-foreground/50 font-medium">${fmtPrice(prices[selectedTicker])}</span>
@@ -5364,16 +5376,16 @@ function AIAnalysisView({ user }: { user: any }) {
       {/* Loading animation */}
       {loading && (
         <div className="fade-in-up">
-          <div className="rounded-2xl p-8 relative overflow-hidden flex flex-col items-center justify-center gap-4" style={{ background: 'var(--popover)', backdropFilter: 'blur(20px)', border: '1px solid var(--border)' }}>
+          <div className="rounded-xl sm:rounded-2xl p-6 sm:p-8 relative overflow-hidden flex flex-col items-center justify-center gap-3 sm:gap-4" style={{ background: 'var(--popover)', backdropFilter: 'blur(20px)', border: '1px solid var(--border)' }}>
             <div className="relative">
-              <div className="w-16 h-16 rounded-2xl flex items-center justify-center" style={{ background: 'rgba(124,92,252,0.1)' }}>
-                <Brain className="w-8 h-8 text-violet-400 animate-pulse" />
+              <div className="w-14 h-14 sm:w-16 sm:h-16 rounded-xl sm:rounded-2xl flex items-center justify-center" style={{ background: ts.accentBg }}>
+                <Brain className="w-7 h-7 sm:w-8 sm:h-8 text-violet-400 animate-pulse" />
               </div>
-              <div className="absolute inset-0 rounded-2xl orbit" style={{ animationDuration: '3s', border: '2px solid transparent', borderTopColor: 'rgba(124,92,252,0.5)', borderRightColor: 'rgba(6,182,212,0.3)' }} />
+              <div className="absolute inset-0 rounded-xl sm:rounded-2xl orbit" style={{ animationDuration: '3s', border: '2px solid transparent', borderTopColor: `${ts.isDark ? 'rgba(124,92,252,0.5)' : 'rgba(109,77,224,0.5)'}`, borderRightColor: `${ts.isDark ? 'rgba(6,182,212,0.3)' : 'rgba(8,145,178,0.3)'}` }} />
             </div>
             <div className="text-center">
-              <p className="text-sm font-medium text-foreground/60">L&apos;IA analyse le marché...</p>
-              <p className="text-xs text-foreground/25 mt-1">Données techniques, sentiment, actualités</p>
+              <p className="text-xs sm:text-sm font-medium text-foreground/60">L&apos;IA analyse le marché...</p>
+              <p className="text-[10px] sm:text-xs text-foreground/25 mt-1">Données techniques, sentiment, actualités</p>
             </div>
             <div className="flex gap-1.5">
               <div className="w-2 h-2 rounded-full bg-violet-400 animate-bounce" style={{ animationDelay: '0ms' }} />
@@ -5386,7 +5398,7 @@ function AIAnalysisView({ user }: { user: any }) {
 
       {/* Error */}
       {error && (
-        <div className="fade-in-up flex items-center gap-2 text-red-400 text-sm p-4 rounded-xl border" style={{ background: 'rgba(239,68,68,0.08)', borderColor: 'rgba(239,68,68,0.2)' }}>
+        <div className="fade-in-up flex items-center gap-2 text-red-400 text-xs sm:text-sm p-3 sm:p-4 rounded-lg sm:rounded-xl border" style={{ background: 'rgba(239,68,68,0.08)', borderColor: 'rgba(239,68,68,0.2)' }}>
           <AlertTriangle className="w-4 h-4 shrink-0" />
           {error}
         </div>
@@ -5394,29 +5406,29 @@ function AIAnalysisView({ user }: { user: any }) {
 
       {/* Analysis Results */}
       {analysis && !loading && (
-        <div className="space-y-4 fade-in-up">
+        <div className="space-y-3 sm:space-y-4 fade-in-up">
           {/* 24h Price Chart */}
           {analysis.chartData && analysis.chartData.length > 0 && (
             <ScrollReveal>
-              <div className="rounded-2xl p-5 relative overflow-hidden" style={{ background: 'var(--popover)', backdropFilter: 'blur(20px)', border: '1px solid var(--border)' }}>
-                <div className="absolute top-0 left-0 right-0 h-px" style={{ background: 'linear-gradient(90deg, transparent, rgba(124,92,252,0.3), rgba(6,182,212,0.2), transparent)' }} />
-                <div className="flex items-center justify-between mb-3">
-                  <div className="flex items-center gap-2">
-                    <Activity className="w-4 h-4 text-violet-400" />
-                    <h3 className="text-sm font-semibold text-foreground/80">Prix 24h</h3>
+              <div className="rounded-xl sm:rounded-2xl p-3 sm:p-5 relative overflow-hidden" style={{ background: 'var(--popover)', backdropFilter: 'blur(20px)', border: '1px solid var(--border)' }}>
+                <div className="absolute top-0 left-0 right-0 h-px" style={{ background: ts.authGradientLine }} />
+                <div className="flex items-center justify-between mb-2 sm:mb-3">
+                  <div className="flex items-center gap-1.5 sm:gap-2">
+                    <Activity className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-violet-400" />
+                    <h3 className="text-xs sm:text-sm font-semibold text-foreground/80">Prix 24h</h3>
                   </div>
                   {(analysis.currentPrice || analysis.priceChangePct24h !== undefined) && (
-                    <div className="flex items-center gap-2">
-                      {analysis.currentPrice && <span className="text-sm font-bold text-foreground">${fmtPrice(analysis.currentPrice)}</span>}
+                    <div className="flex items-center gap-1.5 sm:gap-2">
+                      {analysis.currentPrice && <span className="text-xs sm:text-sm font-bold text-foreground">${fmtPrice(analysis.currentPrice)}</span>}
                       {analysis.priceChangePct24h !== undefined && (
-                        <Badge className={`${analysis.priceChangePct24h >= 0 ? 'bg-emerald-500/15 text-emerald-400' : 'bg-red-500/15 text-red-400'} text-[10px] px-1.5 py-0`}>
+                        <Badge className={`${analysis.priceChangePct24h >= 0 ? 'bg-emerald-500/15 text-emerald-400' : 'bg-red-500/15 text-red-400'} text-[9px] sm:text-[10px] px-1 sm:px-1.5 py-0`}>
                           {analysis.priceChangePct24h >= 0 ? '+' : ''}{analysis.priceChangePct24h.toFixed(2)}%
                         </Badge>
                       )}
                     </div>
                   )}
                 </div>
-                <div className="h-48">
+                <div className="h-[200px] sm:h-[300px]">
                   <ResponsiveContainer width="100%" height="100%">
                     <AreaChart data={analysis.chartData} margin={{ top: 5, right: 5, bottom: 5, left: 5 }}>
                       <defs>
@@ -5426,9 +5438,9 @@ function AIAnalysisView({ user }: { user: any }) {
                         </linearGradient>
                       </defs>
                       <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
-                      <XAxis dataKey="time" tick={{ fontSize: 10, fill: 'var(--muted-foreground)' }} axisLine={false} tickLine={false} interval="preserveStartEnd" />
-                      <YAxis domain={['auto', 'auto']} tick={{ fontSize: 10, fill: 'var(--muted-foreground)' }} axisLine={false} tickLine={false} width={60} tickFormatter={(v: number) => '$' + fmtPrice(v)} />
-                      <Tooltip contentStyle={{ background: 'var(--popover)', border: '1px solid var(--border)', borderRadius: '12px', fontSize: '11px', color: 'var(--foreground)' }} formatter={(value: number) => ['$' + fmtPrice(value), 'Prix']} labelStyle={{ color: 'var(--muted-foreground)' }} />
+                      <XAxis dataKey="time" tick={{ fontSize: 9, fill: 'var(--muted-foreground)' }} axisLine={false} tickLine={false} interval="preserveStartEnd" />
+                      <YAxis domain={['auto', 'auto']} tick={{ fontSize: 9, fill: 'var(--muted-foreground)' }} axisLine={false} tickLine={false} width={50} tickFormatter={(v: number) => '$' + fmtPrice(v)} />
+                      <Tooltip contentStyle={{ background: ts.chartTooltipBg, border: `1px solid ${ts.chartTooltipBorder}`, borderRadius: '12px', fontSize: '11px', color: 'var(--foreground)', boxShadow: ts.chartTooltipShadow }} formatter={(value: number) => ['$' + fmtPrice(value), 'Prix']} labelStyle={{ color: 'var(--muted-foreground)' }} />
                       <Area type="monotone" dataKey="price" stroke={analysis.priceChangePct24h !== undefined && analysis.priceChangePct24h < 0 ? "#ef4444" : "#7c5cfc"} strokeWidth={2} fill="url(#aiChartGradient)" />
                     </AreaChart>
                   </ResponsiveContainer>
@@ -5439,54 +5451,72 @@ function AIAnalysisView({ user }: { user: any }) {
 
           {/* Signal Card */}
           <ScrollReveal direction="scale">
-            <div className={`rounded-2xl p-6 border relative overflow-hidden glass-card ${signalConfig(analysis.signal).glow}`}>
-              <div className="absolute top-0 left-0 right-0 h-px" style={{ background: 'linear-gradient(90deg, transparent, rgba(124,92,252,0.3), rgba(6,182,212,0.2), transparent)' }} />
+            <div className={`rounded-xl sm:rounded-2xl p-4 sm:p-6 border relative overflow-hidden glass-card ${signalConfig(analysis.signal).glow}`}>
+              <div className="absolute top-0 left-0 right-0 h-px" style={{ background: ts.authGradientLine }} />
 
-              <div className="flex items-center justify-between mb-4">
-                <div className="flex items-center gap-3">
+              <div className="flex items-center justify-between mb-3 sm:mb-4">
+                <div className="flex items-center gap-2 sm:gap-3">
                   {signalIcon(analysis.signal)}
                   <div>
-                    <p className="text-xs font-medium text-muted-foreground" >Signal</p>
-                    <p className={`text-2xl font-bold ${signalConfig(analysis.signal).text}`}>
+                    <p className="text-[10px] sm:text-xs font-medium text-muted-foreground">Signal</p>
+                    <p className={`text-lg sm:text-2xl font-bold ${signalConfig(analysis.signal).text}`}>
                       {analysis.signal}
                     </p>
                   </div>
                 </div>
                 <div className="text-right">
-                  <p className="text-xs font-medium text-muted-foreground" >Confiance</p>
-                  <p className={`text-2xl font-bold ${signalConfig(analysis.signal).text}`}>
+                  <p className="text-[10px] sm:text-xs font-medium text-muted-foreground">Confiance</p>
+                  <p className={`text-lg sm:text-2xl font-bold ${signalConfig(analysis.signal).text}`}>
                     {analysis.confidence}%
                   </p>
                 </div>
               </div>
 
-              {/* Confidence bar */}
-              <div className="w-full h-2 rounded-full mb-4" style={{ background: 'var(--muted)' }}>
+              {/* Confidence bar with label */}
+              <div className="w-full h-6 sm:h-7 rounded-full mb-3 sm:mb-4 relative overflow-hidden" style={{ background: 'var(--muted)' }}>
                 <div
-                  className="h-2 rounded-full transition-all duration-1000"
+                  className="h-full rounded-full transition-all duration-1000 flex items-center justify-end pr-2"
                   style={{
-                    width: `${analysis.confidence}%`,
+                    width: `${Math.max(analysis.confidence, 15)}%`,
                     background: analysis.signal === 'ACHAT' ? 'linear-gradient(90deg, #10b981, #34d399)' : analysis.signal === 'VENTE' ? 'linear-gradient(90deg, #ef4444, #f87171)' : 'linear-gradient(90deg, #f59e0b, #fbbf24)',
                     boxShadow: `0 0 10px ${analysis.signal === 'ACHAT' ? 'rgba(16,185,129,0.3)' : analysis.signal === 'VENTE' ? 'rgba(239,68,68,0.3)' : 'rgba(245,158,11,0.3)'}`
                   }}
-                />
+                >
+                  {analysis.confidence > 20 && (
+                    <span className="text-[10px] sm:text-xs font-bold text-white drop-shadow-sm">{analysis.confidence}%</span>
+                  )}
+                </div>
               </div>
 
-              <p className="text-sm leading-relaxed text-foreground/60">{analysis.summary}</p>
+              <p className="text-xs sm:text-sm leading-relaxed text-foreground/60">{analysis.summary}</p>
+
+              {/* Re-analyze button */}
+              <div className="mt-3 sm:mt-4 flex justify-end">
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={runAnalysis}
+                  disabled={loading}
+                  className="text-foreground/40 hover:text-foreground/70 hover:bg-foreground/5 rounded-xl text-xs"
+                >
+                  <RefreshCw className="w-3.5 h-3.5 mr-1.5" />
+                  Re-analyser
+                </Button>
+              </div>
             </div>
           </ScrollReveal>
 
           {/* Technical Analysis + Sentiment */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-3 sm:gap-4">
             {/* Technical */}
             <ScrollReveal direction="left">
-              <div className="rounded-2xl p-5 relative overflow-hidden h-full" style={{ background: 'var(--popover)', backdropFilter: 'blur(20px)', border: '1px solid var(--border)' }}>
-                <div className="absolute top-0 left-0 right-0 h-px" style={{ background: 'linear-gradient(90deg, transparent, rgba(124,92,252,0.2), transparent)' }} />
-                <div className="flex items-center gap-2 mb-4">
-                  <BarChart3 className="w-4 h-4 text-violet-400" />
-                  <h3 className="text-sm font-semibold text-foreground/80">Analyse Technique</h3>
+              <div className="rounded-xl sm:rounded-2xl p-3 sm:p-5 relative overflow-hidden h-full" style={{ background: 'var(--popover)', backdropFilter: 'blur(20px)', border: '1px solid var(--border)' }}>
+                <div className="absolute top-0 left-0 right-0 h-px" style={{ background: `linear-gradient(90deg, transparent, ${ts.isDark ? 'rgba(124,92,252,0.2)' : 'rgba(109,77,224,0.2)'}, transparent)` }} />
+                <div className="flex items-center gap-1.5 sm:gap-2 mb-3 sm:mb-4">
+                  <BarChart3 className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-violet-400" />
+                  <h3 className="text-xs sm:text-sm font-semibold text-foreground/80">Analyse Technique</h3>
                 </div>
-                <div className="space-y-3">
+                <div className="space-y-2 sm:space-y-3">
                   {[
                     { label: 'Tendance', value: analysis.technicalAnalysis.trend },
                     { label: 'Support', value: analysis.technicalAnalysis.supportLevel },
@@ -5495,8 +5525,8 @@ function AIAnalysisView({ user }: { user: any }) {
                     { label: 'Volume 24h', value: analysis.technicalAnalysis.volume24h },
                   ].map(item => (
                     <div key={item.label} className="flex items-center justify-between">
-                      <span className="text-xs text-muted-foreground" >{item.label}</span>
-                      <span className="text-xs font-medium text-foreground/70">{item.value}</span>
+                      <span className="text-[10px] sm:text-xs text-muted-foreground">{item.label}</span>
+                      <span className="text-[10px] sm:text-xs font-medium text-foreground/70">{item.value}</span>
                     </div>
                   ))}
                 </div>
@@ -5505,28 +5535,29 @@ function AIAnalysisView({ user }: { user: any }) {
 
             {/* Sentiment */}
             <ScrollReveal direction="left">
-              <div className="rounded-2xl p-5 relative overflow-hidden h-full" style={{ background: 'var(--popover)', backdropFilter: 'blur(20px)', border: '1px solid var(--border)' }}>
-                <div className="absolute top-0 left-0 right-0 h-px" style={{ background: 'linear-gradient(90deg, transparent, rgba(6,182,212,0.2), transparent)' }} />
-                <div className="flex items-center gap-2 mb-4">
-                  <Gauge className="w-4 h-4 text-cyan-400" />
-                  <h3 className="text-sm font-semibold text-foreground/80">Sentiment du Marche</h3>
+              <div className="rounded-xl sm:rounded-2xl p-3 sm:p-5 relative overflow-hidden h-full" style={{ background: 'var(--popover)', backdropFilter: 'blur(20px)', border: '1px solid var(--border)' }}>
+                <div className="absolute top-0 left-0 right-0 h-px" style={{ background: `linear-gradient(90deg, transparent, ${ts.isDark ? 'rgba(6,182,212,0.2)' : 'rgba(8,145,178,0.2)'}, transparent)` }} />
+                <div className="flex items-center gap-1.5 sm:gap-2 mb-3 sm:mb-4">
+                  <Gauge className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-cyan-400" />
+                  <h3 className="text-xs sm:text-sm font-semibold text-foreground/80">Sentiment du Marché</h3>
                 </div>
-                <div className="flex items-center justify-center mb-4">
-                  <div className="relative w-24 h-24">
-                    <svg className="w-24 h-24 transform -rotate-90" viewBox="0 0 100 100">
-                      <circle cx="50" cy="50" r="40" fill="none" stroke="rgba(255,255,255,0.05)" strokeWidth="8" />
-                      <circle cx="50" cy="50" r="40" fill="none" stroke={analysis.sentiment.fearGreedIndex <= 25 ? '#ef4444' : analysis.sentiment.fearGreedIndex <= 45 ? '#f97316' : analysis.sentiment.fearGreedIndex <= 55 ? '#f59e0b' : analysis.sentiment.fearGreedIndex <= 75 ? '#10b981' : '#06b6d4'} strokeWidth="8" strokeLinecap="round" strokeDasharray={`${(analysis.sentiment.fearGreedIndex / 100) * 251.3} 251.3`} />
+                <div className="flex flex-col sm:flex-row items-center justify-center gap-3 sm:gap-0 sm:mb-4">
+                  {/* Fear & Greed Gauge - responsive size */}
+                  <div className="relative w-20 h-20 sm:w-24 sm:h-24 shrink-0">
+                    <svg className="w-full h-full transform -rotate-90" viewBox="0 0 100 100">
+                      <circle cx="50" cy="50" r="40" fill="none" stroke="var(--muted)" strokeWidth="8" />
+                      <circle cx="50" cy="50" r="40" fill="none" stroke={fgColor(analysis.sentiment.fearGreedIndex)} strokeWidth="8" strokeLinecap="round" strokeDasharray={`${(analysis.sentiment.fearGreedIndex / 100) * 251.3} 251.3`} />
                     </svg>
                     <div className="absolute inset-0 flex flex-col items-center justify-center">
-                      <span className="text-xl font-bold text-foreground">{analysis.sentiment.fearGreedIndex}</span>
-                      <span className="text-[9px] text-muted-foreground" >F&amp;G</span>
+                      <span className="text-base sm:text-xl font-bold text-foreground">{analysis.sentiment.fearGreedIndex}</span>
+                      <span className="text-[8px] sm:text-[9px] text-muted-foreground">F&amp;G</span>
                     </div>
                   </div>
-                  <div className="ml-4">
-                    <Badge className={`${analysis.sentiment.fearGreedIndex <= 25 ? 'bg-red-500/15 text-red-400 border-red-500/30' : analysis.sentiment.fearGreedIndex <= 45 ? 'bg-orange-500/15 text-orange-400 border-orange-500/30' : analysis.sentiment.fearGreedIndex <= 55 ? 'bg-amber-500/15 text-amber-400 border-amber-500/30' : analysis.sentiment.fearGreedIndex <= 75 ? 'bg-emerald-500/15 text-emerald-400 border-emerald-500/30' : 'bg-cyan-500/15 text-cyan-400 border-cyan-500/30'} text-xs`}>
+                  <div className="sm:ml-4 text-center sm:text-left">
+                    <Badge className={`${fgBadgeClass(analysis.sentiment.fearGreedIndex)} text-[10px] sm:text-xs`}>
                       {analysis.sentiment.fearGreedLabel}
                     </Badge>
-                    <p className="text-xs mt-2 text-muted-foreground" >{analysis.sentiment.interpretation}</p>
+                    <p className="text-[10px] sm:text-xs mt-2 text-muted-foreground">{analysis.sentiment.interpretation}</p>
                   </div>
                 </div>
               </div>
@@ -5536,28 +5567,28 @@ function AIAnalysisView({ user }: { user: any }) {
           {/* News Impact + News Items */}
           {(analysis.newsImpact || (analysis.newsItems && analysis.newsItems.length > 0)) && (
             <ScrollReveal>
-              <div className="rounded-2xl p-5 relative overflow-hidden" style={{ background: 'var(--popover)', backdropFilter: 'blur(20px)', border: '1px solid var(--border)' }}>
-                <div className="absolute top-0 left-0 right-0 h-px" style={{ background: 'linear-gradient(90deg, transparent, rgba(6,182,212,0.3), rgba(124,92,252,0.2), transparent)' }} />
-                <div className="flex items-center gap-2 mb-3">
-                  <MessageSquare className="w-4 h-4 text-cyan-400" />
-                  <h3 className="text-sm font-semibold text-foreground/80">Impact des Actualites</h3>
+              <div className="rounded-xl sm:rounded-2xl p-3 sm:p-5 relative overflow-hidden" style={{ background: 'var(--popover)', backdropFilter: 'blur(20px)', border: '1px solid var(--border)' }}>
+                <div className="absolute top-0 left-0 right-0 h-px" style={{ background: `linear-gradient(90deg, transparent, ${ts.isDark ? 'rgba(6,182,212,0.3)' : 'rgba(8,145,178,0.2)'}, ${ts.isDark ? 'rgba(124,92,252,0.2)' : 'rgba(109,77,224,0.15)'}, transparent)` }} />
+                <div className="flex items-center gap-1.5 sm:gap-2 mb-2 sm:mb-3">
+                  <MessageSquare className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-cyan-400" />
+                  <h3 className="text-xs sm:text-sm font-semibold text-foreground/80">Impact des Actualités</h3>
                 </div>
                 {analysis.newsImpact && (
-                  <p className="text-sm leading-relaxed mb-4" style={{ color: 'rgba(255,255,255,0.55)' }}>{analysis.newsImpact}</p>
+                  <p className="text-xs sm:text-sm leading-relaxed mb-3 sm:mb-4 text-foreground/55">{analysis.newsImpact}</p>
                 )}
                 {analysis.newsItems && analysis.newsItems.length > 0 && (
-                  <div className="space-y-2">
-                    <p className="text-[10px] font-semibold uppercase tracking-wider mb-2 text-muted-foreground" >Dernieres actualites</p>
+                  <div className="space-y-1.5 sm:space-y-2">
+                    <p className="text-[9px] sm:text-[10px] font-semibold uppercase tracking-wider mb-1.5 sm:mb-2 text-muted-foreground">Dernières actualités</p>
                     {analysis.newsItems.map((news, i) => (
-                      <div key={i} className="rounded-xl p-3 border" style={{ background: 'var(--muted)', borderColor: 'var(--border)' }}>
-                        <div className="flex items-start gap-2">
-                          <div className="w-5 h-5 rounded-md flex items-center justify-center shrink-0 mt-0.5 text-[10px] font-bold" style={{ background: 'rgba(6,182,212,0.1)', color: 'rgba(6,182,212,0.8)' }}>{i + 1}</div>
+                      <div key={i} className="rounded-lg sm:rounded-xl p-2 sm:p-3 border" style={{ background: 'var(--muted)', borderColor: 'var(--border)' }}>
+                        <div className="flex items-start gap-1.5 sm:gap-2">
+                          <div className="w-4 h-4 sm:w-5 sm:h-5 rounded-md flex items-center justify-center shrink-0 mt-0.5 text-[8px] sm:text-[10px] font-bold" style={{ background: ts.isDark ? 'rgba(6,182,212,0.1)' : 'rgba(8,145,178,0.1)', color: ts.isDark ? 'rgba(6,182,212,0.8)' : 'rgba(8,145,178,0.8)' }}>{i + 1}</div>
                           <div className="min-w-0">
-                            <p className="text-xs font-medium text-foreground/60 truncate">{news.title}</p>
-                            <p className="text-[10px] mt-0.5 leading-relaxed text-muted-foreground" >{news.snippet}</p>
-                            <div className="flex items-center gap-2 mt-1">
-                              {news.source && <span className="text-[9px] text-muted-foreground/50" >{news.source}</span>}
-                              {news.date && <span className="text-[9px] text-muted-foreground/40" >{news.date}</span>}
+                            <p className="text-[10px] sm:text-xs font-medium text-foreground/60 truncate">{news.title}</p>
+                            <p className="text-[9px] sm:text-[10px] mt-0.5 leading-relaxed text-muted-foreground">{news.snippet}</p>
+                            <div className="flex items-center gap-1.5 sm:gap-2 mt-1">
+                              {news.source && <span className="text-[8px] sm:text-[9px] text-muted-foreground/50">{news.source}</span>}
+                              {news.date && <span className="text-[8px] sm:text-[9px] text-muted-foreground/40">{news.date}</span>}
                             </div>
                           </div>
                         </div>
@@ -5570,20 +5601,20 @@ function AIAnalysisView({ user }: { user: any }) {
           )}
 
           {/* Key Factors & Risks */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-3 sm:gap-4">
             {/* Key Factors */}
             <ScrollReveal>
-              <div className="rounded-2xl p-5 relative overflow-hidden h-full" style={{ background: 'var(--popover)', backdropFilter: 'blur(20px)', border: '1px solid var(--border)' }}>
-                <div className="absolute top-0 left-0 right-0 h-px" style={{ background: 'linear-gradient(90deg, transparent, rgba(16,185,129,0.2), transparent)' }} />
-                <div className="flex items-center gap-2 mb-4">
-                  <Eye className="w-4 h-4 text-emerald-400" />
-                  <h3 className="text-sm font-semibold text-foreground/80">Facteurs Cles a Suivre</h3>
+              <div className="rounded-xl sm:rounded-2xl p-3 sm:p-5 relative overflow-hidden h-full" style={{ background: 'var(--popover)', backdropFilter: 'blur(20px)', border: '1px solid var(--border)' }}>
+                <div className="absolute top-0 left-0 right-0 h-px" style={{ background: `linear-gradient(90deg, transparent, ${ts.isDark ? 'rgba(16,185,129,0.2)' : 'rgba(5,150,105,0.15)'}, transparent)` }} />
+                <div className="flex items-center gap-1.5 sm:gap-2 mb-3 sm:mb-4">
+                  <Eye className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-emerald-400" />
+                  <h3 className="text-xs sm:text-sm font-semibold text-foreground/80">Facteurs Clés à Suivre</h3>
                 </div>
-                <div className="space-y-2">
+                <div className="space-y-1.5 sm:space-y-2">
                   {analysis.keyFactors.map((factor, i) => (
-                    <div key={i} className="flex items-start gap-2">
-                      <div className="w-5 h-5 rounded-md flex items-center justify-center shrink-0 mt-0.5 text-[10px] font-bold" style={{ background: 'rgba(16,185,129,0.1)', color: 'rgba(16,185,129,0.8)' }}>{i + 1}</div>
-                      <p className="text-xs leading-relaxed text-muted-foreground" >{factor}</p>
+                    <div key={i} className="flex items-start gap-1.5 sm:gap-2">
+                      <div className="w-4 h-4 sm:w-5 sm:h-5 rounded-md flex items-center justify-center shrink-0 mt-0.5 text-[8px] sm:text-[10px] font-bold" style={{ background: ts.isDark ? 'rgba(16,185,129,0.1)' : 'rgba(5,150,105,0.1)', color: ts.isDark ? 'rgba(16,185,129,0.8)' : 'rgba(5,150,105,0.8)' }}>{i + 1}</div>
+                      <p className="text-[10px] sm:text-xs leading-relaxed text-muted-foreground">{factor}</p>
                     </div>
                   ))}
                 </div>
@@ -5592,17 +5623,17 @@ function AIAnalysisView({ user }: { user: any }) {
 
             {/* Risks */}
             <ScrollReveal>
-              <div className="rounded-2xl p-5 relative overflow-hidden h-full" style={{ background: 'var(--popover)', backdropFilter: 'blur(20px)', border: '1px solid var(--border)' }}>
-                <div className="absolute top-0 left-0 right-0 h-px" style={{ background: 'linear-gradient(90deg, transparent, rgba(239,68,68,0.2), transparent)' }} />
-                <div className="flex items-center gap-2 mb-4">
-                  <AlertTriangle className="w-4 h-4 text-red-400" />
-                  <h3 className="text-sm font-semibold text-foreground/80">Risques Identifies</h3>
+              <div className="rounded-xl sm:rounded-2xl p-3 sm:p-5 relative overflow-hidden h-full" style={{ background: 'var(--popover)', backdropFilter: 'blur(20px)', border: '1px solid var(--border)' }}>
+                <div className="absolute top-0 left-0 right-0 h-px" style={{ background: `linear-gradient(90deg, transparent, ${ts.isDark ? 'rgba(239,68,68,0.2)' : 'rgba(220,38,38,0.15)'}, transparent)` }} />
+                <div className="flex items-center gap-1.5 sm:gap-2 mb-3 sm:mb-4">
+                  <AlertTriangle className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-red-400" />
+                  <h3 className="text-xs sm:text-sm font-semibold text-foreground/80">Risques Identifiés</h3>
                 </div>
-                <div className="space-y-2">
+                <div className="space-y-1.5 sm:space-y-2">
                   {analysis.risks.map((risk, i) => (
-                    <div key={i} className="flex items-start gap-2">
-                      <div className="w-5 h-5 rounded-md flex items-center justify-center shrink-0 mt-0.5 text-[10px] font-bold" style={{ background: 'rgba(239,68,68,0.1)', color: 'rgba(239,68,68,0.8)' }}>{i + 1}</div>
-                      <p className="text-xs leading-relaxed text-muted-foreground" >{risk}</p>
+                    <div key={i} className="flex items-start gap-1.5 sm:gap-2">
+                      <div className="w-4 h-4 sm:w-5 sm:h-5 rounded-md flex items-center justify-center shrink-0 mt-0.5 text-[8px] sm:text-[10px] font-bold" style={{ background: ts.isDark ? 'rgba(239,68,68,0.1)' : 'rgba(220,38,38,0.1)', color: ts.isDark ? 'rgba(239,68,68,0.8)' : 'rgba(220,38,38,0.8)' }}>{i + 1}</div>
+                      <p className="text-[10px] sm:text-xs leading-relaxed text-muted-foreground">{risk}</p>
                     </div>
                   ))}
                 </div>
@@ -5612,40 +5643,40 @@ function AIAnalysisView({ user }: { user: any }) {
 
           {/* Disclaimer */}
           <ScrollReveal>
-            <div className="rounded-xl p-4 border text-center" style={{ background: 'var(--muted)', borderColor: 'var(--border)' }}>
-              <p className="text-[11px] leading-relaxed text-muted-foreground">{analysis.disclaimer}</p>
+            <div className="rounded-lg sm:rounded-xl p-3 sm:p-4 border text-center" style={{ background: 'var(--muted)', borderColor: 'var(--border)' }}>
+              <p className="text-[10px] sm:text-[11px] leading-relaxed text-muted-foreground">{analysis.disclaimer}</p>
             </div>
           </ScrollReveal>
         </div>
       )}
 
-      {/* Empty state */}
+      {/* Empty state - more engaging */}
       {!analysis && !loading && !error && (
         <ScrollReveal direction="scale">
-          <div className="rounded-2xl p-10 relative overflow-hidden flex flex-col items-center justify-center text-center glass-card">
-            <div className="w-20 h-20 rounded-2xl flex items-center justify-center mb-4 breathe" style={{ background: 'rgba(124,92,252,0.08)', border: '1px solid rgba(124,92,252,0.15)' }}>
-              <Brain className="w-10 h-10 text-violet-400/50" />
+          <div className="rounded-xl sm:rounded-2xl p-6 sm:p-10 relative overflow-hidden flex flex-col items-center justify-center text-center glass-card">
+            <div className="w-16 h-16 sm:w-20 sm:h-20 rounded-xl sm:rounded-2xl flex items-center justify-center mb-3 sm:mb-4 breathe" style={{ background: ts.subtleBg, border: `1px solid ${ts.isDark ? 'rgba(124,92,252,0.15)' : 'rgba(109,77,224,0.12)'}` }}>
+              <Brain className="w-8 h-8 sm:w-10 sm:h-10 text-violet-400/50" />
             </div>
-            <h3 className="text-lg font-semibold text-foreground/60 mb-2">L&apos;IA est prete a analyser</h3>
-            <p className="text-sm max-w-md text-muted-foreground" >
-              Selectionnez un token et lancez l&apos;analyse. L&apos;IA etudiera les indicateurs techniques, le sentiment du marche, les actualites et les facteurs cles pour vous fournir une analyse claire.
+            <h3 className="text-base sm:text-lg font-semibold text-foreground/60 mb-1.5 sm:mb-2">L&apos;IA est prête à analyser</h3>
+            <p className="text-xs sm:text-sm max-w-md text-muted-foreground">
+              Sélectionnez un token et lancez l&apos;analyse. L&apos;IA étudiera les indicateurs techniques, le sentiment du marché, les actualités et les facteurs clés pour vous fournir une analyse claire.
             </p>
-            <div className="flex items-center gap-4 mt-6">
-              <div className="flex items-center gap-2 text-xs text-muted-foreground/50" >
+            <div className="grid grid-cols-2 sm:flex sm:flex-row items-center gap-2 sm:gap-4 mt-4 sm:mt-6 w-full sm:w-auto">
+              <div className="flex items-center gap-1.5 sm:gap-2 text-[10px] sm:text-xs text-muted-foreground/50 justify-center p-2 rounded-lg" style={{ background: ts.subtleBg }}>
                 <BarChart3 className="w-3.5 h-3.5" />
                 <span>Technique</span>
               </div>
-              <div className="flex items-center gap-2 text-xs text-muted-foreground/50" >
+              <div className="flex items-center gap-1.5 sm:gap-2 text-[10px] sm:text-xs text-muted-foreground/50 justify-center p-2 rounded-lg" style={{ background: ts.subtleBg }}>
                 <Gauge className="w-3.5 h-3.5" />
                 <span>Sentiment</span>
               </div>
-              <div className="flex items-center gap-2 text-xs text-muted-foreground/50" >
+              <div className="flex items-center gap-1.5 sm:gap-2 text-[10px] sm:text-xs text-muted-foreground/50 justify-center p-2 rounded-lg" style={{ background: ts.subtleBg }}>
                 <MessageSquare className="w-3.5 h-3.5" />
-                <span>Actualites</span>
+                <span>Actualités</span>
               </div>
-              <div className="flex items-center gap-2 text-xs text-muted-foreground/50" >
+              <div className="flex items-center gap-1.5 sm:gap-2 text-[10px] sm:text-xs text-muted-foreground/50 justify-center p-2 rounded-lg" style={{ background: ts.subtleBg }}>
                 <Eye className="w-3.5 h-3.5" />
-                <span>Facteurs cles</span>
+                <span>Facteurs clés</span>
               </div>
             </div>
           </div>
@@ -5793,7 +5824,7 @@ export function CryptoApp() {
   }
 
   return (
-    <div className="flex min-h-screen relative noise-overlay mesh-gradient bg-background">
+    <div className="flex min-h-screen relative noise-overlay mesh-gradient bg-background overflow-x-hidden">
       <AmbientBackground />
       <ParticleField />
       <MouseGlow />
@@ -5803,8 +5834,8 @@ export function CryptoApp() {
         user={user}
         onLogout={logout}
       />
-      <main className="flex-1 p-3 sm:p-4 md:p-8 overflow-auto pb-20 md:pb-8">
-        <div className="max-w-7xl mx-auto view-enter-cinematic" key={currentView}>
+      <main className="flex-1 min-w-0 p-3 sm:p-4 md:p-8 overflow-auto pb-20 md:pb-8">
+        <div className="max-w-7xl w-full mx-auto view-enter-cinematic" key={currentView}>
           {renderView()}
         </div>
       </main>
