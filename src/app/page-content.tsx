@@ -106,6 +106,88 @@ interface AdminExchange extends ExchangeData {
 }
 
 // ============================================================
+// THEME-AWARE STYLES HOOK
+// Returns style objects that adapt to light/dark theme
+// ============================================================
+function useThemeStyles() {
+  const { resolvedTheme } = useTheme()
+  const isDark = resolvedTheme === 'dark'
+  return {
+    // Card styles
+    cardBg: isDark ? 'rgba(6, 6, 10, 0.6)' : 'rgba(255, 255, 255, 0.92)',
+    cardBorder: isDark ? 'rgba(255, 255, 255, 0.04)' : 'rgba(109, 77, 224, 0.12)',
+    cardShadow: isDark ? '0 4px 24px rgba(0,0,0,0.4)' : '0 4px 24px rgba(109, 77, 224, 0.12)',
+    subtleBg: isDark ? 'rgba(124, 92, 252, 0.08)' : 'rgba(109, 77, 224, 0.06)',
+    accentBg: isDark ? 'rgba(124, 92, 252, 0.12)' : 'rgba(109, 77, 224, 0.08)',
+    primaryGradient: isDark
+      ? 'linear-gradient(135deg, #7c5cfc, #06b6d4)'
+      : 'linear-gradient(135deg, #6d4de0, #0891b2)',
+    glowShadow: isDark
+      ? '0 0 20px rgba(124, 92, 252, 0.1)'
+      : '0 0 20px rgba(109, 77, 224, 0.15)',
+    overlayBg: isDark ? 'rgba(0,0,0,0.6)' : 'rgba(255,255,255,0.7)',
+    textMuted: isDark ? 'rgba(255,255,255,0.5)' : 'rgba(15,23,42,0.5)',
+    // Social button styles
+    socialBtnBg: isDark ? 'rgba(255,255,255,0.03)' : 'rgba(0,0,0,0.03)',
+    socialBtnBorder: isDark ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.08)',
+    socialBtnText: isDark ? 'rgba(255,255,255,0.7)' : 'rgba(0,0,0,0.7)',
+    // Login/Loading screen specific
+    orbBg1: isDark ? 'rgba(124,92,252,0.07)' : 'rgba(124,92,252,0.12)',
+    orbBg2: isDark ? 'rgba(6,182,212,0.05)' : 'rgba(6,182,212,0.08)',
+    orbBg3: isDark ? 'rgba(168,85,247,0.04)' : 'rgba(168,85,247,0.06)',
+    logoBg: isDark ? 'rgba(124,92,252,0.15)' : 'rgba(109,77,224,0.1)',
+    logoBorder: isDark ? 'rgba(124,92,252,0.3)' : 'rgba(109,77,224,0.2)',
+    logoShadow: isDark ? '0 0 40px rgba(124,92,252,0.06)' : '0 0 40px rgba(109,77,224,0.1)',
+    // Sidebar
+    sidebarActiveBg: isDark ? 'rgba(124,92,252,0.12)' : 'rgba(109,77,224,0.08)',
+    sidebarActiveBorder: isDark ? '#7c5cfc' : '#6d4de0',
+    // Badge
+    badgeBg: isDark ? 'rgba(124,92,252,0.15)' : 'rgba(109,77,224,0.1)',
+    // Error states
+    errorBg: isDark ? 'rgba(239,68,68,0.08)' : 'rgba(239,68,68,0.06)',
+    errorBorder: isDark ? 'rgba(239,68,68,0.2)' : 'rgba(239,68,68,0.15)',
+    // Premium
+    premiumBg: isDark ? 'rgba(245,158,11,0.15)' : 'rgba(245,158,11,0.1)',
+    premiumBorder: isDark ? 'rgba(245,158,11,0.2)' : 'rgba(245,158,11,0.15)',
+    premiumShadow: isDark ? '0 4px 20px rgba(245,158,11,0.15)' : '0 4px 20px rgba(245,158,11,0.2)',
+    premiumBtnShadow: isDark ? '0 4px 20px rgba(245,158,11,0.3)' : '0 4px 20px rgba(245,158,11,0.25)',
+    // Auth card shadow
+    authCardShadow: isDark ? '0 8px 60px rgba(0,0,0,0.4), 0 0 40px rgba(124,92,252,0.06)' : '0 8px 60px rgba(0,0,0,0.12), 0 0 40px rgba(109,77,224,0.08)',
+    // Input focus shadow
+    inputFocusShadow: isDark ? '0 0 0 2px rgba(124,92,252,0.25), 0 0 12px rgba(124,92,252,0.1)' : '0 0 0 2px rgba(109,77,224,0.25), 0 0 12px rgba(109,77,224,0.1)',
+    // Gradient line for auth card top
+    authGradientLine: isDark ? 'linear-gradient(90deg, transparent, rgba(124,92,252,0.3), rgba(6,182,212,0.2), transparent)' : 'linear-gradient(90deg, transparent, rgba(109,77,224,0.3), rgba(8,145,178,0.2), transparent)',
+    // Dot grid for login
+    dotGrid: isDark ? 'rgba(124,92,252,0.06)' : 'rgba(109,77,224,0.06)',
+    // Logo gradient overlay
+    logoGradientOverlay: isDark ? 'linear-gradient(135deg, rgba(124,92,252,0.1), rgba(6,182,212,0.05))' : 'linear-gradient(135deg, rgba(109,77,224,0.1), rgba(8,145,178,0.05))',
+    // Chart tooltip
+    chartTooltipBg: isDark ? 'rgba(6, 6, 10, 0.92)' : 'rgba(255, 255, 255, 0.96)',
+    chartTooltipBorder: isDark ? 'rgba(124, 92, 252, 0.15)' : 'rgba(109, 77, 224, 0.15)',
+    chartTooltipShadow: isDark ? '0 8px 32px rgba(0,0,0,0.5), 0 0 20px rgba(124,92,252,0.08)' : '0 8px 32px rgba(0,0,0,0.12), 0 0 20px rgba(109,77,224,0.08)',
+    // Primary button shadow
+    primaryBtnShadow: isDark ? '0 4px 20px rgba(124,92,252,0.25)' : '0 4px 20px rgba(109,77,224,0.25)',
+    // Explorer icon background
+    explorerIconBg: isDark ? 'linear-gradient(135deg, rgba(6,182,212,0.15), rgba(16,185,129,0.1))' : 'linear-gradient(135deg, rgba(8,145,178,0.15), rgba(5,150,105,0.1))',
+    explorerIconBorder: isDark ? 'rgba(6,182,212,0.2)' : 'rgba(8,145,178,0.2)',
+    // Icon backgrounds for KPI
+    iconBgViolet: isDark ? 'rgba(124,92,252,0.12)' : 'rgba(109,77,224,0.1)',
+    iconBgCyan: isDark ? 'rgba(6,182,212,0.12)' : 'rgba(8,145,178,0.1)',
+    iconBgEmerald: isDark ? 'rgba(16,185,129,0.12)' : 'rgba(5,150,105,0.1)',
+    iconBgAmber: isDark ? 'rgba(245,158,11,0.12)' : 'rgba(217,119,6,0.1)',
+    iconBgRed: isDark ? 'rgba(239,68,68,0.12)' : 'rgba(220,38,38,0.1)',
+    // Glow colors for KPI
+    glowViolet: isDark ? 'rgba(124,92,252,0.08)' : 'rgba(109,77,224,0.08)',
+    glowCyan: isDark ? 'rgba(6,182,212,0.06)' : 'rgba(8,145,178,0.06)',
+    glowEmerald: isDark ? 'rgba(16,185,129,0.06)' : 'rgba(5,150,105,0.06)',
+    glowAmber: isDark ? 'rgba(245,158,11,0.06)' : 'rgba(217,119,6,0.06)',
+    glowRed: isDark ? 'rgba(239,68,68,0.06)' : 'rgba(220,38,38,0.06)',
+    // isDark flag
+    isDark,
+  }
+}
+
+// ============================================================
 // SCROLL REVEAL HOOK — IntersectionObserver
 // ============================================================
 function useScrollReveal() {
@@ -495,6 +577,7 @@ function LoginScreen({ onLogin, onRegister }: {
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)
   const [oauthLoading, setOauthLoading] = useState<string | null>(null)
+  const ts = useThemeStyles()
 
   // Email verification state
   const [showVerification, setShowVerification] = useState(false)
@@ -630,9 +713,9 @@ function LoginScreen({ onLogin, onRegister }: {
     <div className="min-h-screen flex items-center justify-center p-4 relative overflow-hidden bg-background">
       {/* Animated ambient gradient orbs */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
-        <div className="absolute top-[-20%] left-[15%] w-[60%] h-[60%] rounded-full parallax-orb" style={{ background: 'radial-gradient(ellipse, rgba(124,92,252,0.12) 0%, transparent 70%)', animation: 'ambientDrift1 20s ease-in-out infinite' }} />
-        <div className="absolute bottom-[-20%] right-[10%] w-[50%] h-[50%] rounded-full parallax-orb" style={{ background: 'radial-gradient(ellipse, rgba(6,182,212,0.08) 0%, transparent 70%)', animation: 'ambientDrift2 25s ease-in-out infinite' }} />
-        <div className="absolute top-[50%] left-[60%] w-[40%] h-[40%] rounded-full parallax-orb" style={{ background: 'radial-gradient(ellipse, rgba(168,85,247,0.06) 0%, transparent 70%)', animation: 'ambientDrift3 30s ease-in-out infinite' }} />
+        <div className="absolute top-[-20%] left-[15%] w-[60%] h-[60%] rounded-full parallax-orb" style={{ background: `radial-gradient(ellipse, ${ts.orbBg1} 0%, transparent 70%)`, animation: 'ambientDrift1 20s ease-in-out infinite' }} />
+        <div className="absolute bottom-[-20%] right-[10%] w-[50%] h-[50%] rounded-full parallax-orb" style={{ background: `radial-gradient(ellipse, ${ts.orbBg2} 0%, transparent 70%)`, animation: 'ambientDrift2 25s ease-in-out infinite' }} />
+        <div className="absolute top-[50%] left-[60%] w-[40%] h-[40%] rounded-full parallax-orb" style={{ background: `radial-gradient(ellipse, ${ts.orbBg3} 0%, transparent 70%)`, animation: 'ambientDrift3 30s ease-in-out infinite' }} />
       </div>
 
       {/* Aurora morphing blobs on login */}
@@ -646,7 +729,7 @@ function LoginScreen({ onLogin, onRegister }: {
 
       {/* Particle grid background */}
       <div className="absolute inset-0 pointer-events-none" style={{
-        backgroundImage: 'radial-gradient(rgba(124,92,252,0.06) 1px, transparent 1px)',
+        backgroundImage: `radial-gradient(${ts.dotGrid} 1px, transparent 1px)`,
         backgroundSize: '40px 40px',
         opacity: 0.5,
       }} />
@@ -654,9 +737,9 @@ function LoginScreen({ onLogin, onRegister }: {
       <div className="w-full max-w-md space-y-7 fade-in-up relative z-10">
         {/* Logo with immersive glow */}
         <div className="text-center space-y-3">
-          <div className="float-animation inline-flex items-center justify-center w-20 h-20 rounded-2xl border relative" style={{ background: 'rgba(124, 92, 252, 0.08)', borderColor: 'rgba(124, 92, 252, 0.15)', boxShadow: '0 0 40px rgba(124, 92, 252, 0.1), 0 0 80px rgba(124, 92, 252, 0.04)' }}>
+          <div className="float-animation inline-flex items-center justify-center w-20 h-20 rounded-2xl border relative" style={{ background: ts.logoBg, borderColor: ts.logoBorder, boxShadow: `${ts.logoShadow}, 0 0 80px ${ts.isDark ? 'rgba(124,92,252,0.04)' : 'rgba(109,77,224,0.04)'}` }}>
             <Wallet className="w-10 h-10 text-violet-400" />
-            <div className="absolute inset-0 rounded-2xl" style={{ background: 'linear-gradient(135deg, rgba(124,92,252,0.1), rgba(6,182,212,0.05))', opacity: 0.5 }} />
+            <div className="absolute inset-0 rounded-2xl" style={{ background: ts.logoGradientOverlay, opacity: 0.5 }} />
           </div>
           <h1 className="text-4xl font-bold gradient-text">
             CryptoFolio
@@ -666,11 +749,11 @@ function LoginScreen({ onLogin, onRegister }: {
 
         {/* Email Verification Screen */}
         {showVerification ? (
-          <div className="rounded-2xl p-6 sm:p-8 shadow-2xl relative overflow-hidden glass-strong" style={{ boxShadow: '0 8px 60px rgba(0,0,0,0.12), 0 0 40px rgba(124,92,252,0.04)' }}>
-            <div className="absolute top-0 left-0 right-0 h-px" style={{ background: 'linear-gradient(90deg, transparent, rgba(124,92,252,0.3), rgba(6,182,212,0.2), transparent)' }} />
+          <div className="rounded-2xl p-6 sm:p-8 shadow-2xl relative overflow-hidden glass-strong" style={{ boxShadow: ts.authCardShadow }}>
+            <div className="absolute top-0 left-0 right-0 h-px" style={{ background: ts.authGradientLine }} />
             <div className="mb-6">
               <div className="flex items-center gap-3 mb-2">
-                <div className="w-10 h-10 rounded-xl flex items-center justify-center" style={{ background: 'rgba(124,92,252,0.1)' }}>
+                <div className="w-10 h-10 rounded-xl flex items-center justify-center" style={{ background: ts.accentBg }}>
                   <Mail className="w-5 h-5 text-violet-400" />
                 </div>
                 <h2 className="text-xl font-semibold text-foreground">Vérifiez votre email</h2>
@@ -687,14 +770,16 @@ function LoginScreen({ onLogin, onRegister }: {
                   value={verifyCode}
                   onChange={(e) => { const val = e.target.value.replace(/\D/g, '').slice(0, 6); setVerifyCode(val); setVerifyError('') }}
                   placeholder="000000"
-                  className="border text-foreground text-center text-2xl tracking-[0.5em] font-mono placeholder:text-muted-foreground/30 rounded-xl h-14 transition-all duration-300 focus:shadow-[0_0_0_2px_rgba(124,92,252,0.25),0_0_12px_rgba(124,92,252,0.1)]"
-                  style={{ background: 'var(--input)', borderColor: 'var(--border)' }}
+                  className="border text-foreground text-center text-2xl tracking-[0.5em] font-mono placeholder:text-muted-foreground/30 rounded-xl h-14 transition-all duration-300"
+                  style={{ background: 'var(--input)', borderColor: 'var(--border)', boxShadow: 'none' }}
+                  onFocus={(e) => { e.target.style.boxShadow = ts.inputFocusShadow }}
+                  onBlur={(e) => { e.target.style.boxShadow = 'none' }}
                   maxLength={6}
                 />
               </div>
 
               {verifyError && (
-                <div className="flex items-center gap-2 text-red-400 text-sm p-3 rounded-xl border" style={{ background: 'rgba(239,68,68,0.08)', borderColor: 'rgba(239,68,68,0.2)' }}>
+                <div className="flex items-center gap-2 text-red-400 text-sm p-3 rounded-xl border" style={{ background: ts.errorBg, borderColor: ts.errorBorder }}>
                   <AlertTriangle className="w-4 h-4 shrink-0" />
                   {verifyError}
                 </div>
@@ -703,7 +788,7 @@ function LoginScreen({ onLogin, onRegister }: {
               <Button
                 onClick={handleVerify}
                 className="btn-primary-glow btn-ripple w-full text-foreground rounded-xl h-11 font-medium shadow-lg transition-all active:scale-[0.98]"
-                style={{ background: 'linear-gradient(135deg, #7c5cfc, #06b6d4)', boxShadow: '0 4px 20px rgba(124,92,252,0.25)' }}
+                style={{ background: ts.primaryGradient, boxShadow: ts.primaryBtnShadow }}
                 disabled={verifyLoading || verifyCode.length !== 6}
               >
                 {verifyLoading ? <RefreshCw className="w-4 h-4 animate-spin mr-2" /> : <Check className="w-4 h-4 mr-2" />}
@@ -733,9 +818,9 @@ function LoginScreen({ onLogin, onRegister }: {
         ) : (
         <>
         {/* Main auth card */}
-        <div className="rounded-2xl p-6 sm:p-8 shadow-2xl relative overflow-hidden glass-strong" style={{ boxShadow: '0 8px 60px rgba(0,0,0,0.12), 0 0 40px rgba(124,92,252,0.04)' }}>
+        <div className="rounded-2xl p-6 sm:p-8 shadow-2xl relative overflow-hidden glass-strong" style={{ boxShadow: ts.authCardShadow }}>
           {/* Card inner gradient accent */}
-          <div className="absolute top-0 left-0 right-0 h-px" style={{ background: 'linear-gradient(90deg, transparent, rgba(124,92,252,0.3), rgba(6,182,212,0.2), transparent)' }} />
+          <div className="absolute top-0 left-0 right-0 h-px" style={{ background: ts.authGradientLine }} />
 
           <div className="mb-6">
             <h2 className="text-xl font-semibold text-foreground">
@@ -757,7 +842,7 @@ function LoginScreen({ onLogin, onRegister }: {
                   onClick={() => handleOAuthSignIn('google')}
                   disabled={oauthLoading !== null}
                   className="social-btn w-full flex items-center justify-center gap-3 h-11 rounded-xl font-medium text-sm transition-all duration-300 active:scale-[0.98] disabled:opacity-50"
-                  style={{ background: 'rgba(0,0,0,0.03)', border: '1px solid rgba(0,0,0,0.08)', color: 'rgba(0,0,0,0.7)' }}
+                  style={{ background: ts.socialBtnBg, border: `1px solid ${ts.socialBtnBorder}`, color: ts.socialBtnText }}
                 >
                   {oauthLoading === 'google' ? (
                     <RefreshCw className="w-4 h-4 animate-spin" />
@@ -778,7 +863,7 @@ function LoginScreen({ onLogin, onRegister }: {
                   onClick={() => handleOAuthSignIn('apple')}
                   disabled={oauthLoading !== null}
                   className="social-btn w-full flex items-center justify-center gap-3 h-11 rounded-xl font-medium text-sm transition-all duration-300 active:scale-[0.98] disabled:opacity-50"
-                  style={{ background: 'rgba(0,0,0,0.03)', border: '1px solid rgba(0,0,0,0.08)', color: 'rgba(0,0,0,0.7)' }}
+                  style={{ background: ts.socialBtnBg, border: `1px solid ${ts.socialBtnBorder}`, color: ts.socialBtnText }}
                 >
                   {oauthLoading === 'apple' ? (
                     <RefreshCw className="w-4 h-4 animate-spin" />
@@ -846,7 +931,7 @@ function LoginScreen({ onLogin, onRegister }: {
               />
             </div>
             {error && (
-              <div className="flex items-center gap-2 text-red-400 text-sm p-3 rounded-xl border fade-in" style={{ background: 'rgba(239,68,68,0.08)', borderColor: 'rgba(239,68,68,0.2)' }}>
+              <div className="flex items-center gap-2 text-red-400 text-sm p-3 rounded-xl border fade-in" style={{ background: ts.errorBg, borderColor: ts.errorBorder }}>
                 <AlertTriangle className="w-4 h-4 shrink-0" />
                 {error}
               </div>
@@ -854,7 +939,7 @@ function LoginScreen({ onLogin, onRegister }: {
             <Button
               type="submit"
               className="btn-primary-glow btn-ripple w-full text-foreground rounded-xl h-11 font-medium shadow-lg transition-all active:scale-[0.98]"
-              style={{ background: 'linear-gradient(135deg, #7c5cfc, #06b6d4)', boxShadow: '0 4px 20px rgba(124,92,252,0.25)' }}
+              style={{ background: ts.primaryGradient, boxShadow: ts.primaryBtnShadow }}
               disabled={loading}
             >
               {loading ? <RefreshCw className="w-4 h-4 animate-spin mr-2" /> : null}
@@ -960,6 +1045,7 @@ function Sidebar({ currentView, setView, user, onLogout }: {
   const [mobileOpen, setMobileOpen] = useState(false)
   const [showLogoutConfirm, setShowLogoutConfirm] = useState(false)
   const { theme, setTheme, resolvedTheme } = useTheme()
+  const ts = useThemeStyles()
 
   const userItems = [
     { id: 'dashboard' as View, label: 'Tableau de bord', icon: LayoutDashboard, premium: false },
@@ -988,7 +1074,7 @@ function Sidebar({ currentView, setView, user, onLogout }: {
             : locked ? 'text-foreground/25'
             : 'text-foreground/40 hover:text-foreground/70'
         }`}
-        style={active ? { background: 'rgba(124,92,252,0.12)', borderLeft: '3px solid #7c5cfc' } : { borderLeft: '3px solid transparent' }}
+        style={active ? { background: ts.sidebarActiveBg, borderLeft: `3px solid ${ts.sidebarActiveBorder}` } : { borderLeft: '3px solid transparent' }}
       >
         <item.icon className={`w-5 h-5 shrink-0 transition-colors ${active ? 'text-violet-400' : ''}`} />
         {!collapsed && <span className="flex-1 text-left">{item.label}</span>}
@@ -1011,7 +1097,7 @@ function Sidebar({ currentView, setView, user, onLogout }: {
     <>
       {/* Logo */}
       <div className={`flex items-center gap-3 px-5 py-5 border-b ${collapsed ? 'justify-center' : ''}`} style={{ borderColor: 'var(--border)' }}>
-        <div className="w-10 h-10 rounded-xl flex items-center justify-center shrink-0 shadow-lg relative breathe" style={{ background: 'linear-gradient(135deg, rgba(124,92,252,0.3), rgba(6,182,212,0.3))', border: '1px solid rgba(124,92,252,0.2)', boxShadow: '0 0 20px rgba(124,92,252,0.1), 0 0 40px rgba(124,92,252,0.05)' }}>
+        <div className="w-10 h-10 rounded-xl flex items-center justify-center shrink-0 shadow-lg relative breathe" style={{ background: `linear-gradient(135deg, ${ts.isDark ? 'rgba(124,92,252,0.3)' : 'rgba(109,77,224,0.3)'}, ${ts.isDark ? 'rgba(6,182,212,0.3)' : 'rgba(8,145,178,0.3)'})`, border: `1px solid ${ts.isDark ? 'rgba(124,92,252,0.2)' : 'rgba(109,77,224,0.2)'}`, boxShadow: `${ts.logoShadow}, 0 0 40px ${ts.isDark ? 'rgba(124,92,252,0.05)' : 'rgba(109,77,224,0.05)'}` }}>
           <Wallet className="w-5 h-5 text-violet-400" />
           {/* Animated ring around logo */}
           <div className="absolute inset-[-4px] rounded-xl orbit" style={{ animationDuration: '6s', border: '1px solid transparent', borderTopColor: 'rgba(124,92,252,0.4)', borderRightColor: 'rgba(6,182,212,0.3)', borderBottomColor: 'rgba(167,139,250,0.2)' }} />
@@ -1042,9 +1128,9 @@ function Sidebar({ currentView, setView, user, onLogout }: {
         <div className={`flex items-center gap-3 ${collapsed ? '' : 'w-full'}`}>
           <div className="avatar-ring shrink-0">
             {user?.image ? (
-              <img src={user.image} alt="Avatar" className="w-9 h-9 rounded-full object-cover" style={{ background: 'linear-gradient(135deg, #7c5cfc, #06b6d4)' }} />
+              <img src={user.image} alt="Avatar" className="w-9 h-9 rounded-full object-cover" style={{ background: ts.primaryGradient }} />
             ) : (
-              <div className="w-9 h-9 flex items-center justify-center text-foreground text-sm font-bold" style={{ background: 'linear-gradient(135deg, #7c5cfc, #06b6d4)' }}>
+              <div className="w-9 h-9 flex items-center justify-center text-foreground text-sm font-bold" style={{ background: ts.primaryGradient }}>
                 {user?.name?.[0] || user?.email?.[0]?.toUpperCase() || '?'}
               </div>
             )}
@@ -1196,7 +1282,7 @@ function LivePriceTicker() {
           </span>
           <span className="text-xs font-semibold text-emerald-400">LIVE</span>
         </div>
-        <span className="text-xs" className="text-muted-foreground">Cours en temps réel</span>
+        <span className="text-xs text-muted-foreground" >Cours en temps réel</span>
       </div>
       <div ref={tickerRef} className="flex items-center gap-1 px-4 py-3 overflow-x-auto ticker-scroll">
         {entries.map(([ticker, price]) => {
@@ -1385,7 +1471,7 @@ function FearGreedWidget() {
           <signal.icon className="w-5 h-5 shrink-0" style={{ color: signal.color }} />
           <div className="flex-1">
             <p className="text-sm font-semibold" style={{ color: signal.color }}>{signal.label}</p>
-            <p className="text-xs" className="text-muted-foreground">
+            <p className="text-xs text-muted-foreground" >
               {data.value <= 25 ? 'Le marché est dans un état de peur extrême – c\'est souvent le meilleur moment pour acheter à bas prix.' :
                data.value <= 45 ? 'Le marché est craintif – les prix peuvent être sous-évalués, c\'est une fenêtre d\'achat potentielle.' :
                data.value <= 55 ? 'Le marché est neutre – ni peur ni cupidité excessive. Restez prudent et surveillez les tendances.' :
@@ -1398,7 +1484,7 @@ function FearGreedWidget() {
         {/* 30-Day History Chart */}
         {chartData.length > 1 && (
           <div>
-            <p className="text-xs font-medium mb-2" className="text-muted-foreground">Historique 30 jours</p>
+            <p className="text-xs font-medium mb-2 text-muted-foreground" >Historique 30 jours</p>
             <ResponsiveContainer width="100%" height={100}>
               <AreaChart data={chartData}>
                 <defs>
@@ -1428,7 +1514,7 @@ function FearGreedWidget() {
         )}
 
         {/* Legend */}
-        <div className="flex items-center justify-between text-[10px]" className="text-muted-foreground">
+        <div className="flex items-center justify-between text-[10px] text-muted-foreground" >
           <span className="flex items-center gap-1"><span className="w-2 h-2 rounded-full bg-red-500" /> Peur Extrême</span>
           <span className="flex items-center gap-1"><span className="w-2 h-2 rounded-full bg-orange-500" /> Peur</span>
           <span className="flex items-center gap-1"><span className="w-2 h-2 rounded-full bg-yellow-500" /> Neutre</span>
@@ -1567,7 +1653,7 @@ function TokenSignals() {
           </div>
           <div>
             <h3 className="text-sm font-semibold text-foreground/80">Signaux d&apos;Achat & Vente</h3>
-            <p className="text-xs" className="text-muted-foreground">Basé sur votre PRU et le contexte marché</p>
+            <p className="text-xs text-muted-foreground" >Basé sur votre PRU et le contexte marché</p>
           </div>
         </div>
 
@@ -1608,7 +1694,7 @@ function TokenSignals() {
         </div>
 
         {/* Info note */}
-        <p className="text-[10px] text-center" className="text-muted-foreground/50">
+        <p className="text-[10px] text-center text-muted-foreground/50" >
           Ces signaux sont indicatifs et ne constituent pas un conseil financier. Faites vos propres recherches.
         </p>
       </CardContent>
@@ -1625,6 +1711,7 @@ function DashboardView({ user, onUpgrade }: { user: any; onUpgrade: () => void }
   const [refreshing, setRefreshing] = useState(false)
   const [lastUpdated, setLastUpdated] = useState<Date | null>(null)
   const [nextRefreshIn, setNextRefreshIn] = useState(60)
+  const ts = useThemeStyles()
 
   const fetchData = useCallback(async (showToast = false, force = false) => {
     try {
@@ -1693,7 +1780,7 @@ function DashboardView({ user, onUpgrade }: { user: any; onUpgrade: () => void }
           <BarChart3 className="w-10 h-10 text-violet-400/50" />
         </div>
         <h2 className="text-xl font-semibold text-foreground/80">Aucune transaction</h2>
-        <p className="text-center max-w-md" className="text-muted-foreground">
+        <p className="text-center max-w-md text-muted-foreground" >
           Commencez par ajouter des transactions dans l&apos;onglet &quot;Transactions&quot; pour voir votre tableau de bord.
         </p>
       </div>
@@ -1715,59 +1802,59 @@ function DashboardView({ user, onUpgrade }: { user: any; onUpgrade: () => void }
       value: data.valeurActuelle,
       icon: Wallet,
       barClass: 'kpi-bar-violet',
-      iconBg: 'rgba(124,92,252,0.12)',
+      iconBg: ts.iconBgViolet,
       iconColor: 'text-violet-400',
       colorClass: '',
       prefix: '',
       suffix: ' $',
-      glowColor: 'rgba(124,92,252,0.08)',
+      glowColor: ts.glowViolet,
     },
     {
       label: 'P/L Global',
       value: data.pl,
       icon: data.pl >= 0 ? TrendingUp : TrendingDown,
       barClass: data.pl >= 0 ? 'kpi-bar-emerald' : 'kpi-bar-red',
-      iconBg: data.pl >= 0 ? 'rgba(16,185,129,0.12)' : 'rgba(239,68,68,0.12)',
+      iconBg: data.pl >= 0 ? ts.iconBgEmerald : ts.iconBgRed,
       iconColor: data.pl >= 0 ? 'text-emerald-400' : 'text-red-400',
       colorClass: plColor(data.pl),
       prefix: data.pl >= 0 ? '+' : '',
       suffix: ' $',
-      glowColor: data.pl >= 0 ? 'rgba(16,185,129,0.06)' : 'rgba(239,68,68,0.06)',
+      glowColor: data.pl >= 0 ? ts.glowEmerald : ts.glowRed,
     },
     {
       label: 'Investissement Total',
       value: data.investissementTotal,
       icon: DollarSign,
       barClass: 'kpi-bar-cyan',
-      iconBg: 'rgba(6,182,212,0.12)',
+      iconBg: ts.iconBgCyan,
       iconColor: 'text-cyan-400',
       colorClass: '',
       prefix: '',
       suffix: ' $',
-      glowColor: 'rgba(6,182,212,0.06)',
+      glowColor: ts.glowCyan,
     },
     {
       label: 'ROI',
       value: data.roi,
       icon: data.roi >= 0 ? TrendingUp : TrendingDown,
       barClass: data.roi >= 0 ? 'kpi-bar-amber' : 'kpi-bar-red',
-      iconBg: data.roi >= 0 ? 'rgba(245,158,11,0.12)' : 'rgba(239,68,68,0.12)',
+      iconBg: data.roi >= 0 ? ts.iconBgAmber : ts.iconBgRed,
       iconColor: data.roi >= 0 ? 'text-amber-400' : 'text-red-400',
       colorClass: plColor(data.roi),
       prefix: data.roi >= 0 ? '+' : '',
       suffix: '',
       isPercent: true,
-      glowColor: data.roi >= 0 ? 'rgba(245,158,11,0.06)' : 'rgba(239,68,68,0.06)',
+      glowColor: data.roi >= 0 ? ts.glowAmber : ts.glowRed,
     },
   ]
 
   return (
-    <div className="space-y-6 view-enter-cinematic">
+    <div className="space-y-4 sm:space-y-6 view-enter-cinematic">
       {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 fade-in-up">
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 sm:gap-4 fade-in-up">
         <div>
-          <h1 className="text-2xl font-bold gradient-shimmer-text">Tableau de Bord</h1>
-          <div className="flex items-center gap-2 text-sm mt-1" className="text-muted-foreground">
+          <h1 className="text-lg sm:text-2xl font-bold gradient-shimmer-text">Tableau de Bord</h1>
+          <div className="flex items-center gap-2 text-sm mt-1 text-muted-foreground" >
             <span>Vue d&apos;ensemble de votre portefeuille</span>
             {lastUpdated && (
               <span className="hidden sm:flex items-center gap-1.5">
@@ -1793,7 +1880,7 @@ function DashboardView({ user, onUpgrade }: { user: any; onUpgrade: () => void }
       <LivePriceTicker />
 
       {/* Fear & Greed Index + Market Signals */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-5 fade-in-up">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-5 fade-in-up">
         <FearGreedWidget />
         {/* Token Buy/Sell Signals */}
         <TokenSignals />
@@ -1801,7 +1888,7 @@ function DashboardView({ user, onUpgrade }: { user: any; onUpgrade: () => void }
 
       {/* Freemium Upgrade Banner */}
       {user?.role === 'user_free' && (
-        <Card className="glass-card rounded-2xl fade-in-up rainbow-border" style={{ borderColor: 'rgba(245,158,11,0.25)', background: 'rgba(245,158,11,0.04)' }}>
+        <Card className="glass-card rounded-2xl fade-in-up rainbow-border" style={{ borderColor: ts.premiumBorder, background: ts.premiumBg }}>
           <CardContent className="p-4 flex flex-col sm:flex-row items-start sm:items-center gap-3">
             <div className="w-10 h-10 rounded-xl flex items-center justify-center shrink-0" style={{ background: 'rgba(245,158,11,0.1)' }}>
               <Crown className="w-5 h-5 text-amber-400" />
@@ -1823,13 +1910,13 @@ function DashboardView({ user, onUpgrade }: { user: any; onUpgrade: () => void }
 
       {/* KPI Cards */}
       <ScrollReveal>
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-5">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-5">
         {kpiCards.map((card, i) => (
           <div key={card.label} className={`fade-in-up stagger-${i + 1}`}>
             <Card className={`glass-card rounded-2xl card-hover-3d tilt-card gradient-border shimmer-vivid ${card.barClass}`}>
               <CardContent className="p-5 sm:p-6 relative">
                 <div className="flex items-center justify-between mb-3">
-                  <span className="text-xs font-medium uppercase tracking-wider" className="text-muted-foreground">{card.label}</span>
+                  <span className="text-xs font-medium uppercase tracking-wider text-muted-foreground" >{card.label}</span>
                   <div className="w-9 h-9 rounded-xl flex items-center justify-center kpi-icon-glow" style={{ background: card.iconBg }}>
                     <card.icon className={`w-4 h-4 ${card.iconColor}`} />
                   </div>
@@ -1854,11 +1941,11 @@ function DashboardView({ user, onUpgrade }: { user: any; onUpgrade: () => void }
 
       {/* Charts */}
       <ScrollReveal direction="scale">
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-5">
         {/* Portfolio Distribution - Dynamic Pie Chart */}
         <Card className="glass-card rounded-2xl card-hover-3d gradient-border spotlight-card fade-in-up stagger-5 chart-enter chart-bg-grad">
           <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium" className="text-muted-foreground">Répartition du Portefeuille</CardTitle>
+            <CardTitle className="text-sm font-medium text-muted-foreground" >Répartition du Portefeuille</CardTitle>
           </CardHeader>
           <CardContent>
             <div className="flex flex-col items-center">
@@ -1887,14 +1974,14 @@ function DashboardView({ user, onUpgrade }: { user: any; onUpgrade: () => void }
                   </Pie>
                   <Tooltip
                     contentStyle={{
-                      background: 'rgba(6, 6, 10, 0.92)',
+                      background: ts.chartTooltipBg,
                       backdropFilter: 'blur(20px)',
                       WebkitBackdropFilter: 'blur(20px)',
-                      border: '1px solid rgba(124, 92, 252, 0.15)',
+                      border: `1px solid ${ts.chartTooltipBorder}`,
                       borderRadius: '12px',
                       fontSize: '12px',
                       color: 'var(--foreground)',
-                      boxShadow: '0 8px 32px rgba(0,0,0,0.5), 0 0 20px rgba(124,92,252,0.08)',
+                      boxShadow: ts.chartTooltipShadow,
                     }}
                     formatter={(value: number, name: string) => [`${fmt(value)} $`, name]}
                   />
@@ -1920,7 +2007,7 @@ function DashboardView({ user, onUpgrade }: { user: any; onUpgrade: () => void }
         {/* Investment vs Value Bar Chart */}
         <Card className="glass-card rounded-2xl card-hover-3d gradient-border spotlight-card fade-in-up stagger-6 chart-enter chart-bg-grad">
           <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium" className="text-muted-foreground">Investissement vs Valeur Actuelle</CardTitle>
+            <CardTitle className="text-sm font-medium text-muted-foreground" >Investissement vs Valeur Actuelle</CardTitle>
           </CardHeader>
           <CardContent>
             <ResponsiveContainer width="100%" height={280} className="sm:h-[300px]">
@@ -1952,14 +2039,14 @@ function DashboardView({ user, onUpgrade }: { user: any; onUpgrade: () => void }
             <Table>
               <TableHeader>
                 <TableRow className="hover:bg-transparent" style={{ borderBottomColor: 'var(--border)' }}>
-                  <TableHead className="font-semibold" className="text-muted-foreground">Token</TableHead>
-                  <TableHead className="text-right font-semibold" className="text-muted-foreground">Montant Investi</TableHead>
-                  <TableHead className="text-right font-semibold" className="text-muted-foreground">Quantité</TableHead>
-                  <TableHead className="text-right font-semibold" className="text-muted-foreground">PRU</TableHead>
-                  <TableHead className="text-right font-semibold" className="text-muted-foreground">Cours Actuel</TableHead>
-                  <TableHead className="text-right font-semibold" className="text-muted-foreground">Valeur Actuelle</TableHead>
-                  <TableHead className="text-right font-semibold" className="text-muted-foreground">P/L</TableHead>
-                  <TableHead className="text-right font-semibold" className="text-muted-foreground">Rentabilité</TableHead>
+                  <TableHead className="font-semibold text-muted-foreground" >Token</TableHead>
+                  <TableHead className="text-right font-semibold text-muted-foreground" >Montant Investi</TableHead>
+                  <TableHead className="text-right font-semibold text-muted-foreground" >Quantité</TableHead>
+                  <TableHead className="text-right font-semibold text-muted-foreground" >PRU</TableHead>
+                  <TableHead className="text-right font-semibold text-muted-foreground" >Cours Actuel</TableHead>
+                  <TableHead className="text-right font-semibold text-muted-foreground" >Valeur Actuelle</TableHead>
+                  <TableHead className="text-right font-semibold text-muted-foreground" >P/L</TableHead>
+                  <TableHead className="text-right font-semibold text-muted-foreground" >Rentabilité</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -1970,7 +2057,7 @@ function DashboardView({ user, onUpgrade }: { user: any; onUpgrade: () => void }
                         <TokenLogo ticker={t.ticker} size={36} />
                         <div>
                           <p className="font-semibold text-foreground/80">{t.ticker}</p>
-                          <p className="text-xs" className="text-muted-foreground">{t.name}</p>
+                          <p className="text-xs text-muted-foreground" >{t.name}</p>
                         </div>
                       </div>
                     </TableCell>
@@ -2002,7 +2089,7 @@ function DashboardView({ user, onUpgrade }: { user: any; onUpgrade: () => void }
                     <TokenLogo ticker={t.ticker} size={40} />
                     <div>
                       <p className="font-semibold text-foreground/80">{t.ticker}</p>
-                      <p className="text-xs" className="text-muted-foreground">{t.name}</p>
+                      <p className="text-xs text-muted-foreground" >{t.name}</p>
                     </div>
                   </div>
                   <Badge className={`${t.rentabilite >= 0 ? 'bg-emerald-400/10 text-emerald-400 border-emerald-400/20' : 'bg-red-400/10 text-red-400 border-red-400/20'} border font-mono text-xs`}>
@@ -2011,19 +2098,19 @@ function DashboardView({ user, onUpgrade }: { user: any; onUpgrade: () => void }
                 </div>
                 <div className="grid grid-cols-2 gap-x-4 gap-y-2 text-sm">
                   <div>
-                    <p className="text-xs" className="text-muted-foreground">Investi</p>
+                    <p className="text-xs text-muted-foreground" >Investi</p>
                     <p className="text-foreground/60 font-mono">{fmt(t.montantInvesti)} $</p>
                   </div>
                   <div>
-                    <p className="text-xs" className="text-muted-foreground">Valeur</p>
+                    <p className="text-xs text-muted-foreground" >Valeur</p>
                     <p className="text-foreground/60 font-mono">{fmt(t.valeurActuelle)} $</p>
                   </div>
                   <div>
-                    <p className="text-xs" className="text-muted-foreground">Quantité</p>
+                    <p className="text-xs text-muted-foreground" >Quantité</p>
                     <p className="text-foreground/40 font-mono">{fmtSmall(t.quantite)}</p>
                   </div>
                   <div>
-                    <p className="text-xs" className="text-muted-foreground">P/L</p>
+                    <p className="text-xs text-muted-foreground" >P/L</p>
                     <p className={`font-mono font-semibold ${plColor(t.pl)}`}>
                       {t.pl >= 0 ? '+' : ''}{fmt(t.pl)} $
                     </p>
@@ -2210,12 +2297,12 @@ function TransactionsView({ user, onUpgrade }: { user: any; onUpgrade: () => voi
   }
 
   return (
-    <div className="space-y-6 view-enter-cinematic">
+    <div className="space-y-4 sm:space-y-6 view-enter-cinematic">
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 fade-in-up">
         <div>
-          <h1 className="text-2xl font-bold gradient-shimmer-text">Transactions</h1>
-          <p className="mt-1" className="text-muted-foreground">Gérez vos achats de crypto-actifs</p>
+          <h1 className="text-lg sm:text-2xl font-bold gradient-shimmer-text">Transactions</h1>
+          <p className="mt-1 text-muted-foreground" >Gérez vos achats de crypto-actifs</p>
         </div>
         <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
           <DialogTrigger asChild>
@@ -2231,12 +2318,12 @@ function TransactionsView({ user, onUpgrade }: { user: any; onUpgrade: () => voi
             <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div className="space-y-2">
-                  <Label className="text-xs" className="text-muted-foreground">Date</Label>
+                  <Label className="text-xs text-muted-foreground" >Date</Label>
                   <Input type="date" {...register('date')} className="border text-foreground rounded-xl h-11" style={{ background: 'var(--input)', borderColor: 'var(--border)' }} />
                   {errors.date && <p className="text-xs text-red-400">{errors.date.message}</p>}
                 </div>
                 <div className="space-y-2">
-                  <Label className="text-xs" className="text-muted-foreground">Token</Label>
+                  <Label className="text-xs text-muted-foreground" >Token</Label>
                   <Select onValueChange={v => setValue('tokenTicker', v)} defaultValue={editingTx?.tokenTicker}>
                     <SelectTrigger className="border text-foreground rounded-xl h-11" style={{ background: 'var(--input)', borderColor: 'var(--border)' }}><SelectValue placeholder="Sélectionner" /></SelectTrigger>
                     <SelectContent style={{ background: 'var(--popover)', border: '1px solid var(--border)' }}>
@@ -2250,18 +2337,18 @@ function TransactionsView({ user, onUpgrade }: { user: any; onUpgrade: () => voi
               </div>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div className="space-y-2">
-                  <Label className="text-xs" className="text-muted-foreground">Montant investi ($)</Label>
+                  <Label className="text-xs text-muted-foreground" >Montant investi ($)</Label>
                   <Input type="number" step="0.01" {...register('montantInvesti')} placeholder="15.70" className="border text-foreground placeholder:text-muted-foreground/50 rounded-xl h-11" style={{ background: 'var(--input)', borderColor: 'var(--border)' }} />
                   {errors.montantInvesti && <p className="text-xs text-red-400">{errors.montantInvesti.message}</p>}
                 </div>
                 <div className="space-y-2">
-                  <Label className="text-xs" className="text-muted-foreground">Cours d&apos;achat ($)</Label>
+                  <Label className="text-xs text-muted-foreground" >Cours d&apos;achat ($)</Label>
                   <Input type="number" step="0.0001" {...register('coursAchat')} placeholder="82603.9" className="border text-foreground placeholder:text-muted-foreground/50 rounded-xl h-11" style={{ background: 'var(--input)', borderColor: 'var(--border)' }} />
                   {errors.coursAchat && <p className="text-xs text-red-400">{errors.coursAchat.message}</p>}
                 </div>
               </div>
               <div className="space-y-2">
-                <Label className="text-xs" className="text-muted-foreground">Exchange (optionnel)</Label>
+                <Label className="text-xs text-muted-foreground" >Exchange (optionnel)</Label>
                 <Select onValueChange={v => setValue('exchangeId', v)} defaultValue={editingTx?.exchangeId || ''}>
                   <SelectTrigger className="border text-foreground rounded-xl h-11" style={{ background: 'var(--input)', borderColor: 'var(--border)' }}><SelectValue placeholder="Sélectionner" /></SelectTrigger>
                   <SelectContent style={{ background: 'var(--popover)', border: '1px solid var(--border)' }}>
@@ -2272,7 +2359,7 @@ function TransactionsView({ user, onUpgrade }: { user: any; onUpgrade: () => voi
                 </Select>
               </div>
               <div className="space-y-2">
-                <Label className="text-xs" className="text-muted-foreground">Notes (optionnel)</Label>
+                <Label className="text-xs text-muted-foreground" >Notes (optionnel)</Label>
                 <Input {...register('notes')} placeholder="Note facultative" className="border text-foreground placeholder:text-muted-foreground/50 rounded-xl h-11" style={{ background: 'var(--input)', borderColor: 'var(--border)' }} />
               </div>
               <DialogFooter className="gap-2">
@@ -2319,7 +2406,7 @@ function TransactionsView({ user, onUpgrade }: { user: any; onUpgrade: () => voi
       {/* Search/Filter Bar */}
       {transactions.length > 0 && (
         <div className="relative fade-in-up stagger-2">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4" className="text-muted-foreground/50" />
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground/50"  />
           <Input
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
@@ -2338,7 +2425,7 @@ function TransactionsView({ user, onUpgrade }: { user: any; onUpgrade: () => voi
               <Wallet className="w-8 h-8 text-violet-400/40" />
             </div>
             <h3 className="text-lg font-semibold text-foreground/70 mb-2">Aucune transaction</h3>
-            <p className="mb-6" className="text-muted-foreground">Ajoutez votre première transaction pour commencer le suivi.</p>
+            <p className="mb-6 text-muted-foreground" >Ajoutez votre première transaction pour commencer le suivi.</p>
             <Button onClick={openNew} className="gap-2 rounded-xl shadow-lg text-foreground btn-primary-glow btn-ripple" style={{ background: 'linear-gradient(135deg, #7c5cfc, #06b6d4)', boxShadow: '0 4px 20px rgba(124,92,252,0.25)' }}>
               <Plus className="w-4 h-4" /> Ajouter une transaction
             </Button>
@@ -2353,19 +2440,19 @@ function TransactionsView({ user, onUpgrade }: { user: any; onUpgrade: () => voi
                 <Table>
                   <TableHeader>
                     <TableRow className="hover:bg-transparent" style={{ borderBottomColor: 'var(--border)' }}>
-                      <TableHead className="cursor-pointer select-none" className="text-muted-foreground" onClick={() => toggleSort('date')}>
+                      <TableHead className="cursor-pointer select-none text-muted-foreground"  onClick={() => toggleSort('date')}>
                         <span className="flex items-center gap-1">Date <SortIcon field="date" /></span>
                       </TableHead>
-                      <TableHead className="cursor-pointer select-none" className="text-muted-foreground" onClick={() => toggleSort('tokenTicker')}>
+                      <TableHead className="cursor-pointer select-none text-muted-foreground"  onClick={() => toggleSort('tokenTicker')}>
                         <span className="flex items-center gap-1">Token <SortIcon field="tokenTicker" /></span>
                       </TableHead>
-                      <TableHead className="text-right cursor-pointer select-none" className="text-muted-foreground" onClick={() => toggleSort('montantInvesti')}>
+                      <TableHead className="text-right cursor-pointer select-none text-muted-foreground"  onClick={() => toggleSort('montantInvesti')}>
                         <span className="flex items-center justify-end gap-1">Montant <SortIcon field="montantInvesti" /></span>
                       </TableHead>
-                      <TableHead className="text-right" className="text-muted-foreground">Cours</TableHead>
-                      <TableHead className="text-right" className="text-muted-foreground">Quantité</TableHead>
+                      <TableHead className="text-right text-muted-foreground" >Cours</TableHead>
+                      <TableHead className="text-right text-muted-foreground" >Quantité</TableHead>
                       <TableHead className="text-muted-foreground">Exchange</TableHead>
-                      <TableHead className="text-right" className="text-muted-foreground">Actions</TableHead>
+                      <TableHead className="text-right text-muted-foreground" >Actions</TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
@@ -2431,7 +2518,7 @@ function TransactionsView({ user, onUpgrade }: { user: any; onUpgrade: () => voi
                     <TokenLogo ticker={tx.tokenTicker} size={40} />
                     <div>
                       <p className="font-semibold text-foreground/80">{tx.tokenTicker}</p>
-                      <p className="text-xs" className="text-muted-foreground">{new Date(tx.date).toLocaleDateString('fr-FR')}</p>
+                      <p className="text-xs text-muted-foreground" >{new Date(tx.date).toLocaleDateString('fr-FR')}</p>
                     </div>
                   </div>
                   <div className="flex items-center gap-1">
@@ -2456,15 +2543,15 @@ function TransactionsView({ user, onUpgrade }: { user: any; onUpgrade: () => voi
                 </div>
                 <div className="grid grid-cols-3 gap-2 text-sm">
                   <div>
-                    <p className="text-xs" className="text-muted-foreground/50">Montant</p>
+                    <p className="text-xs text-muted-foreground/50" >Montant</p>
                     <p className="text-foreground/60 font-mono">{fmt(tx.montantInvesti)} $</p>
                   </div>
                   <div>
-                    <p className="text-xs" className="text-muted-foreground/50">Cours</p>
+                    <p className="text-xs text-muted-foreground/50" >Cours</p>
                     <p className="text-foreground/50 font-mono">{fmt(tx.coursAchat)} $</p>
                   </div>
                   <div>
-                    <p className="text-xs" className="text-muted-foreground/50">Quantité</p>
+                    <p className="text-xs text-muted-foreground/50" >Quantité</p>
                     <p className="text-foreground/40 font-mono">{fmtSmall(tx.quantite)}</p>
                   </div>
                 </div>
@@ -2477,7 +2564,7 @@ function TransactionsView({ user, onUpgrade }: { user: any; onUpgrade: () => voi
                       </div>
                     )}
                     {tx.notes && (
-                      <span className="text-xs truncate flex-1" className="text-muted-foreground/40">{tx.notes}</span>
+                      <span className="text-xs truncate flex-1 text-muted-foreground/40" >{tx.notes}</span>
                     )}
                   </div>
                 )}
@@ -2957,7 +3044,7 @@ function UpgradePremiumModal({ open, onOpenChange, onSuccess }: {
 
               {/* Duration selector */}
               <div className="space-y-2">
-                <p className="text-xs font-medium" className="text-muted-foreground">Choisissez votre durée d&apos;engagement</p>
+                <p className="text-xs font-medium text-muted-foreground" >Choisissez votre durée d&apos;engagement</p>
                 <div className="grid grid-cols-2 gap-2">
                   {SUBSCRIPTION_PLANS.map((plan) => {
                     const isSelected = selectedPlan === plan.months
@@ -2998,7 +3085,7 @@ function UpgradePremiumModal({ open, onOpenChange, onSuccess }: {
                             {plan.total.toFixed(2).replace('.', ',')} €
                           </span>
                         </div>
-                        <p className="text-[10px] mt-0.5" className="text-muted-foreground">
+                        <p className="text-[10px] mt-0.5 text-muted-foreground" >
                           {plan.monthly.toFixed(2).replace('.', ',')} €/mois
                         </p>
                       </button>
@@ -3010,7 +3097,7 @@ function UpgradePremiumModal({ open, onOpenChange, onSuccess }: {
               {/* Summary */}
               <div className="p-3 rounded-xl" style={{ background: 'rgba(245,158,11,0.06)', border: '1px solid rgba(245,158,11,0.15)' }}>
                 <div className="flex items-center justify-between">
-                  <span className="text-sm" className="text-muted-foreground">Total</span>
+                  <span className="text-sm text-muted-foreground" >Total</span>
                   <div className="text-right">
                     <span className="text-xl font-bold text-amber-400">{currentPlan.total.toFixed(2).replace('.', ',')} €</span>
                     {currentPlan.discount > 0 && (
@@ -3020,7 +3107,7 @@ function UpgradePremiumModal({ open, onOpenChange, onSuccess }: {
                     )}
                   </div>
                 </div>
-                <p className="text-[10px] mt-1" className="text-muted-foreground">
+                <p className="text-[10px] mt-1 text-muted-foreground" >
                   Soit {currentPlan.monthly.toFixed(2).replace('.', ',')} €/mois
                   {currentPlan.discount > 0 && ` au lieu de 9,99 €/mois`}
                 </p>
@@ -3028,7 +3115,7 @@ function UpgradePremiumModal({ open, onOpenChange, onSuccess }: {
 
               <div className="p-3 rounded-xl flex items-start gap-2" style={{ background: 'rgba(6,182,212,0.06)', border: '1px solid rgba(6,182,212,0.12)' }}>
                 <Shield className="w-4 h-4 text-cyan-400 shrink-0 mt-0.5" />
-                <p className="text-xs" className="text-muted-foreground">
+                <p className="text-xs text-muted-foreground" >
                   Paiement sécurisé via PayPal. Annulation possible à tout moment depuis votre profil.
                 </p>
               </div>
@@ -3070,7 +3157,7 @@ function UpgradePremiumModal({ open, onOpenChange, onSuccess }: {
                 <div className="flex items-center justify-between">
                   <div>
                     <p className="text-sm font-semibold text-foreground/80">CryptoFolio Premium</p>
-                    <p className="text-xs" className="text-muted-foreground">
+                    <p className="text-xs text-muted-foreground" >
                       Abonnement {currentPlan.label}
                       {currentPlan.discount > 0 && ` (-${currentPlan.discount}%)`}
                     </p>
@@ -3090,7 +3177,7 @@ function UpgradePremiumModal({ open, onOpenChange, onSuccess }: {
                 {paypalLoading && (
                   <div className="flex items-center justify-center py-4 gap-2">
                     <RefreshCw className="w-4 h-4 animate-spin text-amber-400/60" />
-                    <span className="text-xs" className="text-muted-foreground">Chargement de PayPal...</span>
+                    <span className="text-xs text-muted-foreground" >Chargement de PayPal...</span>
                   </div>
                 )}
 
@@ -3103,7 +3190,7 @@ function UpgradePremiumModal({ open, onOpenChange, onSuccess }: {
 
                 {!paypalLoaded && !paypalLoading && (
                   <div className="flex items-center justify-center py-4">
-                    <p className="text-xs" className="text-muted-foreground">Chargement du bouton de paiement...</p>
+                    <p className="text-xs text-muted-foreground" >Chargement du bouton de paiement...</p>
                   </div>
                 )}
               </div>
@@ -3131,7 +3218,7 @@ function UpgradePremiumModal({ open, onOpenChange, onSuccess }: {
             </div>
             <div className="text-center">
               <p className="text-foreground/80 font-medium">Vérification du paiement...</p>
-              <p className="text-xs mt-1" className="text-muted-foreground">Activation de votre abonnement Premium</p>
+              <p className="text-xs mt-1 text-muted-foreground" >Activation de votre abonnement Premium</p>
             </div>
           </div>
         )}
@@ -3142,7 +3229,7 @@ function UpgradePremiumModal({ open, onOpenChange, onSuccess }: {
             </div>
             <div className="text-center">
               <p className="text-foreground/80 font-semibold text-lg">Bienvenue en Premium !</p>
-              <p className="text-xs mt-1" className="text-muted-foreground">Votre accès illimité est maintenant activé</p>
+              <p className="text-xs mt-1 text-muted-foreground" >Votre accès illimité est maintenant activé</p>
             </div>
           </div>
         )}
@@ -3245,6 +3332,7 @@ const changeBg = (n: number) => n >= 0 ? 'bg-emerald-500/10 dark:bg-emerald-500/
 const CMC_LOGO_URL = (id: number) => `https://s2.coinmarketcap.com/static/img/coins/64x64/${id}.png`
 
 function ExplorerView() {
+  const ts = useThemeStyles()
   const [cmcTokens, setCmcTokens] = useState<CMCToken[]>([])
   const [cmcExchanges, setCmcExchanges] = useState<CMCExchange[]>([])
   const [globalMetrics, setGlobalMetrics] = useState<GlobalMetrics | null>(null)
@@ -3364,15 +3452,15 @@ function ExplorerView() {
   )
 
   return (
-    <div className="space-y-6 view-enter-cinematic">
+    <div className="space-y-4 sm:space-y-6 view-enter-cinematic">
       {/* Header */}
       <div className="fade-in-up">
         <div className="flex items-center gap-3">
-          <div className="w-12 h-12 rounded-2xl flex items-center justify-center relative" style={{ background: 'linear-gradient(135deg, rgba(6,182,212,0.15), rgba(16,185,129,0.1))', border: '1px solid rgba(6,182,212,0.2)' }}>
+          <div className="w-12 h-12 rounded-2xl flex items-center justify-center relative" style={{ background: ts.explorerIconBg, border: `1px solid ${ts.explorerIconBorder}` }}>
             <Search className="w-6 h-6 text-cyan-400" />
           </div>
           <div>
-            <h1 className="text-2xl font-bold gradient-text">Explorateur</h1>
+            <h1 className="text-lg sm:text-2xl font-bold gradient-text">Explorateur</h1>
             <p className="text-sm text-muted-foreground">Données en direct CoinMarketCap — Top 500</p>
           </div>
         </div>
@@ -3380,7 +3468,7 @@ function ExplorerView() {
 
       {/* Global Market Stats */}
       {globalMetrics && (
-        <div className="fade-in-up stagger-1 grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3">
+        <div className="fade-in-up stagger-1 grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-2 sm:gap-3">
           <div className="rounded-xl p-3 border kpi-bar-violet" style={{ background: 'var(--popover)', borderColor: 'var(--border)' }}>
             <div className="flex items-center gap-2">
               <Coins className="w-4 h-4 text-violet-400" />
@@ -3956,7 +4044,7 @@ function ProfileView({ user, onUpgrade }: { user: any; onUpgrade: () => void }) 
   }
 
   return (
-    <div className="space-y-6 max-w-2xl view-enter-cinematic">
+    <div className="space-y-4 sm:space-y-6 max-w-2xl view-enter-cinematic">
       <div className="fade-in-up">
         <h1 className="text-xl sm:text-2xl font-bold gradient-shimmer-text">Profil & Abonnement</h1>
         <p className="mt-1 text-sm text-muted-foreground">Gérez votre compte et votre abonnement</p>
@@ -4355,7 +4443,7 @@ function AdminUsersView() {
     <div className="space-y-6 page-transition">
       <div className="fade-in-up">
         <h1 className="text-2xl font-bold text-foreground/90">Gestion Utilisateurs</h1>
-        <p className="mt-1" className="text-muted-foreground">{users.length} comptes enregistrés</p>
+        <p className="mt-1 text-muted-foreground" >{users.length} comptes enregistrés</p>
       </div>
 
       {/* Desktop Table */}
@@ -4367,9 +4455,9 @@ function AdminUsersView() {
                 <TableRow className="hover:bg-transparent" style={{ borderBottomColor: 'var(--border)' }}>
                   <TableHead className="text-muted-foreground">Utilisateur</TableHead>
                   <TableHead className="text-muted-foreground">Rôle</TableHead>
-                  <TableHead className="text-center" className="text-muted-foreground">Transactions</TableHead>
+                  <TableHead className="text-center text-muted-foreground" >Transactions</TableHead>
                   <TableHead className="text-muted-foreground">Statut</TableHead>
-                  <TableHead className="text-right" className="text-muted-foreground">Actions</TableHead>
+                  <TableHead className="text-right text-muted-foreground" >Actions</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -4382,7 +4470,7 @@ function AdminUsersView() {
                         </div>
                         <div>
                           <p className="font-medium text-foreground/70">{u.name || 'Sans nom'}</p>
-                          <p className="text-xs" className="text-muted-foreground">{u.email}</p>
+                          <p className="text-xs text-muted-foreground" >{u.email}</p>
                         </div>
                       </div>
                     </TableCell>
@@ -4451,7 +4539,7 @@ function AdminUsersView() {
                 </div>
                 <div>
                   <p className="font-semibold text-foreground/70">{u.name || 'Sans nom'}</p>
-                  <p className="text-xs" className="text-muted-foreground">{u.email}</p>
+                  <p className="text-xs text-muted-foreground" >{u.email}</p>
                 </div>
               </div>
               {u.suspended ? (
@@ -4462,7 +4550,7 @@ function AdminUsersView() {
             </div>
             <div className="grid grid-cols-2 gap-2 text-sm">
               <div>
-                <p className="text-xs" className="text-muted-foreground/50">Rôle</p>
+                <p className="text-xs text-muted-foreground/50" >Rôle</p>
                 <Select value={u.role} onValueChange={(v) => updateRole(u.id, v)}>
                   <SelectTrigger className="w-full border text-foreground/60 rounded-xl h-9 text-xs mt-1" style={{ background: 'var(--input)', borderColor: 'var(--border)' }}>
                     <SelectValue />
@@ -4475,7 +4563,7 @@ function AdminUsersView() {
                 </Select>
               </div>
               <div>
-                <p className="text-xs" className="text-muted-foreground/50">Transactions</p>
+                <p className="text-xs text-muted-foreground/50" >Transactions</p>
                 <p className="text-foreground/40 mt-1 font-mono">{u._count.transactions}</p>
               </div>
             </div>
@@ -4574,7 +4662,7 @@ function AdminTokensView() {
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 fade-in-up">
         <div>
           <h1 className="text-2xl font-bold text-foreground/90">Gestion des Tokens</h1>
-          <p className="mt-1" className="text-muted-foreground">{tokens.length} tokens configurés</p>
+          <p className="mt-1 text-muted-foreground" >{tokens.length} tokens configurés</p>
         </div>
         <Dialog open={addOpen} onOpenChange={setAddOpen}>
           <DialogTrigger asChild>
@@ -4590,7 +4678,7 @@ function AdminTokensView() {
             <div className="space-y-4">
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div className="space-y-2">
-                  <Label className="text-xs" className="text-muted-foreground">Ticker</Label>
+                  <Label className="text-xs text-muted-foreground" >Ticker</Label>
                   <Input
                     value={newToken.ticker}
                     onChange={e => setNewToken({ ...newToken, ticker: e.target.value.toUpperCase() })}
@@ -4600,7 +4688,7 @@ function AdminTokensView() {
                   />
                 </div>
                 <div className="space-y-2">
-                  <Label className="text-xs" className="text-muted-foreground">Nom</Label>
+                  <Label className="text-xs text-muted-foreground" >Nom</Label>
                   <Input
                     value={newToken.name}
                     onChange={e => setNewToken({ ...newToken, name: e.target.value })}
@@ -4611,7 +4699,7 @@ function AdminTokensView() {
                 </div>
               </div>
               <div className="space-y-2">
-                <Label className="text-xs" className="text-muted-foreground">CoinGecko ID</Label>
+                <Label className="text-xs text-muted-foreground" >CoinGecko ID</Label>
                 <Input
                   value={newToken.coingeckoId}
                   onChange={e => setNewToken({ ...newToken, coingeckoId: e.target.value })}
@@ -4621,7 +4709,7 @@ function AdminTokensView() {
                 />
               </div>
               <div className="space-y-2">
-                <Label className="text-xs" className="text-muted-foreground">CryptoCompare ID</Label>
+                <Label className="text-xs text-muted-foreground" >CryptoCompare ID</Label>
                 <Input
                   value={newToken.cryptoCompareId}
                   onChange={e => setNewToken({ ...newToken, cryptoCompareId: e.target.value })}
@@ -4646,10 +4734,10 @@ function AdminTokensView() {
                   <TableHead className="text-muted-foreground">Ticker</TableHead>
                   <TableHead className="text-muted-foreground">Nom</TableHead>
                   <TableHead className="text-muted-foreground">CoinGecko ID</TableHead>
-                  <TableHead className="text-right" className="text-muted-foreground">Prix Actuel</TableHead>
-                  <TableHead className="text-center" className="text-muted-foreground">Transactions</TableHead>
-                  <TableHead className="text-center" className="text-muted-foreground">Statut</TableHead>
-                  <TableHead className="text-right" className="text-muted-foreground">Actions</TableHead>
+                  <TableHead className="text-right text-muted-foreground" >Prix Actuel</TableHead>
+                  <TableHead className="text-center text-muted-foreground" >Transactions</TableHead>
+                  <TableHead className="text-center text-muted-foreground" >Statut</TableHead>
+                  <TableHead className="text-right text-muted-foreground" >Actions</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -4662,7 +4750,7 @@ function AdminTokensView() {
                       </div>
                     </TableCell>
                     <TableCell className="text-foreground/60">{t.name}</TableCell>
-                    <TableCell className="font-mono text-xs" className="text-muted-foreground">{t.coingeckoId || '—'}</TableCell>
+                    <TableCell className="font-mono text-xs text-muted-foreground" >{t.coingeckoId || '—'}</TableCell>
                     <TableCell className="text-right font-mono text-foreground/60">
                       {t.currentPrice ? fmt(t.currentPrice) + ' $' : '—'}
                     </TableCell>
@@ -4708,7 +4796,7 @@ function AdminTokensView() {
                 <TokenLogo ticker={t.ticker} size={40} />
                 <div>
                   <p className="font-semibold text-foreground/80">{t.ticker}</p>
-                  <p className="text-xs" className="text-muted-foreground">{t.name}</p>
+                  <p className="text-xs text-muted-foreground" >{t.name}</p>
                 </div>
               </div>
               <div className="flex items-center gap-2">
@@ -4721,11 +4809,11 @@ function AdminTokensView() {
             </div>
             <div className="grid grid-cols-2 gap-2 text-sm">
               <div>
-                <p className="text-xs" className="text-muted-foreground/50">Prix</p>
+                <p className="text-xs text-muted-foreground/50" >Prix</p>
                 <p className="text-foreground/60 font-mono">{t.currentPrice ? fmt(t.currentPrice) + ' $' : '—'}</p>
               </div>
               <div>
-                <p className="text-xs" className="text-muted-foreground/50">Transactions</p>
+                <p className="text-xs text-muted-foreground/50" >Transactions</p>
                 <p className="text-foreground/40 font-mono">{t._count.transactions}</p>
               </div>
             </div>
@@ -4810,7 +4898,7 @@ function AdminExchangesView() {
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 fade-in-up">
         <div>
           <h1 className="text-2xl font-bold text-foreground/90">Gestion des Exchanges</h1>
-          <p className="mt-1" className="text-muted-foreground">{exchanges.length} plateformes configurées</p>
+          <p className="mt-1 text-muted-foreground" >{exchanges.length} plateformes configurées</p>
         </div>
         <Dialog open={addOpen} onOpenChange={setAddOpen}>
           <DialogTrigger asChild>
@@ -4825,7 +4913,7 @@ function AdminExchangesView() {
             </DialogHeader>
             <div className="space-y-4">
               <div className="space-y-2">
-                <Label className="text-xs" className="text-muted-foreground">Nom</Label>
+                <Label className="text-xs text-muted-foreground" >Nom</Label>
                 <Input
                   value={newName}
                   onChange={e => setNewName(e.target.value.toUpperCase())}
@@ -4848,9 +4936,9 @@ function AdminExchangesView() {
               <TableHeader>
                 <TableRow className="hover:bg-transparent" style={{ borderBottomColor: 'var(--border)' }}>
                   <TableHead className="text-muted-foreground">Nom</TableHead>
-                  <TableHead className="text-center" className="text-muted-foreground">Transactions</TableHead>
-                  <TableHead className="text-center" className="text-muted-foreground">Statut</TableHead>
-                  <TableHead className="text-right" className="text-muted-foreground">Actions</TableHead>
+                  <TableHead className="text-center text-muted-foreground" >Transactions</TableHead>
+                  <TableHead className="text-center text-muted-foreground" >Statut</TableHead>
+                  <TableHead className="text-right text-muted-foreground" >Actions</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -4904,7 +4992,7 @@ function AdminExchangesView() {
                 <ExchangeLogo name={e.name} size={40} />
                 <div>
                   <p className="font-semibold text-foreground/80">{e.name}</p>
-                  <p className="text-xs" className="text-muted-foreground">{e._count.transactions} transactions</p>
+                  <p className="text-xs text-muted-foreground" >{e._count.transactions} transactions</p>
                 </div>
               </div>
               <Switch
@@ -5358,14 +5446,14 @@ function AIAnalysisView({ user }: { user: any }) {
                 <div className="flex items-center gap-3">
                   {signalIcon(analysis.signal)}
                   <div>
-                    <p className="text-xs font-medium" className="text-muted-foreground">Signal</p>
+                    <p className="text-xs font-medium text-muted-foreground" >Signal</p>
                     <p className={`text-2xl font-bold ${signalConfig(analysis.signal).text}`}>
                       {analysis.signal}
                     </p>
                   </div>
                 </div>
                 <div className="text-right">
-                  <p className="text-xs font-medium" className="text-muted-foreground">Confiance</p>
+                  <p className="text-xs font-medium text-muted-foreground" >Confiance</p>
                   <p className={`text-2xl font-bold ${signalConfig(analysis.signal).text}`}>
                     {analysis.confidence}%
                   </p>
@@ -5407,7 +5495,7 @@ function AIAnalysisView({ user }: { user: any }) {
                     { label: 'Volume 24h', value: analysis.technicalAnalysis.volume24h },
                   ].map(item => (
                     <div key={item.label} className="flex items-center justify-between">
-                      <span className="text-xs" className="text-muted-foreground">{item.label}</span>
+                      <span className="text-xs text-muted-foreground" >{item.label}</span>
                       <span className="text-xs font-medium text-foreground/70">{item.value}</span>
                     </div>
                   ))}
@@ -5431,14 +5519,14 @@ function AIAnalysisView({ user }: { user: any }) {
                     </svg>
                     <div className="absolute inset-0 flex flex-col items-center justify-center">
                       <span className="text-xl font-bold text-foreground">{analysis.sentiment.fearGreedIndex}</span>
-                      <span className="text-[9px]" className="text-muted-foreground">F&amp;G</span>
+                      <span className="text-[9px] text-muted-foreground" >F&amp;G</span>
                     </div>
                   </div>
                   <div className="ml-4">
                     <Badge className={`${analysis.sentiment.fearGreedIndex <= 25 ? 'bg-red-500/15 text-red-400 border-red-500/30' : analysis.sentiment.fearGreedIndex <= 45 ? 'bg-orange-500/15 text-orange-400 border-orange-500/30' : analysis.sentiment.fearGreedIndex <= 55 ? 'bg-amber-500/15 text-amber-400 border-amber-500/30' : analysis.sentiment.fearGreedIndex <= 75 ? 'bg-emerald-500/15 text-emerald-400 border-emerald-500/30' : 'bg-cyan-500/15 text-cyan-400 border-cyan-500/30'} text-xs`}>
                       {analysis.sentiment.fearGreedLabel}
                     </Badge>
-                    <p className="text-xs mt-2" className="text-muted-foreground">{analysis.sentiment.interpretation}</p>
+                    <p className="text-xs mt-2 text-muted-foreground" >{analysis.sentiment.interpretation}</p>
                   </div>
                 </div>
               </div>
@@ -5459,17 +5547,17 @@ function AIAnalysisView({ user }: { user: any }) {
                 )}
                 {analysis.newsItems && analysis.newsItems.length > 0 && (
                   <div className="space-y-2">
-                    <p className="text-[10px] font-semibold uppercase tracking-wider mb-2" className="text-muted-foreground">Dernieres actualites</p>
+                    <p className="text-[10px] font-semibold uppercase tracking-wider mb-2 text-muted-foreground" >Dernieres actualites</p>
                     {analysis.newsItems.map((news, i) => (
                       <div key={i} className="rounded-xl p-3 border" style={{ background: 'var(--muted)', borderColor: 'var(--border)' }}>
                         <div className="flex items-start gap-2">
                           <div className="w-5 h-5 rounded-md flex items-center justify-center shrink-0 mt-0.5 text-[10px] font-bold" style={{ background: 'rgba(6,182,212,0.1)', color: 'rgba(6,182,212,0.8)' }}>{i + 1}</div>
                           <div className="min-w-0">
                             <p className="text-xs font-medium text-foreground/60 truncate">{news.title}</p>
-                            <p className="text-[10px] mt-0.5 leading-relaxed" className="text-muted-foreground">{news.snippet}</p>
+                            <p className="text-[10px] mt-0.5 leading-relaxed text-muted-foreground" >{news.snippet}</p>
                             <div className="flex items-center gap-2 mt-1">
-                              {news.source && <span className="text-[9px]" className="text-muted-foreground/50">{news.source}</span>}
-                              {news.date && <span className="text-[9px]" className="text-muted-foreground/40">{news.date}</span>}
+                              {news.source && <span className="text-[9px] text-muted-foreground/50" >{news.source}</span>}
+                              {news.date && <span className="text-[9px] text-muted-foreground/40" >{news.date}</span>}
                             </div>
                           </div>
                         </div>
@@ -5495,7 +5583,7 @@ function AIAnalysisView({ user }: { user: any }) {
                   {analysis.keyFactors.map((factor, i) => (
                     <div key={i} className="flex items-start gap-2">
                       <div className="w-5 h-5 rounded-md flex items-center justify-center shrink-0 mt-0.5 text-[10px] font-bold" style={{ background: 'rgba(16,185,129,0.1)', color: 'rgba(16,185,129,0.8)' }}>{i + 1}</div>
-                      <p className="text-xs leading-relaxed" className="text-muted-foreground">{factor}</p>
+                      <p className="text-xs leading-relaxed text-muted-foreground" >{factor}</p>
                     </div>
                   ))}
                 </div>
@@ -5514,7 +5602,7 @@ function AIAnalysisView({ user }: { user: any }) {
                   {analysis.risks.map((risk, i) => (
                     <div key={i} className="flex items-start gap-2">
                       <div className="w-5 h-5 rounded-md flex items-center justify-center shrink-0 mt-0.5 text-[10px] font-bold" style={{ background: 'rgba(239,68,68,0.1)', color: 'rgba(239,68,68,0.8)' }}>{i + 1}</div>
-                      <p className="text-xs leading-relaxed" className="text-muted-foreground">{risk}</p>
+                      <p className="text-xs leading-relaxed text-muted-foreground" >{risk}</p>
                     </div>
                   ))}
                 </div>
@@ -5539,23 +5627,23 @@ function AIAnalysisView({ user }: { user: any }) {
               <Brain className="w-10 h-10 text-violet-400/50" />
             </div>
             <h3 className="text-lg font-semibold text-foreground/60 mb-2">L&apos;IA est prete a analyser</h3>
-            <p className="text-sm max-w-md" className="text-muted-foreground">
+            <p className="text-sm max-w-md text-muted-foreground" >
               Selectionnez un token et lancez l&apos;analyse. L&apos;IA etudiera les indicateurs techniques, le sentiment du marche, les actualites et les facteurs cles pour vous fournir une analyse claire.
             </p>
             <div className="flex items-center gap-4 mt-6">
-              <div className="flex items-center gap-2 text-xs" className="text-muted-foreground/50">
+              <div className="flex items-center gap-2 text-xs text-muted-foreground/50" >
                 <BarChart3 className="w-3.5 h-3.5" />
                 <span>Technique</span>
               </div>
-              <div className="flex items-center gap-2 text-xs" className="text-muted-foreground/50">
+              <div className="flex items-center gap-2 text-xs text-muted-foreground/50" >
                 <Gauge className="w-3.5 h-3.5" />
                 <span>Sentiment</span>
               </div>
-              <div className="flex items-center gap-2 text-xs" className="text-muted-foreground/50">
+              <div className="flex items-center gap-2 text-xs text-muted-foreground/50" >
                 <MessageSquare className="w-3.5 h-3.5" />
                 <span>Actualites</span>
               </div>
-              <div className="flex items-center gap-2 text-xs" className="text-muted-foreground/50">
+              <div className="flex items-center gap-2 text-xs text-muted-foreground/50" >
                 <Eye className="w-3.5 h-3.5" />
                 <span>Facteurs cles</span>
               </div>
@@ -5576,6 +5664,7 @@ export function CryptoApp() {
   const [currentView, setCurrentView] = useState<View>('dashboard')
   const [showUpgrade, setShowUpgrade] = useState(false)
   const [seeded, setSeeded] = useState(false)
+  const ts = useThemeStyles()
 
   const refreshSession = useCallback(async () => {
     await updateSession({})
@@ -5608,7 +5697,7 @@ export function CryptoApp() {
           {/* Orbit animation around wallet icon */}
           <div className="relative w-20 h-20">
             <div className="absolute inset-0 flex items-center justify-center">
-              <div className="w-12 h-12 rounded-xl border flex items-center justify-center float-animation" style={{ background: 'rgba(124,92,252,0.15)', borderColor: 'rgba(124,92,252,0.3)' }}>
+              <div className="w-12 h-12 rounded-xl border flex items-center justify-center float-animation" style={{ background: ts.logoBg, borderColor: ts.logoBorder }}>
                 <Wallet className="w-6 h-6 text-violet-400" />
               </div>
             </div>
@@ -5618,7 +5707,7 @@ export function CryptoApp() {
             </div>
             {/* Second orbiting dot */}
             <div className="absolute inset-0 orbit-reverse" style={{ animationDuration: '4s' }}>
-              <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-1.5 h-1.5 rounded-full bg-cyan-400" style={{ boxShadow: '0 0 8px rgba(6,182,212,0.5)' }} />
+              <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-1.5 h-1.5 rounded-full bg-cyan-400" style={{ boxShadow: `0 0 8px ${ts.isDark ? 'rgba(6,182,212,0.5)' : 'rgba(8,145,178,0.5)'}` }} />
             </div>
           </div>
           <div className="flex items-center gap-2">
@@ -5641,13 +5730,13 @@ export function CryptoApp() {
     if (currentView === 'admin-users' || currentView === 'admin-tokens' || currentView === 'admin-exchanges' || currentView === 'admin-pricing') {
       if (!isAdmin) return <DashboardView user={user} onUpgrade={() => setShowUpgrade(true)} />
       return (
-        <div className="space-y-6 page-transition view-enter-cinematic">
+    <div className="space-y-4 sm:space-y-6 page-transition view-enter-cinematic">
           <div className="fade-in-up">
-            <h1 className="text-2xl font-bold gradient-shimmer-text">Administration</h1>
+            <h1 className="text-lg sm:text-2xl font-bold gradient-shimmer-text">Administration</h1>
             <p className="mt-1 text-muted-foreground">Gérez les utilisateurs, tokens, exchanges et tarifs</p>
           </div>
           <Tabs value={currentView} onValueChange={(v) => setCurrentView(v as View)} className="fade-in-up stagger-1">
-            <TabsList className="w-full justify-start rounded-xl p-1 h-auto flex-wrap" style={{ background: 'var(--input)', border: '1px solid var(--border)' }}>
+            <TabsList className="w-full justify-start rounded-xl p-1 h-auto flex-wrap overflow-x-auto" style={{ background: 'var(--input)', border: '1px solid var(--border)' }}>
               <TabsTrigger value="admin-users" className="rounded-lg px-4 py-2 text-sm data-[state=active]:text-foreground data-[state=active]:shadow-sm text-muted-foreground">Utilisateurs</TabsTrigger>
               <TabsTrigger value="admin-tokens" className="rounded-lg px-4 py-2 text-sm data-[state=active]:text-foreground data-[state=active]:shadow-sm text-muted-foreground">Tokens</TabsTrigger>
               <TabsTrigger value="admin-exchanges" className="rounded-lg px-4 py-2 text-sm data-[state=active]:text-foreground data-[state=active]:shadow-sm text-muted-foreground">Exchanges</TabsTrigger>
@@ -5678,16 +5767,16 @@ export function CryptoApp() {
         if (!isPremiumOrAdmin) {
           return (
             <div className="flex flex-col items-center justify-center py-20 space-y-6 fade-in-up">
-              <div className="w-20 h-20 rounded-2xl flex items-center justify-center" style={{ background: 'linear-gradient(135deg, rgba(245,158,11,0.15), rgba(249,115,22,0.1))', border: '1px solid rgba(245,158,11,0.2)' }}>
+              <div className="w-20 h-20 rounded-2xl flex items-center justify-center" style={{ background: `linear-gradient(135deg, ${ts.premiumBg}, rgba(249,115,22,0.1))`, border: `1px solid ${ts.premiumBorder}` }}>
                 <Crown className="w-10 h-10 text-amber-400" />
               </div>
               <div className="text-center space-y-2">
-                <h2 className="text-xl font-bold text-foreground/80">Prédict AI — Premium</h2>
+                <h2 className="text-lg sm:text-xl font-bold text-foreground/80">Prédict AI — Premium</h2>
                 <p className="text-sm text-muted-foreground max-w-md">Prédict AI est réservé aux membres Premium. Passez en Premium pour débloquer cette fonctionnalité.</p>
               </div>
               <Button
                 className="rounded-xl text-black font-semibold shadow-lg transition-all active:scale-[0.98]"
-                style={{ background: 'linear-gradient(135deg, #f59e0b, #f97316)', boxShadow: '0 4px 20px rgba(245,158,11,0.3)' }}
+                style={{ background: 'linear-gradient(135deg, #f59e0b, #f97316)', boxShadow: ts.premiumBtnShadow }}
                 onClick={() => setShowUpgrade(true)}
               >
                 <Crown className="w-4 h-4 mr-2" /> Passer en Premium
@@ -5714,7 +5803,7 @@ export function CryptoApp() {
         user={user}
         onLogout={logout}
       />
-      <main className="flex-1 p-4 md:p-8 overflow-auto pb-20 md:pb-8">
+      <main className="flex-1 p-3 sm:p-4 md:p-8 overflow-auto pb-20 md:pb-8">
         <div className="max-w-7xl mx-auto view-enter-cinematic" key={currentView}>
           {renderView()}
         </div>

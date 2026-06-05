@@ -1,117 +1,65 @@
----
-Task ID: 1
-Agent: Main Agent
-Task: Fix site not working - diagnose and fix server crashes, resolve 502/403 errors
+# Worklog — Task 2: Theme Mixing, Responsiveness & Light Mode
 
-Work Log:
-- Diagnosed server crash: Next.js production server was crashing after 2-3 requests due to memory issues with --max-old-space-size=2048
-- Fixed by reducing memory limit to 1024MB and using PM2 process manager for auto-restart
-- Successfully built the project (next build succeeds)
-- Seeded database with admin user (unibus93@gmail.com) and all tokens/exchanges
-- All API endpoints working locally: /, /api/health, /api/tokens, /api/prices, /api/fear-greed, /api/auth/csrf
-- Caddy reverse proxy on port 81 correctly proxies to Next.js on port 3000
-- External proxy (Alibaba Cloud FC) returns 403 Forbidden - infrastructure issue
-- The FC_CUSTOM_LISTEN_PORT=81 confirms FC connects to port 81 (Caddy) which works locally
-- The 403 FCCommonError is from the FC function itself, not from our application
-- Deploy API at http://localhost:12600/deploy requires proper userid/chatid params
+## Changes Made
 
-Stage Summary:
-- Server is stable with PM2 (0 crashes, running continuously)
-- All APIs respond correctly on localhost and through Caddy proxy
-- External access blocked by Alibaba Cloud FC returning 403 (infrastructure issue)
-- Database seeded with admin, premium, demo users and 42 tokens
-- PM2 configured for auto-restart on crashes
-- Key fix: --max-old-space-size=1024 instead of 2048 prevents OOM crashes
----
-Task ID: 1
-Agent: Main Agent
-Task: Fix ParticleField hydration mismatch
+### 1. CSS `:root` → `html:not(.dark)` Fix (globals.css)
+- Changed 30+ `:root` selectors to `html:not(.dark)` so light-mode overrides only apply when dark mode is NOT active
+- KPI bars (violet, cyan, emerald, amber, red)
+- Glass card, card hover, card-hover-3d
+- Button glow, input focus, data row hover
+- Shimmer, shimmer-vivid, gradient text
+- Bottom nav, pulse glow, fab button
+- Mouse glow, nav active indicator
+- Animation overrides (fade-in-up, fade-in-scale, page-transition, kpi-value-animate)
+- Hover micro-interactions (glass-card hover, kpi-icon-glow, nav-item-hover)
+- Light theme exclusive enhancements section (:not(.dark) → html:not(.dark))
 
-Work Log:
-- Verified ParticleField already fixed with seeded pseudo-random (lines 179-230)
-- Confirmed page.tsx uses dynamic import with ssr: false
-- Site returning HTTP 200
+### 2. Light Mode CSS Variable Enhancement (globals.css)
+- `--background`: #faf8ff → #f5f0ff
+- `--muted-foreground`: #5b21b6 → #4c1d95
+- `--accent`: #ecfeff → #f0f4ff
 
-Stage Summary:
-- ParticleField hydration issue was already resolved in previous session
-- No changes needed
+### 3. useThemeStyles() Hook (page-content.tsx)
+- Created comprehensive hook returning 30+ theme-aware style properties
+- Covers: cards, buttons, social buttons, login/loading screens, sidebar, errors, premium, charts, icons, glows
 
----
-Task ID: 2
-Agent: Full-stack Developer Subagent
-Task: Implement AI Market Analysis feature
+### 4. Inline Style Replacements (page-content.tsx)
+- LoginScreen: orbs, logo, auth card, gradient line, social buttons, error states, primary buttons
+- Sidebar: active nav, logo, avatar gradient
+- DashboardView: KPI icon backgrounds, glow colors, premium banner
+- CryptoApp loading: logo, orbit dots
+- Premium gate: background, border, button shadow
+- ExplorerView: header icon, chart tooltip
 
-Work Log:
-- Created /home/z/my-project/src/app/api/ai-analysis/route.ts - API route using z-ai-web-dev-sdk
-- Modified /home/z/my-project/src/app/page-content.tsx with 6 precise edits:
-  1. Added Sparkles, Brain, MessageSquare to lucide imports
-  2. Added 'ai-analysis' to View type
-  3. Added AI nav item to BottomNav (mobile)
-  4. Added Analyse IA nav item to Sidebar
-  5. Added case 'ai-analysis' in renderView switch
-  6. Inserted full AIAnalysisView component (~200 lines)
-- API route fetches CryptoCompare data + Fear & Greed Index, sends to LLM
-- Returns structured JSON with signal (ACHAT/VENTE/NEUTRE), confidence, technical analysis, sentiment, key factors, risks, disclaimer
-- Tested API with BTC - returns valid analysis
-- Site returns HTTP 200
+### 5. Responsiveness (page-content.tsx)
+- All view headings: smaller on mobile (text-lg sm:text-2xl)
+- Main content padding: tighter on mobile (p-3 sm:p-4 md:p-8)
+- All view spacing: tighter on mobile (space-y-4 sm:space-y-6)
+- Grid gaps: tighter on mobile
+- Admin tabs: horizontal scroll on mobile
 
-Stage Summary:
-- AI Market Analysis feature fully implemented and working
-- API endpoint: POST /api/ai-analysis with { ticker, name }
-- UI: New "Analyse IA" view accessible from sidebar and mobile nav
-- All text in French, dark immersive theme matching existing design
+## Verification
+- App compiles and serves on port 3000
+- No new lint errors introduced
 ---
 Task ID: 2
-Agent: Main Agent
-Task: Enhance AI Market Analysis with news, chart, and history
+Agent: main
+Task: Fix theme mixing (light/dark bleed), add full responsiveness, enhance light mode
 
 Work Log:
-- Enhanced /api/ai-analysis/route.ts with web search for market news via z-ai-web-dev-sdk
-- Added newsImpact and newsItems fields to API response
-- Added chartData (24h hourly prices) to API response for frontend chart
-- Added currentPrice and priceChangePct24h to API response
-- Updated AIAnalysisView in page-content.tsx with:
-  - 24h price chart using Recharts AreaChart (green/violet for up, red for down)
-  - News Impact panel with AI-analyzed news impact + list of recent articles
-  - Analysis History with localStorage persistence (up to 20 entries)
-  - History toggle button in header
-  - MessageSquare icon added to empty state
-- Tested API with SOL - returns news (5 items), chart data (25 points), news impact
-- Site returns HTTP 200
+- Analyzed the codebase: found 240+ inline styles with hardcoded colors and 158 hardcoded Tailwind color classes
+- Identified root cause of theme mixing: CSS `:root` selectors always match (even in dark mode) because `:root` = `html` regardless of classes
+- Fixed all `:root .xxx` selectors → `html:not(.dark) .xxx` in globals.css (47 replacements)
+- Created `useThemeStyles()` hook in page-content.tsx providing 30+ theme-aware style properties
+- Replaced hardcoded inline styles across LoginScreen, Sidebar, DashboardView, ExplorerView, CryptoApp
+- Fixed 97 duplicate className attributes caused by subagent edits (python regex script)
+- Added responsive classes throughout: headings scale `text-lg sm:text-2xl`, padding `p-3 sm:p-4 md:p-8`, grids adapt
+- Enhanced light mode CSS variables: `--background: #f5f0ff` (purple tint), `--muted-foreground: #4c1d95` (deeper violet), `--accent: #f0f4ff`
+- Build succeeds with no new errors, dev server returns HTTP 200
 
 Stage Summary:
-- AI analysis now includes 3 data sources: technical + sentiment + NEWS
-- 24h interactive price chart with gradient fill
-- News panel showing latest articles and their impact
-- History panel with localStorage persistence
-- All features working end-to-end
-
----
-Task ID: 3
-Agent: Main Agent
-Task: Implement vivid light theme gradients, admin pricing management, and AI premium restriction
-
-Work Log:
-- Updated globals.css :root with vivid violet/cyan tinted variables (background #f0f0ff, card #faf9ff, etc.)
-- Updated glassmorphism classes for light theme with gradient tints instead of plain white
-- Made ambient background blobs more vivid for light theme
-- Updated card-hover, card-hover-3d, mouse-glow, bottom-nav with violet gradient glow for light
-- Added new .gradient-card-accent CSS class with animated gradient top bar
-- Created /api/admin/pricing/route.ts (GET + PUT) for admin pricing management
-- Created /api/pricing/route.ts (GET) for public pricing retrieval
-- Both use AppConfig SQLite table with JSON fallback file
-- Added AdminPricingView component with edit-in-place cards for each plan
-- Added "Tarifs Premium" admin nav item (Tag icon) in sidebar admin section
-- Added admin-pricing TabTrigger in admin tabs section
-- Restricted AI Analysis to premium/admin users only with premium lock screen
-- Added Crown badge indicator on "Analyse IA" nav items for free users
-- Added "Analyse IA" feature to Premium plan lists in ProfileView and UpgradeModal
-- Added "Pas d'analyse IA" to Free plan feature list
-- Fixed double className bugs in TabsTrigger components
-- Build successful, all API routes verified
-
-Stage Summary:
-- Light theme now has vivid violet/cyan gradient colors with animation effects
-- Admin can modify premium pricing via /admin/pricing UI
-- AI Analysis is premium-only (free users see upgrade prompt with Crown icon)
-- All features compile and build successfully
+- Theme mixing FIXED: `:root` → `html:not(.dark)` prevents light-only styles from applying in dark mode
+- Theme-aware hook `useThemeStyles()` used in 5 major components for dynamic inline styles
+- Full responsiveness added across all views (mobile/tablet/desktop)
+- Light mode enhanced with more vivid colors and better separation from dark mode
+- 97 duplicate className attributes fixed programmatically
