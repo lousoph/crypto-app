@@ -69,6 +69,7 @@ if (process.env.APPLE_ID && process.env.APPLE_TEAM_ID && process.env.APPLE_PRIVA
 
 export const authOptions: NextAuthOptions = {
   providers,
+  trustHost: true,
   callbacks: {
     async signIn({ user, account, profile }) {
       // Handle OAuth sign-in (Google, Apple, etc.)
