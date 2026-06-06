@@ -7,7 +7,7 @@ import {
   Plus, Trash2, RefreshCw, BarChart3, Crown, AlertTriangle,
   Check, X, Menu, Search, Activity, Zap, Brain, Mail,
   Sun, Moon, Sparkles, ChevronDown, ChevronUp, Eye,
-  Gauge, ArrowUpCircle, ArrowDownCircle, Minus, ExternalLink, Star
+  Gauge, ArrowUpCircle, ArrowDownCircle, Minus, ExternalLink, Star, Pencil
 } from 'lucide-react'
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
@@ -1429,13 +1429,11 @@ function ProfileView({ userRole }: { userRole: string }) {
             </div>
           </div>
           <div className="mt-4">
-            <label className="cursor-pointer">
-              <Button variant="outline" className="rounded-xl h-9 text-xs gap-2" asChild disabled={avatarUploading}>
-                <span>
-                  {avatarUploading ? <RefreshCw className="w-3 h-3 animate-spin" /> : <Plus className="w-3 h-3" />}
-                  {avatarUploading ? 'Envoi en cours...' : 'Changer l\'avatar'}
-                </span>
-              </Button>
+            <label className={`cursor-pointer ${avatarUploading ? 'pointer-events-none opacity-50' : ''}`}>
+              <span className="inline-flex items-center justify-center gap-2 rounded-xl h-9 px-4 text-xs font-medium border border-input bg-background hover:bg-accent hover:text-accent-foreground transition-colors">
+                {avatarUploading ? <RefreshCw className="w-3 h-3 animate-spin" /> : <Plus className="w-3 h-3" />}
+                {avatarUploading ? 'Envoi en cours...' : "Changer l'avatar"}
+              </span>
               <input type="file" accept="image/jpeg,image/png,image/gif,image/webp" className="hidden" onChange={handleAvatarUpload} disabled={avatarUploading} />
             </label>
           </div>
@@ -1619,7 +1617,7 @@ function AdminUsersView() {
                   </Select>
                   <Button variant="outline" size="sm" className="h-8 text-xs rounded-lg gap-1"
                     onClick={() => handleOpenEdit(u)}>
-                    <Edit3 className="w-3 h-3" /><span className="hidden md:inline">Modifier</span>
+                    <Pencil className="w-3 h-3" /><span className="hidden md:inline">Modifier</span>
                   </Button>
                   <Button variant={u.suspended ? 'default' : 'outline'} size="sm"
                     className={`h-8 text-xs rounded-lg ${u.suspended ? 'bg-emerald-600 hover:bg-emerald-700 text-white' : 'text-amber-600 border-amber-500/30 hover:bg-amber-500/10'}`}
@@ -1634,7 +1632,7 @@ function AdminUsersView() {
                 {/* Actions — mobile */}
                 <div className="flex sm:hidden items-center gap-1 shrink-0">
                   <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => handleOpenEdit(u)}>
-                    <Edit3 className="w-4 h-4 text-muted-foreground" />
+                    <Pencil className="w-4 h-4 text-muted-foreground" />
                   </Button>
                   <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => handleToggleSuspend(u)}>
                     {u.suspended ? <Check className="w-4 h-4 text-emerald-500" /> : <AlertTriangle className="w-4 h-4 text-amber-500" />}
@@ -1653,7 +1651,7 @@ function AdminUsersView() {
       <Dialog open={!!editUser} onOpenChange={(open) => { if (!open) setEditUser(null) }}>
         <DialogContent className="sm:max-w-md rounded-xl">
           <DialogHeader>
-            <DialogTitle className="flex items-center gap-2"><Edit3 className="w-4 h-4 text-violet-500" />Modifier l'utilisateur</DialogTitle>
+            <DialogTitle className="flex items-center gap-2"><Pencil className="w-4 h-4 text-violet-500" />Modifier l'utilisateur</DialogTitle>
             <DialogDescription>Modifier les informations du compte de {editUser?.email}</DialogDescription>
           </DialogHeader>
           <div className="space-y-4">
@@ -1969,9 +1967,9 @@ function Sidebar({ view, setView, isAdmin, onLogout }: { view: View; setView: (v
   const ts = useThemeStyles()
 
   return (
-    <aside className="glass-sidebar hidden md:flex flex-col w-60 lg:w-64 h-screen sticky top-0 shrink-0">
+    <aside className="glass-sidebar hidden md:flex flex-col w-60 h-screen sticky top-0 shrink-0">
       {/* Logo */}
-      <div className="p-4 lg:p-6">
+      <div className="p-4">
         <div className="flex items-center gap-3">
           <div className="w-9 h-9 rounded-xl flex items-center justify-center" style={{ background: ts.logoBg, border: `1px solid ${ts.logoBorder}` }}>
             <Wallet className="w-5 h-5 text-violet-500 dark:text-violet-400" />
@@ -2171,7 +2169,9 @@ export function CryptoApp() {
 
         {/* Content */}
         <main className="flex-1 overflow-y-auto pb-20 md:pb-0 custom-scrollbar">
-          {renderView()}
+          <div className="max-w-6xl mx-auto w-full">
+            {renderView()}
+          </div>
         </main>
       </div>
 
