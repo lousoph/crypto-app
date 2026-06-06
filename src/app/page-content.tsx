@@ -7,7 +7,8 @@ import {
   Plus, Trash2, RefreshCw, BarChart3, Crown, AlertTriangle,
   Check, X, Menu, Search, Activity, Zap, Brain, Mail,
   Sun, Moon, Sparkles, ChevronDown, ChevronUp, Eye,
-  Gauge, ArrowUpCircle, ArrowDownCircle, Minus, ExternalLink, Star, Pencil
+  Gauge, ArrowUpCircle, ArrowDownCircle, Minus, ExternalLink, Star, Pencil,
+  Home, Newspaper, Lightbulb, Clock, Globe, TrendingUpRight, ArrowRight
 } from 'lucide-react'
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
@@ -33,7 +34,7 @@ import { useTheme } from '@/components/theme-provider'
 // ============================================================
 // TYPES
 // ============================================================
-type View = 'dashboard' | 'transactions' | 'ai-analysis' | 'explorer' | 'profile' | 'admin-users' | 'admin-tokens' | 'admin-exchanges' | 'admin-pricing'
+type View = 'home' | 'dashboard' | 'transactions' | 'ai-analysis' | 'profile' | 'admin-users' | 'admin-tokens' | 'admin-exchanges' | 'admin-pricing'
 
 interface TokenData {
   id: string; ticker: string; name: string; coingeckoId: string | null; cryptoCompareId: string | null; currentPrice: number | null; active: boolean
@@ -611,7 +612,7 @@ function DashboardView({ tokens: allTokens, userRole }: { tokens: TokenData[]; u
                 </div>
                 <span className="text-[10px] md:text-xs text-muted-foreground font-medium truncate">{kpi.label}</span>
               </div>
-              <p className={`text-lg md:text-2xl font-bold truncate ${kpi.color || 'text-foreground'}`}>
+              <p className={`text-base lg:text-lg font-bold truncate ${kpi.color || 'text-foreground'}`}>
                 {kpi.prefix}{kpi.suffix === '%' ? kpi.value.toFixed(2) + '%' : fmt(Math.abs(kpi.value))}
               </p>
             </CardContent>
@@ -690,7 +691,7 @@ function DashboardView({ tokens: allTokens, userRole }: { tokens: TokenData[]; u
                 <CardTitle className="text-sm font-semibold">P&L par token</CardTitle>
               </CardHeader>
               <CardContent className="p-4 pt-0">
-                <div className="h-64">
+                <div className="h-52 lg:h-56">
                   <ResponsiveContainer width="100%" height="100%">
                     <BarChart data={barChartData} margin={{ top: 5, right: 5, left: -20, bottom: 5 }}>
                       <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
@@ -712,7 +713,7 @@ function DashboardView({ tokens: allTokens, userRole }: { tokens: TokenData[]; u
                 <CardTitle className="text-sm font-semibold">Répartition</CardTitle>
               </CardHeader>
               <CardContent className="p-4 pt-0">
-                <div className="h-64">
+                <div className="h-52 lg:h-56">
                   <ResponsiveContainer width="100%" height="100%">
                     <PieChart>
                       <Pie data={pieChartData} cx="50%" cy="50%" innerRadius={50} outerRadius={80} paddingAngle={3} dataKey="value">
@@ -1198,53 +1199,88 @@ function AIAnalysisView({ tokens, userRole }: { tokens: TokenData[]; userRole: s
 }
 
 // ============================================================
-// EXPLORER VIEW
+// HOME / ACCUEIL VIEW — AI Tips, News, Market Overview
 // ============================================================
-function ExplorerView() {
-  const [tab, setTab] = useState('listings')
-  const [listings, setListings] = useState<any[]>([])
-  const [exchanges, setExchanges] = useState<any[]>([])
+function HomeView({ tokens: allTokens }: { tokens: TokenData[] }) {
+  const [tips, setTips] = useState<string[]>([])
+  const [tipsLoading, setTipsLoading] = useState(true)
+  const [news, setNews] = useState<any[]>([])
+  const [newsLoading, setNewsLoading] = useState(true)
   const [globalData, setGlobalData] = useState<any>(null)
-  const [loading, setLoading] = useState(true)
-  const [search, setSearch] = useState('')
+  const [activeTip, setActiveTip] = useState(0)
   const ts = useThemeStyles()
 
   useEffect(() => {
-    const fetchData = async () => {
-      setLoading(true)
-      try {
-        const [lRes, eRes, gRes] = await Promise.all([
-          fetch('/api/cmc/listings?limit=100'), fetch('/api/cmc/exchanges'), fetch('/api/cmc/global')
-        ])
-        if (lRes.ok) { const d = await lRes.json(); setListings(d.data || []) }
-        if (eRes.ok) { const d = await eRes.json(); setExchanges(d.data || []) }
-        if (gRes.ok) { const d = await gRes.json(); setGlobalData(d.data || null) }
-      } catch {} finally { setLoading(false) }
-    }
-    fetchData()
+    // Fetch AI tips
+    fetch('/api/ai-tips')
+      .then(r => r.json())
+      .then(d => { setTips(d.tips || []); setTipsLoading(false) })
+      .catch(() => setTipsLoading(false))
+
+    // Fetch news from @crypto_detente
+    fetch('/api/news')
+      .then(r => r.json())
+      .then(d => { setNews(d.news || []); setNewsLoading(false) })
+      .catch(() => setNewsLoading(false))
+
+    // Fetch global market data
+    fetch('/api/cmc/global')
+      .then(r => r.json())
+      .then(d => { if (d.data) setGlobalData(d.data) })
+      .catch(() => {})
   }, [])
 
-  const filteredListings = listings.filter((c: any) => c.name?.toLowerCase().includes(search.toLowerCase()) || c.symbol?.toLowerCase().includes(search.toLowerCase()))
-  const filteredExchanges = exchanges.filter((e: any) => e.name?.toLowerCase().includes(search.toLowerCase()))
+  // Auto-rotate tips
+  useEffect(() => {
+    if (tips.length <= 1) return
+    const interval = setInterval(() => {
+      setActiveTip(prev => (prev + 1) % tips.length)
+    }, 8000)
+    return () => clearInterval(interval)
+  }, [tips.length])
+
+  const getDateStr = (dateStr: string) => {
+    if (!dateStr) return ''
+    try {
+      const d = new Date(dateStr)
+      const now = new Date()
+      const diff = Math.floor((now.getTime() - d.getTime()) / 60000)
+      if (diff < 60) return `Il y a ${diff}min`
+      if (diff < 1440) return `Il y a ${Math.floor(diff / 60)}h`
+      return d.toLocaleDateString('fr-FR', { day: 'numeric', month: 'short' })
+    } catch { return dateStr }
+  }
 
   return (
-    <div className="space-y-4 p-4 md:p-6 page-transition">
-      <h2 className="text-lg font-bold text-foreground flex items-center gap-2">
-        <Eye className="w-5 h-5 text-violet-500" />Explorer
-      </h2>
+    <div className="space-y-4 p-4 md:p-5 page-transition">
+      {/* Header */}
+      <div className="flex items-center gap-3">
+        <div className="w-10 h-10 rounded-xl flex items-center justify-center" style={{ background: ts.iconBgViolet }}>
+          <Home className="w-5 h-5 text-violet-500" />
+        </div>
+        <div>
+          <h2 className="text-base font-bold text-foreground">Accueil</h2>
+          <p className="text-xs text-muted-foreground">Conseils IA, actualités et marché crypto</p>
+        </div>
+      </div>
 
-      {/* Global metrics */}
+      {/* Global Market Metrics */}
       {globalData && (
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
           {[
-            { label: 'Market Cap', value: `$${(globalData.total_market_cap?.usd / 1e12).toFixed(2)}T` },
-            { label: 'Volume 24h', value: `$${(globalData.total_volume?.usd / 1e9).toFixed(2)}B` },
-            { label: 'BTC Dominance', value: `${globalData.market_cap_percentage?.btc?.toFixed(1)}%` },
-            { label: 'Cryptos', value: globalData.active_cryptocurrencies?.toLocaleString() || '—' },
+            { label: 'Market Cap', value: `$${(globalData.total_market_cap?.usd / 1e12).toFixed(2)}T`, icon: DollarSign, bg: ts.iconBgViolet },
+            { label: 'Volume 24h', value: `$${(globalData.total_volume?.usd / 1e9).toFixed(2)}B`, icon: BarChart3, bg: ts.iconBgCyan },
+            { label: 'BTC Dominance', value: `${globalData.market_cap_percentage?.btc?.toFixed(1)}%`, icon: TrendingUp, bg: ts.iconBgEmerald },
+            { label: 'Cryptos actives', value: globalData.active_cryptocurrencies?.toLocaleString() || '—', icon: Coins, bg: ts.iconBgAmber },
           ].map((m, i) => (
-            <Card key={i} className="glass-card border-border rounded-xl">
+            <Card key={i} className="glass-card card-hover border-border rounded-xl">
               <CardContent className="p-3">
-                <p className="text-[10px] text-muted-foreground font-medium">{m.label}</p>
+                <div className="flex items-center gap-2 mb-1.5">
+                  <div className="w-7 h-7 rounded-lg flex items-center justify-center" style={{ background: m.bg }}>
+                    <m.icon className="w-3.5 h-3.5 text-violet-500" />
+                  </div>
+                  <span className="text-[10px] text-muted-foreground font-medium">{m.label}</span>
+                </div>
                 <p className="text-sm font-bold text-foreground">{m.value}</p>
               </CardContent>
             </Card>
@@ -1252,66 +1288,131 @@ function ExplorerView() {
         </div>
       )}
 
-      {/* Tabs */}
-      <Tabs value={tab} onValueChange={setTab}>
-        <TabsList className="w-full grid grid-cols-2 h-10">
-          <TabsTrigger value="listings" className="text-xs">Crypto</TabsTrigger>
-          <TabsTrigger value="exchanges" className="text-xs">Exchanges</TabsTrigger>
-        </TabsList>
+      {/* Fear & Greed + Live Ticker Row */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+        <FearGreedWidget />
+        <Card className="glass-card card-hover border-border rounded-xl">
+          <CardHeader className="p-3 pb-2">
+            <CardTitle className="text-xs font-semibold flex items-center gap-2">
+              <Activity className="w-3.5 h-3.5 text-cyan-500" />Prix en direct
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="p-3 pt-0">
+            <LivePriceTicker tokens={allTokens} />
+          </CardContent>
+        </Card>
+      </div>
 
-        {/* Search */}
-        <div className="relative mt-3">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-          <Input placeholder="Rechercher..." value={search} onChange={(e) => setSearch(e.target.value)}
-            className="pl-9 h-10 rounded-xl bg-input border-border" />
-        </div>
-
-        <TabsContent value="listings">
-          {loading ? (
-            <div className="space-y-2 mt-3">{[...Array(5)].map((_, i) => <div key={i} className="h-14 rounded-xl bg-muted/30 shimmer" />)}</div>
-          ) : (
-            <div className="space-y-1 mt-3 max-h-[60vh] overflow-y-auto custom-scrollbar">
-              {filteredListings.slice(0, 50).map((coin: any, i: number) => (
-                <div key={coin.id || i} className="flex items-center gap-3 p-2.5 rounded-lg hover:bg-muted/50 transition-colors data-row-hover">
-                  <span className="text-xs text-muted-foreground w-6 text-center shrink-0">{coin.cmc_rank || i + 1}</span>
-                  <TokenLogo ticker={coin.symbol || ''} size={28} />
-                  <div className="flex-1 min-w-0">
-                    <p className="text-sm font-semibold text-foreground truncate">{coin.name}</p>
-                    <p className="text-[10px] text-muted-foreground">{coin.symbol}</p>
+      {/* AI Tips Section */}
+      <Card className="glass-card border-border rounded-xl overflow-hidden">
+        <div className="h-0.5" style={{ background: 'linear-gradient(90deg,#7c5cfc,#06b6d4,#a78bfa)' }} />
+        <CardHeader className="p-3 pb-2">
+          <CardTitle className="text-xs font-semibold flex items-center gap-2">
+            <Sparkles className="w-3.5 h-3.5 text-violet-500" />Conseils IA du jour
+            <Badge variant="secondary" className="text-[9px] px-1.5 py-0 bg-violet-500/10 text-violet-500">Auto-généré</Badge>
+          </CardTitle>
+        </CardHeader>
+        <CardContent className="p-3 pt-1">
+          {tipsLoading ? (
+            <div className="space-y-2">
+              {[...Array(3)].map((_, i) => <div key={i} className="h-12 rounded-lg bg-muted/30 shimmer" />)}
+            </div>
+          ) : tips.length > 0 ? (
+            <div className="space-y-2">
+              {tips.map((tip, i) => (
+                <div
+                  key={i}
+                  className={`flex items-start gap-2.5 p-2.5 rounded-lg transition-all duration-500 ${i === activeTip ? 'ring-1 ring-violet-500/30 bg-violet-500/5' : 'hover:bg-muted/30'}`}
+                  onClick={() => setActiveTip(i)}
+                >
+                  <div className={`w-6 h-6 rounded-full flex items-center justify-center shrink-0 mt-0.5 transition-colors ${i === activeTip ? 'bg-violet-500 text-white' : 'bg-muted text-muted-foreground'}`}>
+                    <Lightbulb className="w-3 h-3" />
                   </div>
-                  <div className="text-right shrink-0">
-                    <p className="text-sm font-semibold text-foreground">${coin.quote?.USD?.price ? fmtPrice(coin.quote.USD.price) : '—'}</p>
-                    <p className={`text-xs font-medium ${coin.quote?.USD?.percent_change_24h >= 0 ? 'text-emerald-500' : 'text-red-500'}`}>
-                      {coin.quote?.USD?.percent_change_24h != null ? (coin.quote.USD.percent_change_24h >= 0 ? '+' : '') + coin.quote.USD.percent_change_24h.toFixed(2) + '%' : '—'}
-                    </p>
-                  </div>
+                  <p className="text-xs text-foreground leading-relaxed">{tip}</p>
                 </div>
               ))}
             </div>
-          )}
-        </TabsContent>
-
-        <TabsContent value="exchanges">
-          {loading ? (
-            <div className="space-y-2 mt-3">{[...Array(5)].map((_, i) => <div key={i} className="h-14 rounded-xl bg-muted/30 shimmer" />)}</div>
           ) : (
-            <div className="space-y-1 mt-3 max-h-[60vh] overflow-y-auto custom-scrollbar">
-              {filteredExchanges.slice(0, 30).map((ex: any, i: number) => (
-                <div key={ex.id || i} className="flex items-center gap-3 p-2.5 rounded-lg hover:bg-muted/50 transition-colors data-row-hover">
-                  <span className="text-xs text-muted-foreground w-6 text-center shrink-0">{i + 1}</span>
-                  <div className="w-8 h-8 rounded-lg bg-muted flex items-center justify-center text-xs font-bold text-foreground shrink-0">{(ex.name || '?').slice(0, 2)}</div>
+            <p className="text-xs text-muted-foreground text-center py-4">Impossible de charger les conseils IA pour le moment.</p>
+          )}
+        </CardContent>
+      </Card>
+
+      {/* Crypto News Section */}
+      <Card className="glass-card border-border rounded-xl overflow-hidden">
+        <div className="h-0.5" style={{ background: 'linear-gradient(90deg,#06b6d4,#f59e0b,#06b6d4)' }} />
+        <CardHeader className="p-3 pb-2">
+          <div className="flex items-center justify-between">
+            <CardTitle className="text-xs font-semibold flex items-center gap-2">
+              <Newspaper className="w-3.5 h-3.5 text-cyan-500" />Actualités Crypto
+            </CardTitle>
+            <a
+              href="https://x.com/crypto_detente"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center gap-1 text-[10px] text-violet-500 hover:text-violet-400 transition-colors font-medium"
+            >
+              <Globe className="w-3 h-3" />@crypto_detente
+              <ExternalLink className="w-2.5 h-2.5" />
+            </a>
+          </div>
+        </CardHeader>
+        <CardContent className="p-3 pt-1">
+          {newsLoading ? (
+            <div className="space-y-2">
+              {[...Array(4)].map((_, i) => <div key={i} className="h-16 rounded-lg bg-muted/30 shimmer" />)}
+            </div>
+          ) : news.length > 1 ? (
+            <div className="space-y-2">
+              {news.slice(0, 8).map((item: any, i: number) => (
+                <a
+                  key={i}
+                  href={item.link}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex items-start gap-3 p-2.5 rounded-lg hover:bg-muted/30 transition-colors group"
+                >
+                  {item.thumbnail ? (
+                    <img src={item.thumbnail} alt="" className="w-12 h-12 rounded-lg object-cover shrink-0 bg-muted" />
+                  ) : (
+                    <div className="w-12 h-12 rounded-lg flex items-center justify-center shrink-0 bg-gradient-to-br from-cyan-500/10 to-violet-500/10">
+                      <Newspaper className="w-5 h-5 text-cyan-500" />
+                    </div>
+                  )}
                   <div className="flex-1 min-w-0">
-                    <p className="text-sm font-semibold text-foreground truncate">{ex.name}</p>
+                    <p className="text-xs font-semibold text-foreground group-hover:text-violet-500 transition-colors line-clamp-2">{item.title}</p>
+                    {item.description && (
+                      <p className="text-[10px] text-muted-foreground mt-0.5 line-clamp-2">{item.description}</p>
+                    )}
+                    <div className="flex items-center gap-1.5 mt-1">
+                      <Clock className="w-2.5 h-2.5 text-muted-foreground/50" />
+                      <span className="text-[9px] text-muted-foreground/60">{getDateStr(item.pubDate)}</span>
+                    </div>
                   </div>
-                  <div className="text-right shrink-0">
-                    <p className="text-xs text-muted-foreground">Vol: ${(ex.quote?.USD?.volume_24h / 1e9)?.toFixed(2) || '—'}B</p>
-                  </div>
-                </div>
+                  <ArrowRight className="w-3.5 h-3.5 text-muted-foreground/30 group-hover:text-violet-500 transition-colors shrink-0 mt-3" />
+                </a>
               ))}
             </div>
+          ) : (
+            <div className="text-center py-6">
+              <div className="w-14 h-14 rounded-xl mx-auto mb-3 flex items-center justify-center" style={{ background: ts.iconBgCyan }}>
+                <Newspaper className="w-7 h-7 text-cyan-500" />
+              </div>
+              <p className="text-xs font-medium text-foreground mb-1">Suivez Crypto Détente</p>
+              <p className="text-[10px] text-muted-foreground mb-3">Actualités, analyses et conseils crypto quotidiens</p>
+              <a
+                href="https://x.com/crypto_detente"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center gap-1.5 px-4 py-2 rounded-lg text-xs font-medium text-white transition-all hover:opacity-90"
+                style={{ background: ts.primaryGradient }}
+              >
+                <ExternalLink className="w-3 h-3" />Voir sur X
+              </a>
+            </div>
           )}
-        </TabsContent>
-      </Tabs>
+        </CardContent>
+      </Card>
     </div>
   )
 }
@@ -1444,17 +1545,37 @@ function ProfileView({ userRole }: { userRole: string }) {
       {!isPremium && (
         <Card className="glass-card border-border rounded-xl overflow-hidden">
           <div className="h-1" style={{ background: 'linear-gradient(90deg,#f59e0b,#d97706)' }} />
-          <CardContent className="p-4 md:p-6">
-            <div className="flex items-center gap-3 mb-3">
-              <Crown className="w-8 h-8 text-amber-500" />
+          <CardContent className="p-4 md:p-5">
+            <div className="flex items-center gap-3 mb-4">
+              <div className="w-12 h-12 rounded-xl flex items-center justify-center" style={{ background: 'rgba(245,158,11,0.12)' }}>
+                <Crown className="w-6 h-6 text-amber-500" />
+              </div>
               <div>
-                <p className="font-semibold text-foreground">Passer en Premium</p>
-                <p className="text-xs text-muted-foreground">Débloquez toutes les fonctionnalités</p>
+                <p className="font-semibold text-foreground text-sm">Passer en Premium</p>
+                <p className="text-[10px] text-muted-foreground">Débloquez toutes les fonctionnalités</p>
               </div>
             </div>
-            <Button className="upgrade-btn-glow text-foreground rounded-xl h-10 w-full" style={{ background: 'linear-gradient(135deg,#f59e0b,#d97706)' }}>
-              <Crown className="w-4 h-4 mr-2" />S'abonner
+            <div className="grid grid-cols-2 gap-2 mb-4">
+              {[
+                { months: 1, price: 9.99, label: '1 mois', badge: '' },
+                { months: 3, price: 26.97, label: '3 mois', badge: '-10%', monthly: 8.99 },
+                { months: 6, price: 50.95, label: '6 mois', badge: '-15%', monthly: 8.49 },
+                { months: 12, price: 95.90, label: '12 mois', badge: '-20%', monthly: 7.99 },
+              ].map(plan => (
+                <div key={plan.months} className={`p-2.5 rounded-lg border transition-all cursor-pointer hover:border-amber-500/40 hover:bg-amber-500/5 ${plan.months === 1 ? 'border-amber-500/30 bg-amber-500/5' : 'border-border'}`}>
+                  <div className="flex items-center justify-between mb-1">
+                    <span className="text-[10px] font-medium text-muted-foreground">{plan.label}</span>
+                    {plan.badge && <Badge variant="secondary" className="text-[8px] px-1 py-0 bg-emerald-500/10 text-emerald-500">{plan.badge}</Badge>}
+                  </div>
+                  <p className="text-sm font-bold text-foreground">${plan.price.toFixed(2)}</p>
+                  {plan.monthly && <p className="text-[9px] text-muted-foreground">${plan.monthly.toFixed(2)}/mois</p>}
+                </div>
+              ))}
+            </div>
+            <Button className="upgrade-btn-glow text-foreground rounded-xl h-10 w-full text-xs font-medium" style={{ background: 'linear-gradient(135deg,#f59e0b,#d97706)' }}>
+              <Crown className="w-4 h-4 mr-2" />S'abonner — 9.99$/mois
             </Button>
+            <p className="text-[9px] text-muted-foreground text-center mt-2">Annulable à tout moment. Essai satisfait ou remboursé.</p>
           </CardContent>
         </Card>
       )}
@@ -1928,10 +2049,10 @@ function AdminPricingView() {
 // NAVIGATION COMPONENTS
 // ============================================================
 const NAV_ITEMS: { id: View; label: string; icon: typeof LayoutDashboard; mobileOnly?: boolean }[] = [
+  { id: 'home', label: 'Accueil', icon: Home },
   { id: 'dashboard', label: 'Dashboard', icon: LayoutDashboard },
   { id: 'transactions', label: 'Transactions', icon: ArrowLeftRight },
   { id: 'ai-analysis', label: 'Prédict AI', icon: Brain },
-  { id: 'explorer', label: 'Explorer', icon: Eye },
   { id: 'profile', label: 'Profil', icon: User },
 ]
 
@@ -1967,7 +2088,7 @@ function Sidebar({ view, setView, isAdmin, onLogout }: { view: View; setView: (v
   const ts = useThemeStyles()
 
   return (
-    <aside className="glass-sidebar hidden md:flex flex-col w-60 h-screen sticky top-0 shrink-0">
+    <aside className="glass-sidebar hidden md:flex flex-col w-52 h-screen sticky top-0 shrink-0">
       {/* Logo */}
       <div className="p-4">
         <div className="flex items-center gap-3">
@@ -2099,7 +2220,7 @@ function MobileHeader({ view, setView, isAdmin, onLogout }: { view: View; setVie
 // ============================================================
 export function CryptoApp() {
   const { user, loading, login, register, logout, emailVerified, userRole } = useAuth()
-  const [view, setView] = useState<View>('dashboard')
+  const [view, setView] = useState<View>('home')
   const [tokens, setTokens] = useState<TokenData[]>([])
   const [initialized, setInitialized] = useState(false)
   const isAdmin = userRole === 'admin'
@@ -2138,16 +2259,16 @@ export function CryptoApp() {
   // Render current view
   const renderView = () => {
     switch (view) {
+      case 'home': return <HomeView tokens={tokens} />
       case 'dashboard': return <DashboardView tokens={tokens} userRole={userRole} />
       case 'transactions': return <TransactionsView userRole={userRole} />
       case 'ai-analysis': return <AIAnalysisView tokens={tokens} userRole={userRole} />
-      case 'explorer': return <ExplorerView />
       case 'profile': return <ProfileView userRole={userRole} />
       case 'admin-users': return isAdmin ? <AdminUsersView /> : <DashboardView tokens={tokens} userRole={userRole} />
       case 'admin-tokens': return isAdmin ? <AdminTokensView /> : <DashboardView tokens={tokens} userRole={userRole} />
       case 'admin-exchanges': return isAdmin ? <AdminExchangesView /> : <DashboardView tokens={tokens} userRole={userRole} />
       case 'admin-pricing': return isAdmin ? <AdminPricingView /> : <DashboardView tokens={tokens} userRole={userRole} />
-      default: return <DashboardView tokens={tokens} userRole={userRole} />
+      default: return <HomeView tokens={tokens} />
     }
   }
 
@@ -2169,7 +2290,7 @@ export function CryptoApp() {
 
         {/* Content */}
         <main className="flex-1 overflow-y-auto pb-20 md:pb-0 custom-scrollbar">
-          <div className="max-w-6xl mx-auto w-full">
+          <div className="max-w-5xl mx-auto w-full">
             {renderView()}
           </div>
         </main>
