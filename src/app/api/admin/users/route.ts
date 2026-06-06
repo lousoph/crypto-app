@@ -30,7 +30,7 @@ export async function GET() {
   }
 }
 
-// PUT /api/admin/users - Update user role or suspend
+// PUT /api/admin/users - Update user (role, suspend, name, email)
 export async function PUT(req: NextRequest) {
   try {
     const session = await getServerSession(authOptions)
@@ -38,13 +38,27 @@ export async function PUT(req: NextRequest) {
       return NextResponse.json({ error: "Accès refusé" }, { status: 403 })
     }
 
-    const { id, role, suspended } = await req.json()
+    const { id, role, suspended, name, email } = await req.json()
+
+    if (!id) {
+      return NextResponse.json({ error: "ID requis" }, { status: 400 })
+    }
+
+    // Check if email is being changed and if it conflicts
+    if (email) {
+      const existingUser = await db.user.findUnique({ where: { email } })
+      if (existingUser && existingUser.id !== id) {
+        return NextResponse.json({ error: "Cet email est déjà utilisé par un autre compte" }, { status: 409 })
+      }
+    }
 
     const user = await db.user.update({
       where: { id },
       data: {
         ...(role && { role }),
         ...(suspended !== undefined && { suspended }),
+        ...(name !== undefined && { name }),
+        ...(email !== undefined && { email }),
       },
     })
 
@@ -54,7 +68,7 @@ export async function PUT(req: NextRequest) {
   }
 }
 
-// DELETE /api/admin/users?id=xxx
+// DELETE /api/admin/users?id=xxx — Admin delete user and all related data
 export async function DELETE(req: NextRequest) {
   try {
     const session = await getServerSession(authOptions)
@@ -65,6 +79,17 @@ export async function DELETE(req: NextRequest) {
     const { searchParams } = new URL(req.url)
     const id = searchParams.get("id")
     if (!id) return NextResponse.json({ error: "ID requis" }, { status: 400 })
+
+    // Prevent admin from deleting their own account
+    if (id === (session.user as any).id) {
+      return NextResponse.json({ error: "Vous ne pouvez pas supprimer votre propre compte" }, { status: 400 })
+    }
+
+    // Delete related records first (foreign key constraints)
+    await db.transaction.deleteMany({ where: { userId: id } })
+    await db.account.deleteMany({ where: { userId: id } })
+    await db.session.deleteMany({ where: { userId: id } })
+    await db.verificationToken.deleteMany({ where: { identifier: (await db.user.findUnique({ where: { id } }))?.email || "" } })
 
     await db.user.delete({ where: { id } })
     return NextResponse.json({ success: true })

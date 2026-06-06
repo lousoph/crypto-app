@@ -1321,11 +1321,14 @@ function ExplorerView() {
 // ============================================================
 function ProfileView({ userRole }: { userRole: string }) {
   const { user, logout } = useAuth()
+  const { update: updateSession } = useSession()
   const [currentPassword, setCurrentPassword] = useState('')
   const [newPassword, setNewPassword] = useState('')
   const [newEmail, setNewEmail] = useState('')
   const [pwLoading, setPwLoading] = useState(false)
   const [emailLoading, setEmailLoading] = useState(false)
+  const [avatarUploading, setAvatarUploading] = useState(false)
+  const [avatarUrl, setAvatarUrl] = useState<string | null>(null)
   const [subscription, setSubscription] = useState<any>(null)
   const isPremium = userRole === 'user_premium' || userRole === 'admin'
 
@@ -1374,13 +1377,25 @@ function ProfileView({ userRole }: { userRole: string }) {
   const handleAvatarUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0]
     if (!file) return
+    if (file.size > 2 * 1024 * 1024) { toast.error('Fichier trop volumineux (max 2 Mo)'); return }
+    if (!['image/jpeg', 'image/png', 'image/gif', 'image/webp'].includes(file.type)) { toast.error('Format non supporté (JPEG, PNG, GIF, WebP)'); return }
+    setAvatarUploading(true)
     const formData = new FormData(); formData.append('avatar', file)
     try {
       const res = await fetch('/api/user/upload-avatar', { method: 'POST', body: formData })
-      if (res.ok) toast.success('Avatar mis à jour !')
-      else toast.error('Erreur')
-    } catch { toast.error('Erreur réseau') }
+      const data = await res.json()
+      if (res.ok) {
+        toast.success('Avatar mis à jour !')
+        // Update avatar display with cache-busting timestamp
+        setAvatarUrl(`${data.url}?t=${Date.now()}`)
+        // Refresh session to pick up new avatar
+        await updateSession({})
+      } else toast.error(data.error || 'Erreur lors de l\'upload')
+    } catch { toast.error('Erreur réseau') } finally { setAvatarUploading(false) }
   }
+
+  // Resolve avatar URL: local state (fresh upload) > session image > none
+  const displayAvatar = avatarUrl || user?.image
 
   return (
     <div className="space-y-4 p-4 md:p-6 page-transition">
@@ -1393,8 +1408,13 @@ function ProfileView({ userRole }: { userRole: string }) {
         <CardContent className="p-4 md:p-6">
           <div className="flex items-center gap-4">
             <div className="avatar-ring">
-              <div className="w-16 h-16 rounded-full bg-muted flex items-center justify-center overflow-hidden">
-                {user?.image ? <img src={user.image} alt="Avatar" className="w-full h-full object-cover" /> : <User className="w-8 h-8 text-muted-foreground" />}
+              <div className="w-16 h-16 rounded-full bg-muted flex items-center justify-center overflow-hidden relative">
+                {displayAvatar ? <img src={displayAvatar} alt="Avatar" className="w-full h-full object-cover" /> : <User className="w-8 h-8 text-muted-foreground" />}
+                {avatarUploading && (
+                  <div className="absolute inset-0 bg-background/60 flex items-center justify-center">
+                    <RefreshCw className="w-5 h-5 animate-spin text-violet-500" />
+                  </div>
+                )}
               </div>
             </div>
             <div className="flex-1 min-w-0">
@@ -1410,10 +1430,13 @@ function ProfileView({ userRole }: { userRole: string }) {
           </div>
           <div className="mt-4">
             <label className="cursor-pointer">
-              <Button variant="outline" className="rounded-xl h-9 text-xs gap-2" asChild>
-                <span><Plus className="w-3 h-3" />Changer l'avatar</span>
+              <Button variant="outline" className="rounded-xl h-9 text-xs gap-2" asChild disabled={avatarUploading}>
+                <span>
+                  {avatarUploading ? <RefreshCw className="w-3 h-3 animate-spin" /> : <Plus className="w-3 h-3" />}
+                  {avatarUploading ? 'Envoi en cours...' : 'Changer l\'avatar'}
+                </span>
               </Button>
-              <input type="file" accept="image/*" className="hidden" onChange={handleAvatarUpload} />
+              <input type="file" accept="image/jpeg,image/png,image/gif,image/webp" className="hidden" onChange={handleAvatarUpload} disabled={avatarUploading} />
             </label>
           </div>
         </CardContent>
@@ -1480,6 +1503,14 @@ function ProfileView({ userRole }: { userRole: string }) {
 function AdminUsersView() {
   const [users, setUsers] = useState<AdminUser[]>([])
   const [loading, setLoading] = useState(true)
+  const [search, setSearch] = useState('')
+  const [editUser, setEditUser] = useState<AdminUser | null>(null)
+  const [editName, setEditName] = useState('')
+  const [editEmail, setEditEmail] = useState('')
+  const [editRole, setEditRole] = useState('')
+  const [editLoading, setEditLoading] = useState(false)
+  const [deleteConfirm, setDeleteConfirm] = useState<string | null>(null)
+  const [deleteLoading, setDeleteLoading] = useState(false)
 
   const fetchUsers = useCallback(async () => {
     setLoading(true)
@@ -1488,42 +1519,128 @@ function AdminUsersView() {
 
   useEffect(() => { fetchUsers() }, [fetchUsers])
 
-  const handleUpdate = async (id: string, updates: { role?: string; suspended?: boolean }) => {
+  const handleUpdate = async (id: string, updates: { role?: string; suspended?: boolean; name?: string; email?: string }) => {
     try {
-      const res = await fetch('/api/admin/users', { method: 'PATCH', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ id, ...updates }) })
-      if (res.ok) { toast.success('Utilisateur modifié'); fetchUsers() } else toast.error('Erreur')
+      const res = await fetch('/api/admin/users', { method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ id, ...updates }) })
+      const data = await res.json()
+      if (res.ok) { toast.success('Utilisateur modifié'); fetchUsers() }
+      else toast.error(data.error || 'Erreur')
     } catch { toast.error('Erreur réseau') }
   }
+
+  const handleOpenEdit = (u: AdminUser) => {
+    setEditUser(u)
+    setEditName(u.name || '')
+    setEditEmail(u.email)
+    setEditRole(u.role)
+  }
+
+  const handleSaveEdit = async () => {
+    if (!editUser) return
+    setEditLoading(true)
+    try {
+      await handleUpdate(editUser.id, { name: editName, email: editEmail, role: editRole })
+      setEditUser(null)
+    } finally { setEditLoading(false) }
+  }
+
+  const handleToggleSuspend = async (u: AdminUser) => {
+    await handleUpdate(u.id, { suspended: !u.suspended })
+  }
+
+  const handleDelete = async (id: string) => {
+    setDeleteLoading(true)
+    try {
+      const res = await fetch(`/api/admin/users?id=${id}`, { method: 'DELETE' })
+      const data = await res.json()
+      if (res.ok) { toast.success('Utilisateur supprimé'); setDeleteConfirm(null); fetchUsers() }
+      else toast.error(data.error || 'Erreur')
+    } catch { toast.error('Erreur réseau') } finally { setDeleteLoading(false) }
+  }
+
+  const filteredUsers = users.filter(u =>
+    u.name?.toLowerCase().includes(search.toLowerCase()) ||
+    u.email.toLowerCase().includes(search.toLowerCase())
+  )
 
   if (loading) return <div className="p-4"><div className="h-64 rounded-xl bg-muted/30 shimmer" /></div>
 
   return (
     <div className="space-y-4 p-4 md:p-6 page-transition">
-      <h2 className="text-lg font-bold text-foreground flex items-center gap-2"><Shield className="w-5 h-5 text-violet-500" />Gestion des utilisateurs</h2>
-      <div className="space-y-2 max-h-[70vh] overflow-y-auto custom-scrollbar">
-        {users.map(u => (
-          <Card key={u.id} className="glass-card border-border rounded-xl">
+      <div className="flex items-center justify-between flex-wrap gap-2">
+        <h2 className="text-lg font-bold text-foreground flex items-center gap-2"><Shield className="w-5 h-5 text-violet-500" />Gestion des utilisateurs</h2>
+        <Badge variant="secondary" className="text-xs">{users.length} utilisateur{users.length !== 1 ? 's' : ''}</Badge>
+      </div>
+
+      {/* Search */}
+      <div className="relative">
+        <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+        <Input placeholder="Rechercher un utilisateur..." value={search} onChange={(e) => setSearch(e.target.value)}
+          className="pl-9 h-10 rounded-xl bg-input border-border" />
+      </div>
+
+      {/* User list */}
+      <div className="space-y-2 max-h-[65vh] overflow-y-auto custom-scrollbar">
+        {filteredUsers.length === 0 ? (
+          <Card className="glass-card border-border rounded-xl">
+            <CardContent className="p-8 text-center">
+              <User className="w-10 h-10 mx-auto text-muted-foreground/30 mb-2" />
+              <p className="text-muted-foreground text-sm">Aucun utilisateur trouvé</p>
+            </CardContent>
+          </Card>
+        ) : filteredUsers.map(u => (
+          <Card key={u.id} className={`glass-card border-border rounded-xl transition-all ${u.suspended ? 'opacity-60 border-red-500/30' : ''}`}>
             <CardContent className="p-3 md:p-4">
               <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-full bg-muted flex items-center justify-center shrink-0">
-                  <User className="w-5 h-5 text-muted-foreground" />
+                {/* Avatar */}
+                <div className={`w-10 h-10 rounded-full flex items-center justify-center shrink-0 text-xs font-bold ${u.suspended ? 'bg-red-500/10 text-red-500' : 'bg-violet-500/10 text-violet-500'}`}>
+                  {u.suspended ? <AlertTriangle className="w-5 h-5" /> : (u.name || u.email).slice(0, 2).toUpperCase()}
                 </div>
+                {/* Info */}
                 <div className="flex-1 min-w-0">
-                  <p className="text-sm font-semibold text-foreground truncate">{u.name || u.email}</p>
+                  <div className="flex items-center gap-2">
+                    <p className="text-sm font-semibold text-foreground truncate">{u.name || 'Sans nom'}</p>
+                    {u.role === 'admin' && <Badge className="text-[9px] px-1.5 py-0 bg-violet-500/10 text-violet-500">Admin</Badge>}
+                    {u.role === 'user_premium' && <Badge className="text-[9px] px-1.5 py-0 bg-amber-500/10 text-amber-500">Premium</Badge>}
+                    {u.suspended && <Badge className="text-[9px] px-1.5 py-0 bg-red-500/10 text-red-500">Suspendu</Badge>}
+                  </div>
                   <p className="text-xs text-muted-foreground truncate">{u.email}</p>
+                  <p className="text-[10px] text-muted-foreground/60 mt-0.5">{u._count.transactions} transaction{u._count.transactions !== 1 ? 's' : ''} · Inscrit le {new Date(u.createdAt).toLocaleDateString('fr-FR')}</p>
                 </div>
-                <div className="flex items-center gap-2 shrink-0">
+                {/* Actions — desktop */}
+                <div className="hidden sm:flex items-center gap-1.5 shrink-0">
                   <Select value={u.role} onValueChange={(role) => handleUpdate(u.id, { role })}>
-                    <SelectTrigger className="h-8 w-28 rounded-lg text-xs"><SelectValue /></SelectTrigger>
+                    <SelectTrigger className="h-8 w-24 rounded-lg text-xs"><SelectValue /></SelectTrigger>
                     <SelectContent>
                       <SelectItem value="user_free">Gratuit</SelectItem>
                       <SelectItem value="user_premium">Premium</SelectItem>
                       <SelectItem value="admin">Admin</SelectItem>
                     </SelectContent>
                   </Select>
-                  <Button variant={u.suspended ? 'default' : 'ghost'} size="sm" className="h-8 text-xs rounded-lg"
-                    onClick={() => handleUpdate(u.id, { suspended: !u.suspended })}>
+                  <Button variant="outline" size="sm" className="h-8 text-xs rounded-lg gap-1"
+                    onClick={() => handleOpenEdit(u)}>
+                    <Edit3 className="w-3 h-3" /><span className="hidden md:inline">Modifier</span>
+                  </Button>
+                  <Button variant={u.suspended ? 'default' : 'outline'} size="sm"
+                    className={`h-8 text-xs rounded-lg ${u.suspended ? 'bg-emerald-600 hover:bg-emerald-700 text-white' : 'text-amber-600 border-amber-500/30 hover:bg-amber-500/10'}`}
+                    onClick={() => handleToggleSuspend(u)}>
                     {u.suspended ? 'Réactiver' : 'Suspendre'}
+                  </Button>
+                  <Button variant="ghost" size="sm" className="h-8 text-xs rounded-lg text-red-500 hover:bg-red-500/10 hover:text-red-600"
+                    onClick={() => setDeleteConfirm(u.id)}>
+                    <Trash2 className="w-3.5 h-3.5" />
+                  </Button>
+                </div>
+                {/* Actions — mobile */}
+                <div className="flex sm:hidden items-center gap-1 shrink-0">
+                  <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => handleOpenEdit(u)}>
+                    <Edit3 className="w-4 h-4 text-muted-foreground" />
+                  </Button>
+                  <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => handleToggleSuspend(u)}>
+                    {u.suspended ? <Check className="w-4 h-4 text-emerald-500" /> : <AlertTriangle className="w-4 h-4 text-amber-500" />}
+                  </Button>
+                  <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => setDeleteConfirm(u.id)}>
+                    <Trash2 className="w-4 h-4 text-red-500" />
                   </Button>
                 </div>
               </div>
@@ -1531,6 +1648,61 @@ function AdminUsersView() {
           </Card>
         ))}
       </div>
+
+      {/* Edit User Dialog */}
+      <Dialog open={!!editUser} onOpenChange={(open) => { if (!open) setEditUser(null) }}>
+        <DialogContent className="sm:max-w-md rounded-xl">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2"><Edit3 className="w-4 h-4 text-violet-500" />Modifier l'utilisateur</DialogTitle>
+            <DialogDescription>Modifier les informations du compte de {editUser?.email}</DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div className="space-y-2">
+              <Label className="text-xs font-medium text-muted-foreground">Nom</Label>
+              <Input value={editName} onChange={(e) => setEditName(e.target.value)} placeholder="Nom de l'utilisateur"
+                className="h-10 rounded-xl bg-input border-border" />
+            </div>
+            <div className="space-y-2">
+              <Label className="text-xs font-medium text-muted-foreground">Email</Label>
+              <Input type="email" value={editEmail} onChange={(e) => setEditEmail(e.target.value)} placeholder="Email"
+                className="h-10 rounded-xl bg-input border-border" />
+            </div>
+            <div className="space-y-2">
+              <Label className="text-xs font-medium text-muted-foreground">Rôle</Label>
+              <Select value={editRole} onValueChange={setEditRole}>
+                <SelectTrigger className="h-10 rounded-xl bg-input border-border"><SelectValue /></SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="user_free">Gratuit</SelectItem>
+                  <SelectItem value="user_premium">Premium</SelectItem>
+                  <SelectItem value="admin">Admin</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
+          <DialogFooter className="gap-2">
+            <Button variant="outline" onClick={() => setEditUser(null)} className="rounded-xl h-10">Annuler</Button>
+            <Button onClick={handleSaveEdit} className="rounded-xl h-10 text-white" style={{ background: 'linear-gradient(135deg,#7c5cfc,#06b6d4)' }} disabled={editLoading}>
+              {editLoading ? <RefreshCw className="w-4 h-4 animate-spin mr-2" /> : <Check className="w-4 h-4 mr-2" />}Enregistrer
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Delete Confirmation Dialog */}
+      <Dialog open={!!deleteConfirm} onOpenChange={(open) => { if (!open) setDeleteConfirm(null) }}>
+        <DialogContent className="sm:max-w-sm rounded-xl">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2 text-red-500"><AlertTriangle className="w-5 h-5" />Supprimer cet utilisateur ?</DialogTitle>
+            <DialogDescription>Cette action est irréversible. Toutes les données de l'utilisateur (transactions, sessions) seront définitivement supprimées.</DialogDescription>
+          </DialogHeader>
+          <DialogFooter className="gap-2">
+            <Button variant="outline" onClick={() => setDeleteConfirm(null)} className="rounded-xl h-10">Annuler</Button>
+            <Button onClick={() => deleteConfirm && handleDelete(deleteConfirm)} className="rounded-xl h-10 bg-red-600 hover:bg-red-700 text-white" disabled={deleteLoading}>
+              {deleteLoading ? <RefreshCw className="w-4 h-4 animate-spin mr-2" /> : <Trash2 className="w-4 h-4 mr-2" />}Supprimer définitivement
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   )
 }
