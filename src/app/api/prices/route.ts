@@ -13,8 +13,6 @@ let lastFetchTime = 0
 const CACHE_DURATION = 60 * 1000 // 1 minute en ms
 
 // GET /api/prices - Get current prices for all tokens
-// Auto-refreshes every 1 minute using CryptoCompare API
-// ?force=true to bypass cache and force refresh
 export async function GET(request: NextRequest) {
   try {
     const { searchParams } = new URL(request.url)
@@ -28,20 +26,19 @@ export async function GET(request: NextRequest) {
         where: { active: true },
       })
 
-      // Build ticker list for CryptoCompare API - use all symbols to ensure complete coverage
       const tickerSet = new Set(tokens.map((t) => t.cryptoCompareId || t.ticker).filter(Boolean))
       const tickers = [...tickerSet].join(",")
 
       try {
         const url = `https://min-api.cryptocompare.com/data/pricemulti?fsyms=${tickers}&tsyms=USD&api_key=${CRYPTO_COMPARE_API_KEY}`
         const response = await fetch(url, {
+          signal: AbortSignal.timeout(8000),
           cache: "no-store",
         })
 
         if (response.ok) {
           const data = await response.json()
 
-          // Update prices in database and cache
           const updatePromises = []
           for (const token of tokens) {
             const key = token.cryptoCompareId || token.ticker
@@ -61,17 +58,14 @@ export async function GET(request: NextRequest) {
             }
           }
 
-          // Run all DB updates in parallel
           await Promise.all(updatePromises)
           lastFetchTime = now
         }
       } catch (fetchError) {
         console.error("Price fetch error:", fetchError)
-        // Continue with cached prices
       }
     }
 
-    // If cache is empty, fetch from DB
     if (Object.keys(priceCache).length === 0) {
       const tokens = await db.token.findMany({
         where: { active: true, currentPrice: { not: null } },
@@ -85,6 +79,6 @@ export async function GET(request: NextRequest) {
 
     return NextResponse.json(priceCache)
   } catch (error: any) {
-    return NextResponse.json({ error: error.message }, { status: 500 })
+    return NextResponse.json({ prices: priceCache })
   }
 }

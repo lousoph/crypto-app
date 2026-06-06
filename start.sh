@@ -1,12 +1,13 @@
 #!/bin/bash
-# Persistent server start script with auto-restart
+# Start the Next.js server and keep it alive
 cd /home/z/my-project
+
 export NODE_ENV=production
+export NODE_OPTIONS='--max-old-space-size=512'
 
 while true; do
-  echo "[$(date)] Starting Next.js server..." >> /tmp/server-start.log
-  node node_modules/.bin/next start -p 3000 2>&1
+  node server.mjs </dev/null &>>/tmp/server.log
   EXIT_CODE=$?
-  echo "[$(date)] Server exited with code $EXIT_CODE, restarting in 2s..." >> /tmp/server-start.log
+  echo "[$(date)] Server exited with code $EXIT_CODE, restarting in 2s..." >> /tmp/server.log
   sleep 2
 done
