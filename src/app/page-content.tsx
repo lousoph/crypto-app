@@ -1431,11 +1431,43 @@ function ProfileView({ userRole }: { userRole: string }) {
   const [avatarUploading, setAvatarUploading] = useState(false)
   const [avatarUrl, setAvatarUrl] = useState<string | null>(null)
   const [subscription, setSubscription] = useState<any>(null)
+  const [selectedPlan, setSelectedPlan] = useState(1)
+  const [paypalLoading, setPaypalLoading] = useState(false)
+  const [paypalError, setPaypalError] = useState('')
   const isPremium = userRole === 'user_premium' || userRole === 'admin'
 
   useEffect(() => {
     fetch('/api/subscription').then(r => r.json()).then(d => setSubscription(d)).catch(() => {})
   }, [])
+
+  const handlePayPalSubscribe = async () => {
+    setPaypalLoading(true)
+    setPaypalError('')
+    try {
+      const res = await fetch('/api/paypal/create-order', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ duration: selectedPlan }),
+      })
+      const data = await res.json()
+      if (res.ok && data.orderID) {
+        // Redirect to PayPal approval page
+        const isSandbox = process.env.NEXT_PUBLIC_PAYPAL_MODE === 'sandbox'
+        const baseUrl = isSandbox
+          ? 'https://www.sandbox.paypal.com/checkoutnow'
+          : 'https://www.paypal.com/checkoutnow'
+        window.location.href = `${baseUrl}?token=${data.orderID}`
+      } else {
+        setPaypalError(data.error || 'Erreur lors de la création de la commande PayPal')
+        toast.error(data.error || 'Erreur PayPal')
+      }
+    } catch (err: any) {
+      setPaypalError('Erreur de connexion au serveur de paiement')
+      toast.error('Erreur réseau')
+    } finally {
+      setPaypalLoading(false)
+    }
+  }
 
   const handleChangePassword = async () => {
     if (!currentPassword || !newPassword) { toast.error('Remplissez tous les champs'); return }
@@ -1541,44 +1573,120 @@ function ProfileView({ userRole }: { userRole: string }) {
         </CardContent>
       </Card>
 
-      {/* Subscription */}
-      {!isPremium && (
-        <Card className="glass-card border-border rounded-xl overflow-hidden">
-          <div className="h-1" style={{ background: 'linear-gradient(90deg,#f59e0b,#d97706)' }} />
-          <CardContent className="p-4 md:p-5">
-            <div className="flex items-center gap-3 mb-4">
-              <div className="w-12 h-12 rounded-xl flex items-center justify-center" style={{ background: 'rgba(245,158,11,0.12)' }}>
-                <Crown className="w-6 h-6 text-amber-500" />
-              </div>
-              <div>
-                <p className="font-semibold text-foreground text-sm">Passer en Premium</p>
-                <p className="text-[10px] text-muted-foreground">Débloquez toutes les fonctionnalités</p>
-              </div>
+      {/* Subscription Plans — always visible */}
+      <Card className="glass-card border-border rounded-xl overflow-hidden">
+        <div className="h-1" style={{ background: isPremium ? 'linear-gradient(90deg,#f59e0b,#d97706)' : 'linear-gradient(90deg,#7c5cfc,#06b6d4)' }} />
+        <CardContent className="p-4 md:p-5">
+          <div className="flex items-center gap-3 mb-4">
+            <div className="w-10 h-10 rounded-xl flex items-center justify-center" style={{ background: isPremium ? 'rgba(245,158,11,0.12)' : 'rgba(124,92,252,0.12)' }}>
+              <Crown className="w-5 h-5" style={{ color: isPremium ? '#f59e0b' : '#7c5cfc' }} />
             </div>
-            <div className="grid grid-cols-2 gap-2 mb-4">
-              {[
-                { months: 1, price: 9.99, label: '1 mois', badge: '' },
-                { months: 3, price: 26.97, label: '3 mois', badge: '-10%', monthly: 8.99 },
-                { months: 6, price: 50.95, label: '6 mois', badge: '-15%', monthly: 8.49 },
-                { months: 12, price: 95.90, label: '12 mois', badge: '-20%', monthly: 7.99 },
-              ].map(plan => (
-                <div key={plan.months} className={`p-2.5 rounded-lg border transition-all cursor-pointer hover:border-amber-500/40 hover:bg-amber-500/5 ${plan.months === 1 ? 'border-amber-500/30 bg-amber-500/5' : 'border-border'}`}>
-                  <div className="flex items-center justify-between mb-1">
-                    <span className="text-[10px] font-medium text-muted-foreground">{plan.label}</span>
-                    {plan.badge && <Badge variant="secondary" className="text-[8px] px-1 py-0 bg-emerald-500/10 text-emerald-500">{plan.badge}</Badge>}
+            <div>
+              <p className="font-semibold text-foreground text-sm">Abonnement</p>
+              <p className="text-[10px] text-muted-foreground">{isPremium ? 'Votre plan actuel' : 'Choisissez votre plan'}</p>
+            </div>
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            {/* Free Plan */}
+            <div className={`p-3 rounded-xl border transition-all ${!isPremium ? 'border-violet-500/30 bg-violet-500/5' : 'border-border opacity-60'}`}>
+              <div className="flex items-center justify-between mb-2">
+                <span className="text-xs font-bold text-foreground">Gratuit</span>
+                <Badge variant="secondary" className={`text-[9px] px-1.5 ${!isPremium ? 'bg-violet-500/10 text-violet-500' : 'bg-muted text-muted-foreground'}`}>
+                  {!isPremium ? 'Actuel' : 'Basique'}
+                </Badge>
+              </div>
+              <p className="text-lg font-bold text-foreground mb-2">0$<span className="text-[10px] text-muted-foreground font-normal">/mois</span></p>
+              <ul className="space-y-1.5">
+                {[
+                  'Dashboard de base',
+                  '3 tokens maximum',
+                  '10 transactions max',
+                  'Prix en temps réel',
+                  'Fear & Greed Index',
+                  'Conseils IA quotidiens',
+                ].map((f, i) => (
+                  <li key={i} className="flex items-center gap-1.5 text-[10px] text-muted-foreground">
+                    <Check className="w-3 h-3 text-violet-500 shrink-0" />{f}
+                  </li>
+                ))}
+              </ul>
+              {!isPremium && (
+                <p className="text-[9px] text-violet-500 text-center mt-3 font-medium">Votre plan actuel</p>
+              )}
+            </div>
+
+            {/* Premium Plan */}
+            <div className={`p-3 rounded-xl border transition-all ${isPremium ? 'border-amber-500/30 bg-amber-500/5' : 'border-border hover:border-amber-500/20'}`}>
+              <div className="flex items-center justify-between mb-2">
+                <span className="text-xs font-bold text-foreground flex items-center gap-1">
+                  <Star className="w-3 h-3 text-amber-500" />Premium
+                </span>
+                <Badge variant="secondary" className={`text-[9px] px-1.5 ${isPremium ? 'bg-amber-500/10 text-amber-500' : 'bg-amber-500/10 text-amber-500'}`}>
+                  {isPremium ? 'Actif' : 'Recommandé'}
+                </Badge>
+              </div>
+              <p className="text-lg font-bold text-foreground mb-2">9.99$<span className="text-[10px] text-muted-foreground font-normal">/mois</span></p>
+              <ul className="space-y-1.5">
+                {[
+                  'Tokens et transactions illimités',
+                  'Analyses IA avancées',
+                  'Signaux de trading',
+                  'Alertes personnalisées',
+                  'Export de données',
+                  'Support prioritaire',
+                ].map((f, i) => (
+                  <li key={i} className="flex items-center gap-1.5 text-[10px] text-muted-foreground">
+                    <Star className="w-3 h-3 text-amber-500 shrink-0" />{f}
+                  </li>
+                ))}
+              </ul>
+              {isPremium ? (
+                <p className="text-[9px] text-amber-500 text-center mt-3 font-medium flex items-center justify-center gap-1">
+                  <Crown className="w-3 h-3" />Premium actif
+                </p>
+              ) : (
+                <div className="mt-3 space-y-2">
+                  <div className="grid grid-cols-4 gap-1.5">
+                    {[
+                      { months: 1, price: 9.99, badge: '' },
+                      { months: 3, price: 26.97, badge: '-10%' },
+                      { months: 6, price: 50.95, badge: '-15%' },
+                      { months: 12, price: 95.90, badge: '-20%' },
+                    ].map(plan => (
+                      <button
+                        key={plan.months}
+                        onClick={() => setSelectedPlan(plan.months)}
+                        className={`p-1.5 rounded-lg border text-center transition-all ${
+                          selectedPlan === plan.months
+                            ? 'border-amber-500/40 bg-amber-500/10'
+                            : 'border-border hover:border-amber-500/20'
+                        }`}
+                      >
+                        <p className="text-[9px] text-muted-foreground">{plan.months === 1 ? '1m' : plan.months === 3 ? '3m' : plan.months === 6 ? '6m' : '12m'}</p>
+                        <p className="text-[10px] font-bold text-foreground">${plan.price.toFixed(0)}</p>
+                      </button>
+                    ))}
                   </div>
-                  <p className="text-sm font-bold text-foreground">${plan.price.toFixed(2)}</p>
-                  {plan.monthly && <p className="text-[9px] text-muted-foreground">${plan.monthly.toFixed(2)}/mois</p>}
+                  {paypalError && (
+                    <p className="text-[10px] text-red-400 text-center">{paypalError}</p>
+                  )}
+                  <Button
+                    onClick={handlePayPalSubscribe}
+                    disabled={paypalLoading}
+                    className="upgrade-btn-glow text-foreground rounded-lg h-9 w-full text-[11px] font-medium"
+                    style={{ background: 'linear-gradient(135deg,#f59e0b,#d97706)' }}
+                  >
+                    {paypalLoading ? <RefreshCw className="w-3 h-3 animate-spin mr-1.5" /> : <Crown className="w-3 h-3 mr-1.5" />}
+                    S'abonner — {[1,3,6,12].includes(selectedPlan) ? [9.99,26.97,50.95,95.90][[1,3,6,12].indexOf(selectedPlan)].toFixed(2) : '9.99'}$
+                  </Button>
+                  <p className="text-[8px] text-muted-foreground text-center">Paiement sécurisé via PayPal. Annulable à tout moment.</p>
                 </div>
-              ))}
+              )}
             </div>
-            <Button className="upgrade-btn-glow text-foreground rounded-xl h-10 w-full text-xs font-medium" style={{ background: 'linear-gradient(135deg,#f59e0b,#d97706)' }}>
-              <Crown className="w-4 h-4 mr-2" />S'abonner — 9.99$/mois
-            </Button>
-            <p className="text-[9px] text-muted-foreground text-center mt-2">Annulable à tout moment. Essai satisfait ou remboursé.</p>
-          </CardContent>
-        </Card>
-      )}
+          </div>
+        </CardContent>
+      </Card>
 
       {/* Change Email */}
       <Card className="glass-card border-border rounded-xl">

@@ -3,8 +3,8 @@ import { getServerSession } from "next-auth"
 import { authOptions } from "@/lib/auth"
 
 const PAYPAL_API_BASE = process.env.PAYPAL_API_BASE || "https://api-m.sandbox.paypal.com"
-const PAYPAL_CLIENT_ID = process.env.PAYPAL_CLIENT_ID
-const PAYPAL_CLIENT_SECRET = process.env.PAYPAL_CLIENT_SECRET
+const PAYPAL_CLIENT_ID = process.env.PAYPAL_CLIENT_ID || ""
+const PAYPAL_CLIENT_SECRET = process.env.PAYPAL_CLIENT_SECRET || ""
 
 // Subscription pricing plans
 const PLANS: Record<number, { months: number; discount: number; total: number; monthly: number; label: string }> = {
@@ -46,6 +46,14 @@ export async function POST(req: NextRequest) {
     }
     if (currentRole === "user_premium") {
       return NextResponse.json({ error: "Vous êtes déjà Premium" }, { status: 400 })
+    }
+
+    // Check if PayPal credentials are configured
+    if (!PAYPAL_CLIENT_ID || !PAYPAL_CLIENT_SECRET) {
+      return NextResponse.json(
+        { error: "PayPal n'est pas encore configuré. Le paiement sera bientôt disponible. Contactez le support pour vous abonner." },
+        { status: 503 }
+      )
     }
 
     const body = await req.json()
