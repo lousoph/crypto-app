@@ -2477,10 +2477,25 @@ function MobileHeader({ view, setView, isAdmin, onLogout }: { view: View; setVie
 // ============================================================
 export function CryptoApp() {
   const { user, loading, login, register, logout, emailVerified, userRole } = useAuth()
-  const [view, setView] = useState<View>('home')
+  const [view, setView] = useState<View>(() => {
+    // Restore view from URL hash on page load/refresh
+    if (typeof window !== 'undefined') {
+      const hash = window.location.hash.replace('#', '')
+      const validViews: View[] = ['home', 'dashboard', 'transactions', 'ai-analysis', 'profile', 'admin-users', 'admin-tokens', 'admin-exchanges', 'admin-pricing']
+      if (hash && validViews.includes(hash as View)) return hash as View
+    }
+    return 'home'
+  })
   const [tokens, setTokens] = useState<TokenData[]>([])
   const [initialized, setInitialized] = useState(false)
   const isAdmin = userRole === 'admin'
+
+  // Update URL hash when view changes
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      window.location.hash = view === 'home' ? '' : view
+    }
+  }, [view])
 
   // Fetch tokens once authenticated
   useEffect(() => {
