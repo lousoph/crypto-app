@@ -197,3 +197,30 @@ Stage Summary:
 - New stagger entrance animation on KPI and market metrics grids
 - Smooth press feedback, breathing glow, and theme transition utilities available
 - Server running, HTTP 200 confirmed on port 3000
+
+---
+Task ID: 1
+Agent: Main Agent
+Task: Ajouter les cryptos manquantes sur le site Prédict AI
+
+Work Log:
+- Analysé le site: 42 cryptos initiales dans le seed script
+- Ajouté 66 nouvelles cryptos majeures réparties en catégories:
+  - Stablecoins: USDT, USDC
+  - DeFi: MKR, COMP, SNX, CRV, DYDX, GMX, LDO, RPL, RUNE, 1INCH, SUSHI, BAL, YFI, PENDLE, JUP
+  - Layer 1: KSM, EGLD, XTZ, NEO, FLOW, CELO, KAVA, MINA
+  - Layer 2: POL, SEI, IMX, STX, CFX, ROSE, METIS
+  - AI/ML: RNDR, AKT, AGIX
+  - Gaming/NFT: GALA, BLUR
+  - Infrastructure: THETA, LRC
+  - Memes: BONK, WIF, BRETT
+  - Utilitaires: ENS, MASK, WOO, PERP
+  - Top manquants: TRX, DOT, MATIC, SHIB, BCH, XLM, UNI, APT, OP, ICP, FIL, HBAR, VET, ALGO, FTM
+- Nettoyé les doublons (TIA, PEPE, ALGO, IMX, ENSCOIN)
+- Ajouté 3 nouveaux exchanges: BITGET, GATE.IO, MEXC
+- Rebuild complet et seed réussi: 42 → 108 tokens
+
+Stage Summary:
+- 108 tokens actifs dans la DB (108 unique tickers)
+- 8 exchanges dans la DB
+- Fichier seed: /home/z/my-project/src/app/api/seed/route.ts
