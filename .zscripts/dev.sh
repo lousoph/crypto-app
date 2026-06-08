@@ -52,12 +52,47 @@ echo "[PRISMA] Generating client..."
 bun run db:generate
 log_step_end "Prisma generate"
 
+# Load .env file into environment
+log_step_start "Loading environment variables"
+if [ -f "$PROJECT_DIR/.env" ]; then
+  echo "[ENV] Loading .env file..."
+  set -a
+  while IFS='=' read -r key value; do
+    # Skip empty lines and comments
+    [[ -z "$key" || "$key" =~ ^[[:space:]]*# ]] && continue
+    # Remove surrounding quotes from value
+    value="${value%\"}"
+    value="${value#\"}"
+    value="${value%\'}"
+    value="${value#\'}"
+    export "$key=$value"
+  done < "$PROJECT_DIR/.env"
+  set +a
+  echo "[ENV] Environment variables loaded."
+else
+  echo "[ENV] No .env file found, skipping."
+fi
+log_step_end "Loading environment variables"
+
 # Start production server in a restart loop
 log_step_start "Starting Next.js production server"
 echo "[SERVER] Starting production server on port 3000..."
 
 (
   cd "$PROJECT_DIR"
+  # Re-load .env in subshell for the server loop
+  if [ -f "$PROJECT_DIR/.env" ]; then
+    set -a
+    while IFS='=' read -r key value; do
+      [[ -z "$key" || "$key" =~ ^[[:space:]]*# ]] && continue
+      value="${value%\"}"
+      value="${value#\"}"
+      value="${value%\'}"
+      value="${value#\'}"
+      export "$key=$value"
+    done < "$PROJECT_DIR/.env"
+    set +a
+  fi
   while true; do
     NODE_ENV=production NODE_OPTIONS='--max-old-space-size=384' \
       node -e "

@@ -6,7 +6,7 @@ const nextConfig: NextConfig = {
     ignoreBuildErrors: true,
   },
   reactStrictMode: false,
-  allowedDevOrigins: true,
+  allowedDevOrigins: ["*"],
   async rewrites() {
     return [
       {

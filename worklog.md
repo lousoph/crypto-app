@@ -100,3 +100,26 @@ Stage Summary:
 - PayPal payment flow now complete: create order → PayPal redirect → return to success page → capture → upgrade to Premium
 - Homepage enhanced with: Global Market Metrics, Fear & Greed with signals, Live Prices, AI Tips, News, Premium CTA, Features Grid
 - Server running on port 3000, Caddy proxy on port 81
+---
+Task ID: 1
+Agent: Main Agent
+Task: Configurer PayPal avec les identifiants live et corriger le chargement des variables d'environnement
+
+Work Log:
+- Lu les fichiers existants: .env (déjà contenu les identifiants PayPal), create-order/route.ts, capture-order/route.ts, success/cancel pages
+- Identifié le problème: le serveur tournait sans charger le fichier .env dans l'environnement (les variables PayPal n'étaient pas dans process.env)
+- Testé les identifiants PayPal directement: token obtenu avec succès sur api-m.paypal.com (live)
+- Modifié dev.sh pour charger .env avant de démarrer le serveur (parsing du fichier, export des variables)
+- Modifié serve-prod.js pour charger .env en JavaScript au démarrage
+- Corrigé next.config.ts: allowedDevOrigins: true → allowedDevOrigins: ["*"] (tableau au lieu de booléen)
+- Tué l'ancien serveur et redémarré via dev.sh mis à jour
+- Vérifié que les variables PayPal sont bien dans l'environnement du processus serveur
+- Testé le flux complet: register → verify → login → create-order PayPal
+- Résultat: ordres PayPal créés avec succès pour toutes les durées (1, 3, 6, 12 mois)
+- URLs d'approbation PayPal live générées correctement
+
+Stage Summary:
+- PayPal est maintenant configuré et fonctionnel en mode LIVE
+- Les 4 plans (1mo/9.99€, 3mo/26.97€, 6mo/50.95€, 12mo/95.90€) créent tous des ordres valides
+- Le problème racine était que le serveur ne chargeait pas le fichier .env
+- Le site est accessible via Caddy (port 81 → Node port 3000)
