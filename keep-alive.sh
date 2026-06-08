@@ -1,25 +1,31 @@
 #!/bin/bash
-cd /home/z/my-project
-echo "[$(date)] Keep-alive script started" >> /tmp/keep-alive.log
+# Self-sustaining server supervisor
+# Uses file-based locking to prevent duplicate instances
+LOCK_FILE="/tmp/next-server.lock"
+PID_FILE="/tmp/next-server.pid"
 
-while true; do
-  if ! ss -tlnp | grep -q ':3000 '; then
-    echo "[$(date)] Starting production server..." >> /tmp/keep-alive.log
-    # Run next start directly (not via npx) to avoid wrapper process issues
-    node node_modules/.bin/next start -p 3000 >> /tmp/next.log 2>&1 &
-    SERVER_PID=$!
-    echo "[$(date)] Launched PID $SERVER_PID" >> /tmp/keep-alive.log
-    # Wait for it to come up
-    for i in $(seq 1 20); do
-      sleep 1
-      if ss -tlnp | grep -q ':3000 '; then
-        echo "[$(date)] Server is up (PID $SERVER_PID)" >> /tmp/keep-alive.log
-        break
-      fi
-    done
-    if ! ss -tlnp | grep -q ':3000 '; then
-      echo "[$(date)] WARNING: Server failed to start after 20s" >> /tmp/keep-alive.log
+acquire_lock() {
+  if [ -f "$LOCK_FILE" ]; then
+    OLD_PID=$(cat "$LOCK_FILE" 2>/dev/null)
+    if [ -n "$OLD_PID" ] && kill -0 "$OLD_PID" 2>/dev/null; then
+      echo "Already running as PID $OLD_PID"
+      exit 0
     fi
   fi
-  sleep 2
+  echo $$ > "$LOCK_FILE"
+}
+
+release_lock() {
+  rm -f "$LOCK_FILE" "$PID_FILE"
+}
+
+trap release_lock EXIT
+acquire_lock
+
+cd /home/z/my-project
+while true; do
+  node serve-prod.js </dev/null >> /tmp/next-prod.log 2>&1
+  EC=$?
+  echo "[$(date)] Exit code: $EC, restarting in 3s..." >> /tmp/next-prod.log
+  sleep 3
 done
