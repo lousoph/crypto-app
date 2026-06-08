@@ -643,7 +643,7 @@ function DashboardView({ tokens: allTokens, userRole }: { tokens: TokenData[]; u
       <LivePriceTicker tokens={allTokens} />
 
       {/* KPI Cards */}
-      <div className="grid grid-cols-2 gap-2 md:gap-3">
+      <div className="grid grid-cols-2 gap-2 md:gap-3 card-stagger">
         {kpis.map((kpi, i) => (
           <Card key={i} className={`glass-card card-hover border-border rounded-xl ${kpi.barClass} kpi-value-animate stagger-${i + 1}`}>
             <CardContent className="p-3 md:p-4">
@@ -1316,7 +1316,7 @@ function HomeView({ tokens: allTokens }: { tokens: TokenData[] }) {
 
       {/* Global Market Metrics */}
       {globalData && (
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 card-stagger">
           {[
             { label: 'Market Cap', value: `$${((globalData.quote?.USD?.total_market_cap || 0) / 1e12).toFixed(2)}T`, icon: DollarSign, bg: ts.iconBgViolet },
             { label: 'Volume 24h', value: `$${((globalData.quote?.USD?.total_volume_24h || 0) / 1e9).toFixed(2)}B`, icon: BarChart3, bg: ts.iconBgCyan },
@@ -2530,7 +2530,7 @@ export function CryptoApp() {
 
         {/* Content */}
         <main className="flex-1 overflow-x-hidden overflow-y-auto pb-20 md:pb-6 custom-scrollbar w-full">
-          <div className="max-w-4xl mx-auto w-full px-4 sm:px-6">
+          <div className="w-full px-3 sm:px-4 md:px-6 lg:px-8 mx-auto max-w-full md:max-w-3xl lg:max-w-4xl xl:max-w-5xl 2xl:max-w-6xl">
             {renderView()}
           </div>
         </main>

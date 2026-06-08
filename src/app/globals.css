@@ -49,7 +49,7 @@
    ============================================================ */
 :root {
   --radius: 0.75rem;
-  --background: #f8fafc;
+  --background: #f1f5f9;
   --foreground: #0f172a;
   --card: #ffffff;
   --card-foreground: #0f172a;
@@ -60,11 +60,11 @@
   --secondary: #f1f5f9;
   --secondary-foreground: #0f172a;
   --muted: #f1f5f9;
-  --muted-foreground: #64748b;
+  --muted-foreground: #475569;
   --accent: #f0f4ff;
   --accent-foreground: #0f172a;
   --destructive: #ef4444;
-  --border: rgba(0, 0, 0, 0.08);
+  --border: rgba(0, 0, 0, 0.12);
   --input: rgba(0, 0, 0, 0.04);
   --ring: #6d4de0;
   --chart-1: #6d4de0;
@@ -268,11 +268,11 @@
 }
 
 .glass-sidebar {
-  background: rgba(255, 255, 255, 0.98);
+  background: rgba(255, 255, 255, 0.99);
   backdrop-filter: blur(30px);
   -webkit-backdrop-filter: blur(30px);
-  border-right: 1px solid rgba(0, 0, 0, 0.06);
-  box-shadow: 1px 0 12px rgba(0, 0, 0, 0.03);
+  border-right: 1px solid rgba(0, 0, 0, 0.10);
+  box-shadow: 1px 0 16px rgba(0, 0, 0, 0.04);
 }
 
 .dark .glass-sidebar {
@@ -428,11 +428,11 @@
    MOBILE BOTTOM NAV — GLASS WITH GRADIENT ACCENT (theme-aware)
    ============================================================ */
 .bottom-nav {
-  background: rgba(255, 255, 255, 0.96);
+  background: rgba(255, 255, 255, 0.98);
   backdrop-filter: blur(24px);
   -webkit-backdrop-filter: blur(24px);
-  border-top: 1px solid rgba(0, 0, 0, 0.06);
-  box-shadow: 0 -2px 12px rgba(0, 0, 0, 0.04);
+  border-top: 1px solid rgba(0, 0, 0, 0.10);
+  box-shadow: 0 -2px 16px rgba(0, 0, 0, 0.06);
   position: relative;
 }
 
@@ -668,9 +668,9 @@ html:not(.dark) .kpi-bar-red {
 
 /* Light mode cards — clean white with subtle border */
 html:not(.dark) .glass-card {
-  background: rgba(255, 255, 255, 0.95);
-  border: 1px solid rgba(0, 0, 0, 0.06);
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04), 0 0 0 1px rgba(0, 0, 0, 0.02);
+  background: rgba(255, 255, 255, 0.98);
+  border: 1px solid rgba(0, 0, 0, 0.10);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06), 0 4px 12px rgba(0, 0, 0, 0.04);
 }
 
 html:not(.dark) .glass-card:hover {
@@ -681,10 +681,10 @@ html:not(.dark) .glass-card:hover {
 
 /* Light mode card hover — subtle elevation */
 html:not(.dark) .card-hover:hover {
-  transform: translateY(-4px);
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08),
-              0 0 0 1px rgba(109, 77, 224, 0.08);
-  border-color: rgba(109, 77, 224, 0.15);
+  transform: translateY(-3px);
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.10),
+              0 0 0 1px rgba(109, 77, 224, 0.12);
+  border-color: rgba(109, 77, 224, 0.20);
 }
 
 /* Light mode 3D card — gentle lift */
@@ -704,13 +704,13 @@ html:not(.dark) .btn-primary-glow:hover {
 
 /* Light mode input focus — subtle neutral ring */
 html:not(.dark) input:focus, html:not(.dark) select:focus, html:not(.dark) textarea:focus {
-  box-shadow: 0 0 0 2px rgba(109, 77, 224, 0.15);
-  border-color: rgba(109, 77, 224, 0.40);
+  box-shadow: 0 0 0 3px rgba(109, 77, 224, 0.15);
+  border-color: rgba(109, 77, 224, 0.50);
 }
 
 /* Light mode data rows — soft highlight */
 html:not(.dark) .data-row-hover:hover {
-  background: rgba(109, 77, 224, 0.04);
+  background: rgba(109, 77, 224, 0.06);
 }
 
 /* Light mode shimmer — subtle */
@@ -2834,4 +2834,76 @@ html:not(.dark) .pulse-glow {
   background: linear-gradient(90deg, #7c5cfc, #06b6d4, #a78bfa);
   background-size: 200% 100%;
   animation: gradientShift 4s ease infinite;
+}
+
+/* ============================================================
+   ENHANCED MICRO-INTERACTIONS
+   ============================================================ */
+
+/* Smooth card entrance with stagger */
+.card-stagger > * {
+  opacity: 0;
+  transform: translateY(16px);
+  animation: cardStaggerIn 0.5s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+.card-stagger > *:nth-child(1) { animation-delay: 0.05s; }
+.card-stagger > *:nth-child(2) { animation-delay: 0.10s; }
+.card-stagger > *:nth-child(3) { animation-delay: 0.15s; }
+.card-stagger > *:nth-child(4) { animation-delay: 0.20s; }
+.card-stagger > *:nth-child(5) { animation-delay: 0.25s; }
+.card-stagger > *:nth-child(6) { animation-delay: 0.30s; }
+.card-stagger > *:nth-child(7) { animation-delay: 0.35s; }
+.card-stagger > *:nth-child(8) { animation-delay: 0.40s; }
+
+@keyframes cardStaggerIn {
+  from { opacity: 0; transform: translateY(16px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* Subtle press/active feedback */
+@media (hover: hover) {
+  .glass-card:active {
+    transform: scale(0.985) !important;
+    transition: transform 0.1s ease !important;
+  }
+}
+
+/* Smooth number value transitions */
+.value-transition {
+  transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+/* Progress bar smooth fill */
+.progress-fill {
+  transition: width 0.8s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+/* Gentle breathing glow for active elements */
+.breathe-glow {
+  animation: breatheGlow 3s ease-in-out infinite;
+}
+
+@keyframes breatheGlow {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(124, 92, 252, 0); }
+  50% { box-shadow: 0 0 20px 2px rgba(124, 92, 252, 0.08); }
+}
+
+/* Light mode breathe glow */
+html:not(.dark) .breathe-glow {
+  animation: breatheGlowLight 3s ease-in-out infinite;
+}
+
+@keyframes breatheGlowLight {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(109, 77, 224, 0); }
+  50% { box-shadow: 0 0 16px 1px rgba(109, 77, 224, 0.06); }
+}
+
+/* Smooth theme transition for all elements */
+*, *::before, *::after {
+  transition-property: background-color, border-color, box-shadow, color, opacity;
+  transition-duration: 0s;
+}
+
+.theme-transitioning, .theme-transitioning *, .theme-transitioning *::before, .theme-transitioning *::after {
+  transition-duration: 0.3s !important;
 }

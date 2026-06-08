@@ -163,3 +163,37 @@ Stage Summary:
 - Portfolio table is horizontally scrollable within its container
 - All other views (Home, Transactions, AI Analysis, Profile) use card layouts that adapt naturally
 - Server running on port 3000, HTTP 200 confirmed
+---
+Task ID: 3
+Agent: Main Agent
+Task: Dynamic responsive width, light mode contrast improvements, subtle animations enhancement
+
+Work Log:
+- Updated main content container in page-content.tsx (line 2533) from fixed `max-w-4xl mx-auto w-full px-4 sm:px-6` to dynamic responsive classes: `w-full px-3 sm:px-4 md:px-6 lg:px-8 mx-auto max-w-full md:max-w-3xl lg:max-w-4xl xl:max-w-5xl 2xl:max-w-6xl`
+- Updated light mode design tokens in globals.css `:root`:
+  - `--background`: already `#f1f5f9` (confirmed)
+  - `--border`: changed from `rgba(0, 0, 0, 0.08)` to `rgba(0, 0, 0, 0.12)` (stronger borders)
+  - `--muted-foreground`: changed from `#64748b` to `#475569` (darker muted text)
+- Enhanced `.glass-card` light mode: increased background opacity (0.98), stronger border (0.10), added depth shadow
+- Enhanced `.card-hover` light mode hover: adjusted translateY (-3px), stronger shadow (0.10), wider glow border
+- Enhanced `.glass-sidebar`: increased background opacity (0.99), stronger border (0.10), wider shadow
+- Enhanced `.bottom-nav`: increased background opacity (0.98), stronger border (0.10), wider shadow
+- Enhanced input focus in light mode: box-shadow ring 3px (from 2px), stronger border-color (0.50 from 0.40)
+- Enhanced `.data-row-hover` light mode: background from 0.04 to 0.06
+- Added ENHANCED MICRO-INTERACTIONS section at end of globals.css:
+  - `.card-stagger` with staggered entrance animation (8 children, 0.05s increments)
+  - `.glass-card:active` press feedback (scale 0.985) on hover-capable devices
+  - `.value-transition` for smooth number changes
+  - `.progress-fill` for smooth progress bar fills
+  - `.breathe-glow` / `.breathe-glowLight` for active element ambient glow
+  - Global `transition-duration: 0s` base with `.theme-transitioning` override for smooth theme switching
+- Applied `card-stagger` class to DashboardView KPI cards grid (line 646)
+- Applied `card-stagger` class to HomeView global market metrics grid (line 1319)
+
+Stage Summary:
+- Main content area now dynamically adapts width across all breakpoints (mobile→2xl)
+- Light mode has significantly improved contrast with stronger borders, shadows, and text tones
+- Cards have richer depth in light mode with better hover states
+- New stagger entrance animation on KPI and market metrics grids
+- Smooth press feedback, breathing glow, and theme transition utilities available
+- Server running, HTTP 200 confirmed on port 3000
