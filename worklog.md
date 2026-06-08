@@ -75,3 +75,28 @@ Stage Summary:
 - Caddy proxy on port 81 correctly forwards to port 3000
 - Authentication system fully functional (register, verify, login)
 - Test user: test@test.com / Test1234! (verified, user_free role)
+
+---
+Task ID: 2
+Agent: Main Agent
+Task: Add homepage sections, fix PayPal Premium payment, configure API credentials
+
+Work Log:
+- Analyzed user screenshot to understand desired homepage layout
+- Added PayPal API credentials to .env (Client ID + Secret, live mode)
+- Fixed PayPal create-order API: added return_url and cancel_url pointing to /payment/success and /payment/cancel
+- Created /payment/success/page.tsx with Suspense boundary - captures PayPal order and upgrades user to Premium
+- Created /payment/cancel/page.tsx with Suspense boundary - shows cancellation message
+- Updated frontend PayPal handler to use approval URL from API response
+- Enhanced FearGreedWidget with buy/sell signals (7 levels from "Achat Fort" to "Vente Forte")
+- Added Premium CTA card to homepage with feature list and pricing
+- Added Quick Features Grid (4 cards: Analyse de marché, Sécurité, Données 24/7, IA Prédictive)
+- Fixed TrendingUpRight import error (not in lucide-react)
+- Rebuilt project successfully
+- Verified PayPal API credentials work (token generation returns 200)
+- Restarted production server
+
+Stage Summary:
+- PayPal payment flow now complete: create order → PayPal redirect → return to success page → capture → upgrade to Premium
+- Homepage enhanced with: Global Market Metrics, Fear & Greed with signals, Live Prices, AI Tips, News, Premium CTA, Features Grid
+- Server running on port 3000, Caddy proxy on port 81

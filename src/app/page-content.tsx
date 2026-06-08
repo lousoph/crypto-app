@@ -8,7 +8,7 @@ import {
   Check, X, Menu, Search, Activity, Zap, Brain, Mail,
   Sun, Moon, Sparkles, ChevronDown, ChevronUp, Eye,
   Gauge, ArrowUpCircle, ArrowDownCircle, Minus, ExternalLink, Star, Pencil,
-  Home, Newspaper, Lightbulb, Clock, Globe, TrendingUpRight, ArrowRight
+  Home, Newspaper, Lightbulb, Clock, Globe, TrendingUp, ArrowRight
 } from 'lucide-react'
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
@@ -494,10 +494,23 @@ function FearGreedWidget() {
 
   const getColor = (v: number) => v <= 25 ? '#ef4444' : v <= 45 ? '#f97316' : v <= 55 ? '#eab308' : v <= 75 ? '#84cc16' : '#10b981'
 
+  // Determine buy/sell signal based on Fear & Greed value
+  const getSignal = (v: number) => {
+    if (v <= 20) return { label: 'Achat Fort', emoji: '🟢', advice: 'Marché en panique extrême — Opportunité d\'achat historique', color: '#10b981', type: 'buy' }
+    if (v <= 35) return { label: 'Achat', emoji: '🟢', advice: 'Peur dominante — Bon moment pour accumuler', color: '#22c55e', type: 'buy' }
+    if (v <= 45) return { label: 'Achat Modéré', emoji: '🟡', advice: 'Légère peur — Positions progressives recommandées', color: '#eab308', type: 'cautious_buy' }
+    if (v <= 55) return { label: 'Neutre', emoji: '🟡', advice: 'Sentiment neutre — Maintenir les positions actuelles', color: '#eab308', type: 'neutral' }
+    if (v <= 65) return { label: 'Prudence', emoji: '🟠', advice: 'Cupidité croissante — Réduire les achats', color: '#f97316', type: 'cautious_sell' }
+    if (v <= 80) return { label: 'Vente Partielle', emoji: '🔴', advice: 'Cupidité forte — Prendre des profits partiels', color: '#ef4444', type: 'sell' }
+    return { label: 'Vente Forte', emoji: '🔴', advice: 'Cupidité extrême — Risque de correction élevé', color: '#dc2626', type: 'sell' }
+  }
+
+  const signal = getSignal(data.value)
+
   return (
     <Card className="glass-card card-hover border-border rounded-xl">
       <CardContent className="p-4">
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-3 mb-3">
           <div className="w-12 h-12 rounded-xl flex items-center justify-center" style={{ background: `${getColor(data.value)}15` }}>
             <Gauge className="w-6 h-6" style={{ color: getColor(data.value) }} />
           </div>
@@ -511,8 +524,19 @@ function FearGreedWidget() {
             </div>
           </div>
         </div>
-        <div className="mt-3 h-2 rounded-full bg-muted overflow-hidden">
+        <div className="h-2 rounded-full bg-muted overflow-hidden mb-3">
           <div className="h-full rounded-full transition-all duration-1000" style={{ width: `${data.value}%`, background: `linear-gradient(90deg, ${getColor(0)}, ${getColor(data.value)})` }} />
+        </div>
+        {/* Buy/Sell Signal */}
+        <div className="rounded-lg p-2.5 border" style={{ background: `${signal.color}08`, borderColor: `${signal.color}25` }}>
+          <div className="flex items-center gap-2 mb-1">
+            <span className="text-sm">{signal.emoji}</span>
+            <span className="text-xs font-bold" style={{ color: signal.color }}>{signal.label}</span>
+            {(signal.type === 'buy' || signal.type === 'cautious_buy') && <ArrowUpCircle className="w-3.5 h-3.5 ml-auto" style={{ color: signal.color }} />}
+            {(signal.type === 'sell' || signal.type === 'cautious_sell') && <ArrowDownCircle className="w-3.5 h-3.5 ml-auto" style={{ color: signal.color }} />}
+            {signal.type === 'neutral' && <Minus className="w-3.5 h-3.5 ml-auto" style={{ color: signal.color }} />}
+          </div>
+          <p className="text-[10px] text-muted-foreground leading-relaxed">{signal.advice}</p>
         </div>
       </CardContent>
     </Card>
@@ -1413,6 +1437,83 @@ function HomeView({ tokens: allTokens }: { tokens: TokenData[] }) {
           )}
         </CardContent>
       </Card>
+
+      {/* Premium CTA Section */}
+      <Card className="rounded-xl overflow-hidden relative" style={{ background: 'linear-gradient(135deg, rgba(124,92,252,0.08), rgba(6,182,212,0.06), rgba(168,85,247,0.05))', border: '1px solid rgba(124,92,252,0.15)' }}>
+        <div className="absolute top-0 left-0 right-0 h-0.5" style={{ background: 'linear-gradient(90deg,#f59e0b,#d97706,#f59e0b)' }} />
+        <CardContent className="p-4 md:p-5">
+          <div className="flex items-start gap-3">
+            <div className="w-11 h-11 rounded-xl flex items-center justify-center shrink-0" style={{ background: 'rgba(245,158,11,0.12)' }}>
+              <Crown className="w-5 h-5 text-amber-500" />
+            </div>
+            <div className="flex-1 min-w-0">
+              <div className="flex items-center gap-2 mb-1">
+                <h3 className="text-sm font-bold text-foreground">Prédict AI Premium</h3>
+                <Badge variant="secondary" className="text-[9px] px-1.5 bg-amber-500/10 text-amber-500 font-bold">9.99$/mois</Badge>
+              </div>
+              <p className="text-[11px] text-muted-foreground leading-relaxed mb-3">
+                Débloquez les analyses IA avancées, les signaux de trading en temps réel, les alertes personnalisées et l&apos;export de vos données.
+              </p>
+              <div className="grid grid-cols-2 gap-1.5 mb-3">
+                {[
+                  { icon: Brain, label: 'Analyses IA avancées', color: '#7c5cfc' },
+                  { icon: Zap, label: 'Signaux de trading', color: '#f59e0b' },
+                  { icon: AlertTriangle, label: 'Alertes personnalisées', color: '#ef4444' },
+                  { icon: BarChart3, label: 'Export de données', color: '#06b6d4' },
+                ].map((f, i) => (
+                  <div key={i} className="flex items-center gap-1.5">
+                    <f.icon className="w-3 h-3 shrink-0" style={{ color: f.color }} />
+                    <span className="text-[10px] text-muted-foreground">{f.label}</span>
+                  </div>
+                ))}
+              </div>
+              <div className="flex items-center gap-2 text-[9px] text-muted-foreground/60">
+                <span>1 mois, 3 mois (-10%), 6 mois (-15%), 12 mois (-20%)</span>
+              </div>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* Quick Features Grid */}
+      <div className="grid grid-cols-2 gap-3">
+        <Card className="glass-card card-hover border-border rounded-xl">
+          <CardContent className="p-3">
+            <div className="w-9 h-9 rounded-lg flex items-center justify-center mb-2" style={{ background: ts.iconBgViolet }}>
+              <TrendingUp className="w-4 h-4 text-violet-500" />
+            </div>
+            <p className="text-xs font-semibold text-foreground">Analyse de marché</p>
+            <p className="text-[10px] text-muted-foreground mt-0.5 leading-relaxed">Dashboard en temps réel avec P&L et ROI par token</p>
+          </CardContent>
+        </Card>
+        <Card className="glass-card card-hover border-border rounded-xl">
+          <CardContent className="p-3">
+            <div className="w-9 h-9 rounded-lg flex items-center justify-center mb-2" style={{ background: ts.iconBgCyan }}>
+              <Shield className="w-4 h-4 text-cyan-500" />
+            </div>
+            <p className="text-xs font-semibold text-foreground">Sécurité</p>
+            <p className="text-[10px] text-muted-foreground mt-0.5 leading-relaxed">Données chiffrées, authentification sécurisée</p>
+          </CardContent>
+        </Card>
+        <Card className="glass-card card-hover border-border rounded-xl">
+          <CardContent className="p-3">
+            <div className="w-9 h-9 rounded-lg flex items-center justify-center mb-2" style={{ background: ts.iconBgEmerald }}>
+              <Clock className="w-4 h-4 text-emerald-500" />
+            </div>
+            <p className="text-xs font-semibold text-foreground">Données 24/7</p>
+            <p className="text-[10px] text-muted-foreground mt-0.5 leading-relaxed">Prix actualisés, Fear & Greed en continu</p>
+          </CardContent>
+        </Card>
+        <Card className="glass-card card-hover border-border rounded-xl">
+          <CardContent className="p-3">
+            <div className="w-9 h-9 rounded-lg flex items-center justify-center mb-2" style={{ background: ts.iconBgAmber }}>
+              <Sparkles className="w-4 h-4 text-amber-500" />
+            </div>
+            <p className="text-xs font-semibold text-foreground">IA Prédictive</p>
+            <p className="text-[10px] text-muted-foreground mt-0.5 leading-relaxed">Conseils auto-générés basés sur le marché</p>
+          </CardContent>
+        </Card>
+      </div>
     </div>
   )
 }
@@ -1451,12 +1552,17 @@ function ProfileView({ userRole }: { userRole: string }) {
       })
       const data = await res.json()
       if (res.ok && data.orderID) {
-        // Redirect to PayPal approval page
-        const isSandbox = process.env.NEXT_PUBLIC_PAYPAL_MODE === 'sandbox'
-        const baseUrl = isSandbox
-          ? 'https://www.sandbox.paypal.com/checkoutnow'
-          : 'https://www.paypal.com/checkoutnow'
-        window.location.href = `${baseUrl}?token=${data.orderID}`
+        // Use the approval URL from PayPal (contains proper return/cancel URLs)
+        if (data.approvalUrl) {
+          window.location.href = data.approvalUrl
+        } else {
+          // Fallback: construct URL manually
+          const isSandbox = process.env.NEXT_PUBLIC_PAYPAL_MODE === 'sandbox'
+          const baseUrl = isSandbox
+            ? 'https://www.sandbox.paypal.com/checkoutnow'
+            : 'https://www.paypal.com/checkoutnow'
+          window.location.href = `${baseUrl}?token=${data.orderID}`
+        }
       } else {
         setPaypalError(data.error || 'Erreur lors de la création de la commande PayPal')
         toast.error(data.error || 'Erreur PayPal')

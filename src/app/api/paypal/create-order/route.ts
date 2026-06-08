@@ -70,6 +70,10 @@ export async function POST(req: NextRequest) {
       ? "CryptoFolio Premium — Abonnement 1 mois"
       : `CryptoFolio Premium — Abonnement ${plan.label} (-${plan.discount}%)`
 
+    // Build return URLs based on the request origin or NEXTAUTH_URL
+    const origin = req.headers.get('origin') || process.env.NEXTAUTH_URL || ''
+    const baseUrl = origin.replace(/\/$/, '')
+
     const orderRes = await fetch(`${PAYPAL_API_BASE}/v2/checkout/orders`, {
       method: "POST",
       headers: {
@@ -88,10 +92,12 @@ export async function POST(req: NextRequest) {
           },
         ],
         application_context: {
-          brand_name: "CryptoFolio",
+          brand_name: "Prédict AI",
           locale: "fr-FR",
           shipping_preference: "NO_SHIPPING",
           user_action: "PAY_NOW",
+          return_url: `${baseUrl}/payment/success`,
+          cancel_url: `${baseUrl}/payment/cancel`,
         },
       }),
     })
@@ -106,7 +112,7 @@ export async function POST(req: NextRequest) {
       )
     }
 
-    return NextResponse.json({ orderID: orderData.id, duration })
+    return NextResponse.json({ orderID: orderData.id, duration, approvalUrl: orderData.links?.find((l: any) => l.rel === 'approve')?.href || null })
   } catch (error: any) {
     console.error("PayPal create order exception:", error)
     return NextResponse.json({ error: error.message }, { status: 500 })
