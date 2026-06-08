@@ -638,12 +638,12 @@ function DashboardView({ tokens: allTokens, userRole }: { tokens: TokenData[]; u
   const pieChartData = d.tokens.map(t => ({ name: t.ticker, value: Math.round(t.valeurActuelle * 100) / 100 }))
 
   return (
-    <div className="space-y-4 p-4 md:p-6 page-transition">
+    <div className="space-y-3 md:space-y-4 page-transition">
       {/* Live Price Ticker */}
       <LivePriceTicker tokens={allTokens} />
 
       {/* KPI Cards */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
+      <div className="grid grid-cols-2 gap-2 md:gap-3">
         {kpis.map((kpi, i) => (
           <Card key={i} className={`glass-card card-hover border-border rounded-xl ${kpi.barClass} kpi-value-animate stagger-${i + 1}`}>
             <CardContent className="p-3 md:p-4">
@@ -673,13 +673,12 @@ function DashboardView({ tokens: allTokens, userRole }: { tokens: TokenData[]; u
         <>
           {/* Portfolio Table */}
           <Card className="glass-card border-border rounded-xl">
-            <CardHeader className="p-4 pb-2">
-              <CardTitle className="text-sm font-semibold flex items-center gap-2">
+            <CardHeader className="p-3 md:p-4 pb-2">
+              <CardTitle className="text-xs md:text-sm font-semibold flex items-center gap-2">
                 <BarChart3 className="w-4 h-4 text-violet-500" />Portefeuille
               </CardTitle>
             </CardHeader>
-            <CardContent className="p-4 pt-0">
-              <div className="overflow-x-auto -mx-4 px-4 md:-mx-6 md:px-6">
+            <CardContent className="p-3 md:p-4 pt-0">
                 <Table className="min-w-[500px]">
                   <TableHeader>
                     <TableRow>
@@ -720,19 +719,18 @@ function DashboardView({ tokens: allTokens, userRole }: { tokens: TokenData[]; u
                     ))}
                   </TableBody>
                 </Table>
-              </div>
             </CardContent>
           </Card>
 
           {/* Charts */}
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-3 md:gap-4">
             {/* P&L Bar Chart */}
             <Card className="glass-card border-border rounded-xl">
-              <CardHeader className="p-4 pb-2">
-                <CardTitle className="text-sm font-semibold">P&L par token</CardTitle>
+              <CardHeader className="p-3 md:p-4 pb-2">
+                <CardTitle className="text-xs md:text-sm font-semibold">P&L par token</CardTitle>
               </CardHeader>
-              <CardContent className="p-4 pt-0">
-                <div className="h-52 lg:h-56">
+              <CardContent className="p-3 md:p-4 pt-0">
+                <div className="h-48 md:h-52 lg:h-56">
                   <ResponsiveContainer width="100%" height="100%">
                     <BarChart data={barChartData} margin={{ top: 5, right: 5, left: -20, bottom: 5 }}>
                       <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
@@ -750,11 +748,11 @@ function DashboardView({ tokens: allTokens, userRole }: { tokens: TokenData[]; u
 
             {/* Pie Chart */}
             <Card className="glass-card border-border rounded-xl">
-              <CardHeader className="p-4 pb-2">
-                <CardTitle className="text-sm font-semibold">Répartition</CardTitle>
+              <CardHeader className="p-3 md:p-4 pb-2">
+                <CardTitle className="text-xs md:text-sm font-semibold">Répartition</CardTitle>
               </CardHeader>
-              <CardContent className="p-4 pt-0">
-                <div className="h-52 lg:h-56">
+              <CardContent className="p-3 md:p-4 pt-0">
+                <div className="h-48 md:h-52 lg:h-56">
                   <ResponsiveContainer width="100%" height="100%">
                     <PieChart>
                       <Pie data={pieChartData} cx="50%" cy="50%" innerRadius={50} outerRadius={80} paddingAngle={3} dataKey="value">
@@ -777,7 +775,7 @@ function DashboardView({ tokens: allTokens, userRole }: { tokens: TokenData[]; u
           </div>
 
           {/* Widgets Row */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 md:gap-4">
             <FearGreedWidget />
             <TokenSignals tokens={d.tokens} />
           </div>
@@ -2513,7 +2511,7 @@ export function CryptoApp() {
   }
 
   return (
-    <div className="min-h-screen flex flex-col md:flex-row bg-background overflow-x-hidden">
+    <div className="min-h-screen flex flex-col md:flex-row bg-background overflow-x-hidden w-full">
       {/* Ambient Background */}
       <div className="ambient-bg">
         <div className="aurora-blob" style={{ top: '10%', left: '5%', width: '35%', height: '35%', background: 'rgba(124,92,252,0.06)', animationDuration: '15s' }} />
@@ -2524,13 +2522,13 @@ export function CryptoApp() {
       <Sidebar view={view} setView={setView} isAdmin={isAdmin} onLogout={logout} />
 
       {/* Main Area */}
-      <div className="flex-1 flex flex-col min-h-screen md:min-h-0 overflow-x-hidden">
+      <div className="flex-1 flex flex-col min-h-screen md:min-h-0 overflow-x-hidden min-w-0">
         {/* Mobile Header */}
         <MobileHeader view={view} setView={setView} isAdmin={isAdmin} onLogout={logout} />
 
         {/* Content */}
-        <main className="flex-1 overflow-x-hidden overflow-y-auto pb-20 md:pb-6 custom-scrollbar">
-          <div className="max-w-[900px] mx-auto w-full">
+        <main className="flex-1 overflow-x-hidden overflow-y-auto pb-20 md:pb-6 custom-scrollbar w-full">
+          <div className="max-w-[900px] mx-auto w-full px-4 md:px-6">
             {renderView()}
           </div>
         </main>
