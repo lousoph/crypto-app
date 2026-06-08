@@ -123,3 +123,26 @@ Stage Summary:
 - Les 4 plans (1mo/9.99€, 3mo/26.97€, 6mo/50.95€, 12mo/95.90€) créent tous des ordres valides
 - Le problème racine était que le serveur ne chargeait pas le fichier .env
 - Le site est accessible via Caddy (port 81 → Node port 3000)
+---
+Task ID: 2
+Agent: Main Agent
+Task: Corriger les NaN dans le dashboard, ajouter rafraîchissement automatique 60s, améliorer API prices
+
+Work Log:
+- Analysé le screenshot: NaN pour Market Cap, Volume 24h, BTC Dominance sur la page d'accueil
+- Identifié le bug: CMC API retourne `data.quote.USD.total_market_cap` mais le frontend accédait `data.total_market_cap.usd`
+- Corrigé le frontend: `globalData.quote?.USD?.total_market_cap`, `globalData.btc_dominance`, etc.
+- Corrigé l'API /api/cmc/global: retour cohérent `{data: ...}` pour frais et cache, fallback en structure correcte
+- Corrigé l'API /api/prices: utilise `pricemultifull` au lieu de `pricemulti` pour inclure CHANGEPCT24HOUR, HIGH24HOUR, LOW24HOUR
+- Ajouté rafraîchissement automatique toutes les 60s pour: Global Market Data (HomeView), Fear & Greed Widget, DashboardView
+- Créé supervisor.sh pour la persistance du serveur entre les appels d'outils
+- Amélioré serve-prod.js avec keepalive TCP, PID file, et signal handlers
+- Mis à jour dev.sh pour utiliser serve-prod.js au lieu du script inline
+- Testé avec succès: Market Cap $2.19T, Volume $95.07B, BTC 58.2%, 42 tokens avec prix live
+
+Stage Summary:
+- Plus de NaN dans le dashboard
+- Prix en temps réel mis à jour toutes les 60 secondes
+- 42 tokens avec variations 24h affichées
+- Fear & Greed rafraîchi automatiquement
+- API CMC corrigée pour retourner des données cohérentes

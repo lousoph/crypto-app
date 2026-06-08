@@ -4,15 +4,12 @@ import { NextRequest, NextResponse } from "next/server"
 // CryptoCompare API key
 const CRYPTO_COMPARE_API_KEY = "4f527d4ae4beccf0fb013fc8a7c41fc19595a113d88edb97f83e12fae3ab8e76"
 
-// All supported CryptoCompare symbols
-const ALL_SYMBOLS = "BTC,ETH,SOL,BNB,ZEC,XRP,DOGE,ZEN,SUI,TAO,ADA,LINK,AVAX,XPL,VIRTUAL,PUMP,ENA,WLD,NEAR,AAVE,ARB,PENGU,WLFI,ONDO,ATOM,AR,TIA,INJ,FET,RENDER,NMR,PYTH,W,GRT,QNT,AXL,ILV,QTUM,LTC,PEPE,ANKR,RSR"
-
 // Price cache - shared across requests
-let priceCache: Record<string, number> = {}
+let priceCache: Record<string, { USD: number; CHANGEPCT24HOUR: number; HIGH24HOUR: number; LOW24HOUR: number }> = {}
 let lastFetchTime = 0
 const CACHE_DURATION = 60 * 1000 // 1 minute en ms
 
-// GET /api/prices - Get current prices for all tokens
+// GET /api/prices - Get current prices for all tokens with 24h change
 export async function GET(request: NextRequest) {
   try {
     const { searchParams } = new URL(request.url)
@@ -30,7 +27,8 @@ export async function GET(request: NextRequest) {
       const tickers = [...tickerSet].join(",")
 
       try {
-        const url = `https://min-api.cryptocompare.com/data/pricemulti?fsyms=${tickers}&tsyms=USD&api_key=${CRYPTO_COMPARE_API_KEY}`
+        // Use pricemultifull to get prices + 24h change + highs/lows
+        const url = `https://min-api.cryptocompare.com/data/pricemultifull?fsyms=${tickers}&tsyms=USD&api_key=${CRYPTO_COMPARE_API_KEY}`
         const response = await fetch(url, {
           signal: AbortSignal.timeout(8000),
           cache: "no-store",
@@ -42,15 +40,20 @@ export async function GET(request: NextRequest) {
           const updatePromises = []
           for (const token of tokens) {
             const key = token.cryptoCompareId || token.ticker
-            const priceData = data[key]
-            if (priceData && priceData.USD !== undefined) {
-              priceCache[token.ticker] = priceData.USD
+            const raw = data.RAW?.[key]?.USD
+            if (raw) {
+              priceCache[token.ticker] = {
+                USD: raw.PRICE,
+                CHANGEPCT24HOUR: raw.CHANGEPCT24HOUR || 0,
+                HIGH24HOUR: raw.HIGH24HOUR || 0,
+                LOW24HOUR: raw.LOW24HOUR || 0,
+              }
 
               updatePromises.push(
                 db.token.update({
                   where: { id: token.id },
                   data: {
-                    currentPrice: priceData.USD,
+                    currentPrice: raw.PRICE,
                     priceUpdatedAt: new Date(),
                   },
                 })
@@ -66,18 +69,24 @@ export async function GET(request: NextRequest) {
       }
     }
 
+    // Fallback to DB if cache empty
     if (Object.keys(priceCache).length === 0) {
       const tokens = await db.token.findMany({
         where: { active: true, currentPrice: { not: null } },
       })
       for (const token of tokens) {
         if (token.currentPrice) {
-          priceCache[token.ticker] = token.currentPrice
+          priceCache[token.ticker] = {
+            USD: token.currentPrice,
+            CHANGEPCT24HOUR: 0,
+            HIGH24HOUR: 0,
+            LOW24HOUR: 0,
+          }
         }
       }
     }
 
-    return NextResponse.json(priceCache)
+    return NextResponse.json({ prices: priceCache })
   } catch (error: any) {
     return NextResponse.json({ prices: priceCache })
   }

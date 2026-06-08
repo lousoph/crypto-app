@@ -487,7 +487,12 @@ function FearGreedWidget() {
   const [data, setData] = useState<{ value: number; classification: string; history?: { value: number; date: string }[] } | null>(null)
 
   useEffect(() => {
-    fetch('/api/fear-greed').then(r => r.json()).then(d => { if (d.value) setData(d) }).catch(() => {})
+    const fetchFG = () => {
+      fetch('/api/fear-greed').then(r => r.json()).then(d => { if (d.value) setData(d) }).catch(() => {})
+    }
+    fetchFG()
+    const interval = setInterval(fetchFG, 60000)
+    return () => clearInterval(interval)
   }, [])
 
   if (!data) return null
@@ -594,7 +599,12 @@ function DashboardView({ tokens: allTokens, userRole }: { tokens: TokenData[]; u
     } catch {} finally { setLoading(false) }
   }, [])
 
-  useEffect(() => { fetchDashboard() }, [fetchDashboard])
+  useEffect(() => {
+    fetchDashboard()
+    // Auto-refresh dashboard every 60 seconds
+    const interval = setInterval(fetchDashboard, 60000)
+    return () => clearInterval(interval)
+  }, [fetchDashboard])
 
   if (loading) {
     return (
@@ -1234,6 +1244,14 @@ function HomeView({ tokens: allTokens }: { tokens: TokenData[] }) {
   const [activeTip, setActiveTip] = useState(0)
   const ts = useThemeStyles()
 
+  const fetchGlobalData = useCallback(async () => {
+    try {
+      const res = await fetch('/api/cmc/global')
+      const d = await res.json()
+      if (d.data) setGlobalData(d.data)
+    } catch {}
+  }, [])
+
   useEffect(() => {
     // Fetch AI tips
     fetch('/api/ai-tips')
@@ -1248,11 +1266,12 @@ function HomeView({ tokens: allTokens }: { tokens: TokenData[] }) {
       .catch(() => setNewsLoading(false))
 
     // Fetch global market data
-    fetch('/api/cmc/global')
-      .then(r => r.json())
-      .then(d => { if (d.data) setGlobalData(d.data) })
-      .catch(() => {})
-  }, [])
+    fetchGlobalData()
+
+    // Refresh global market data every 60 seconds
+    const interval = setInterval(fetchGlobalData, 60000)
+    return () => clearInterval(interval)
+  }, [fetchGlobalData])
 
   // Auto-rotate tips
   useEffect(() => {
@@ -1292,9 +1311,9 @@ function HomeView({ tokens: allTokens }: { tokens: TokenData[] }) {
       {globalData && (
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
           {[
-            { label: 'Market Cap', value: `$${(globalData.total_market_cap?.usd / 1e12).toFixed(2)}T`, icon: DollarSign, bg: ts.iconBgViolet },
-            { label: 'Volume 24h', value: `$${(globalData.total_volume?.usd / 1e9).toFixed(2)}B`, icon: BarChart3, bg: ts.iconBgCyan },
-            { label: 'BTC Dominance', value: `${globalData.market_cap_percentage?.btc?.toFixed(1)}%`, icon: TrendingUp, bg: ts.iconBgEmerald },
+            { label: 'Market Cap', value: `$${((globalData.quote?.USD?.total_market_cap || 0) / 1e12).toFixed(2)}T`, icon: DollarSign, bg: ts.iconBgViolet },
+            { label: 'Volume 24h', value: `$${((globalData.quote?.USD?.total_volume_24h || 0) / 1e9).toFixed(2)}B`, icon: BarChart3, bg: ts.iconBgCyan },
+            { label: 'BTC Dominance', value: `${(globalData.btc_dominance || 0).toFixed(1)}%`, icon: TrendingUp, bg: ts.iconBgEmerald },
             { label: 'Cryptos actives', value: globalData.active_cryptocurrencies?.toLocaleString() || '—', icon: Coins, bg: ts.iconBgAmber },
           ].map((m, i) => (
             <Card key={i} className="glass-card card-hover border-border rounded-xl">

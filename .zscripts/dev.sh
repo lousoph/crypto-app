@@ -74,7 +74,7 @@ else
 fi
 log_step_end "Loading environment variables"
 
-# Start production server in a restart loop
+# Start production server using supervisor for auto-restart
 log_step_start "Starting Next.js production server"
 echo "[SERVER] Starting production server on port 3000..."
 
@@ -93,26 +93,9 @@ echo "[SERVER] Starting production server on port 3000..."
     done < "$PROJECT_DIR/.env"
     set +a
   fi
+  # Use serve-prod.js which loads .env natively + has keepalive
   while true; do
-    NODE_ENV=production NODE_OPTIONS='--max-old-space-size=384' \
-      node -e "
-        const next = require('next');
-        const http = require('http');
-        process.on('uncaughtException', (e) => { console.error('UNCAUGHT:', e.message); process.exit(1); });
-        process.on('unhandledRejection', (r) => { console.error('UNHANDLED:', r); process.exit(1); });
-        async function start() {
-          const app = next({ dev: false, hostname: '0.0.0.0', port: 3000 });
-          const handle = app.getRequestHandler();
-          await app.prepare();
-          const server = http.createServer(handle);
-          await new Promise((resolve, reject) => {
-            server.listen(3000, '0.0.0.0', () => { console.log('READY on 0.0.0.0:3000'); resolve(); });
-            server.on('error', reject);
-          });
-          process.on('SIGTERM', () => { console.log('SIGTERM'); server.close(() => process.exit(0)); });
-        }
-        start().catch(err => { console.error('FATAL:', err.message); process.exit(1); });
-      " </dev/null &>>/tmp/next-prod.log
+    node "$PROJECT_DIR/serve-prod.js" </dev/null &>>/tmp/next-prod.log
     echo "[$(date)] Server exited, restarting in 3s..." >> /tmp/next-prod.log
     sleep 3
   done
