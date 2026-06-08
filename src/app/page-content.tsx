@@ -268,7 +268,7 @@ function LoginScreen({ onLogin, onRegister }: {
   const hasApple = !!process.env.NEXT_PUBLIC_HAS_APPLE
 
   return (
-    <div className="min-h-screen flex items-center justify-center p-4 relative overflow-hidden bg-background">
+    <div className="min-h-screen flex items-center justify-center p-4 relative bg-background">
       {/* Animated gradient orbs */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
         <div className="absolute top-[-20%] left-[15%] w-[60%] h-[60%] rounded-full" style={{ background: `radial-gradient(ellipse,${ts.orbBg1} 0%,transparent 70%)`, animation: 'ambientDrift1 20s ease-in-out infinite' }} />
@@ -290,8 +290,8 @@ function LoginScreen({ onLogin, onRegister }: {
 
         {/* Verification or Auth Card */}
         {showVerification ? (
-          <div className="rounded-2xl p-6 sm:p-8 shadow-2xl relative overflow-hidden glass-strong" style={{ boxShadow: ts.authCardShadow }}>
-            <div className="absolute top-0 left-0 right-0 h-px" style={{ background: ts.authGradientLine }} />
+          <div className="rounded-2xl p-6 sm:p-8 shadow-2xl glass-strong" style={{ boxShadow: ts.authCardShadow }}>
+            <div className="h-px -mx-6 -mt-6 sm:-mx-8 sm:-mt-8 mb-6" style={{ background: ts.authGradientLine, position: 'relative' }} />
             <div className="mb-6">
               <div className="flex items-center gap-3 mb-2">
                 <div className="w-10 h-10 rounded-xl flex items-center justify-center" style={{ background: ts.accentBg }}>
@@ -327,8 +327,8 @@ function LoginScreen({ onLogin, onRegister }: {
             </div>
           </div>
         ) : (
-          <div className="rounded-2xl p-6 sm:p-8 shadow-2xl relative overflow-hidden glass-strong" style={{ boxShadow: ts.authCardShadow }}>
-            <div className="absolute top-0 left-0 right-0 h-px" style={{ background: ts.authGradientLine }} />
+          <div className="rounded-2xl p-6 sm:p-8 shadow-2xl glass-strong" style={{ boxShadow: ts.authCardShadow }}>
+            <div className="h-px -mx-6 -mt-6 sm:-mx-8 sm:-mt-8 mb-6" style={{ background: ts.authGradientLine, position: 'relative' }} />
             <div className="mb-6">
               <h2 className="text-xl font-semibold text-foreground">{isRegister ? 'Créer un compte' : 'Bienvenue'}</h2>
               <p className="text-sm mt-1 text-muted-foreground">{isRegister ? 'Créez votre compte pour commencer' : 'Connectez-vous pour accéder à votre portefeuille'}</p>
@@ -363,7 +363,7 @@ function LoginScreen({ onLogin, onRegister }: {
                   <AlertTriangle className="w-4 h-4 shrink-0" />{error}
                 </div>
               )}
-              <Button type="submit" className="btn-primary-glow w-full text-foreground rounded-xl h-11 font-medium shadow-lg" style={{ background: ts.primaryGradient, boxShadow: ts.primaryBtnShadow }} disabled={loading}>
+              <Button type="submit" className="btn-primary-glow w-full rounded-xl h-11 font-medium shadow-lg text-white" style={{ background: ts.primaryGradient, boxShadow: ts.primaryBtnShadow }} disabled={loading}>
                 {loading ? <RefreshCw className="w-4 h-4 animate-spin mr-2" /> : null}
                 {isRegister ? 'Créer mon compte' : 'Se connecter'}
               </Button>
@@ -416,7 +416,7 @@ function EmailVerificationScreen({ email, onVerified }: { email: string; onVerif
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center p-4 relative overflow-hidden bg-background">
+    <div className="min-h-screen flex items-center justify-center p-4 relative bg-background">
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
         <div className="absolute top-[-20%] left-[15%] w-[60%] h-[60%] rounded-full" style={{ background: `radial-gradient(ellipse,${ts.orbBg1} 0%,transparent 70%)`, animation: 'ambientDrift1 20s ease-in-out infinite' }} />
         <div className="absolute bottom-[-20%] right-[10%] w-[50%] h-[50%] rounded-full" style={{ background: `radial-gradient(ellipse,${ts.orbBg2} 0%,transparent 70%)`, animation: 'ambientDrift2 25s ease-in-out infinite' }} />
@@ -429,8 +429,8 @@ function EmailVerificationScreen({ email, onVerified }: { email: string; onVerif
           <h1 className="text-2xl font-bold gradient-text">Vérification requise</h1>
           <p className="text-sm text-muted-foreground">Vérifiez votre email pour accéder à l'application</p>
         </div>
-        <div className="rounded-2xl p-6 sm:p-8 shadow-2xl relative overflow-hidden glass-strong" style={{ boxShadow: ts.authCardShadow }}>
-          <div className="absolute top-0 left-0 right-0 h-px" style={{ background: ts.authGradientLine }} />
+        <div className="rounded-2xl p-6 sm:p-8 shadow-2xl glass-strong" style={{ boxShadow: ts.authCardShadow }}>
+          <div className="h-px -mx-6 -mt-6 sm:-mx-8 sm:-mt-8 mb-4" style={{ background: ts.authGradientLine, position: 'relative' }} />
           <p className="text-sm text-muted-foreground mb-4">Un code a été envoyé à <span className="text-foreground font-medium">{email}</span></p>
           <div className="space-y-4">
             <Input value={code} onChange={(e) => { setCode(e.target.value.replace(/\D/g, '').slice(0, 6)); setError('') }}
