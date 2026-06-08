@@ -146,3 +146,20 @@ Stage Summary:
 - 42 tokens avec variations 24h affichées
 - Fear & Greed rafraîchi automatiquement
 - API CMC corrigée pour retourner des données cohérentes
+---
+Task ID: 1
+Agent: main
+Task: Reduce site width from 900px to compact mobile-app width (512px)
+
+Work Log:
+- Changed main content container from `max-w-[900px]` to `max-w-lg` (512px) with reduced padding `px-3 sm:px-4`
+- Added `overflow-x-auto` wrapper around portfolio table for horizontal scroll on small screens
+- Adjusted table column visibility: made Qté always visible, moved PRU and Valeur to `hidden sm:table-cell`
+- Reduced table min-width from 500px to 480px
+- Built and restarted production server successfully
+
+Stage Summary:
+- Site width reduced from 900px to 512px (max-w-lg) for compact mobile-app feel
+- Portfolio table is horizontally scrollable within its container
+- All other views (Home, Transactions, AI Analysis, Profile) use card layouts that adapt naturally
+- Server running on port 3000, HTTP 200 confirmed

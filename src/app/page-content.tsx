@@ -678,18 +678,19 @@ function DashboardView({ tokens: allTokens, userRole }: { tokens: TokenData[]; u
                 <BarChart3 className="w-4 h-4 text-violet-500" />Portefeuille
               </CardTitle>
             </CardHeader>
-            <CardContent className="p-3 md:p-4 pt-0">
-                <Table className="min-w-[500px]">
+            <CardContent className="p-3 md:p-4 pt-0 -mx-3 md:-mx-4 px-3 md:px-4">
+                <div className="overflow-x-auto -mx-3 md:-mx-4 px-3 md:px-4">
+                <Table className="min-w-[480px]">
                   <TableHeader>
                     <TableRow>
-                      <TableHead className="text-[10px] md:text-xs">Token</TableHead>
-                      <TableHead className="text-[10px] md:text-xs text-right">Investi</TableHead>
-                      <TableHead className="text-[10px] md:text-xs text-right hidden sm:table-cell">Qté</TableHead>
-                      <TableHead className="text-[10px] md:text-xs text-right hidden md:table-cell">PRU</TableHead>
-                      <TableHead className="text-[10px] md:text-xs text-right">Prix</TableHead>
-                      <TableHead className="text-[10px] md:text-xs text-right hidden lg:table-cell">Valeur</TableHead>
-                      <TableHead className="text-[10px] md:text-xs text-right">P&L</TableHead>
-                      <TableHead className="text-[10px] md:text-xs text-right">ROI</TableHead>
+                      <TableHead className="text-[10px]">Token</TableHead>
+                      <TableHead className="text-[10px] text-right">Investi</TableHead>
+                      <TableHead className="text-[10px] text-right">Qté</TableHead>
+                      <TableHead className="text-[10px] text-right hidden sm:table-cell">PRU</TableHead>
+                      <TableHead className="text-[10px] text-right">Prix</TableHead>
+                      <TableHead className="text-[10px] text-right hidden sm:table-cell">Valeur</TableHead>
+                      <TableHead className="text-[10px] text-right">P&L</TableHead>
+                      <TableHead className="text-[10px] text-right">ROI</TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
@@ -719,6 +720,7 @@ function DashboardView({ tokens: allTokens, userRole }: { tokens: TokenData[]; u
                     ))}
                   </TableBody>
                 </Table>
+                </div>
             </CardContent>
           </Card>
 
@@ -2528,7 +2530,7 @@ export function CryptoApp() {
 
         {/* Content */}
         <main className="flex-1 overflow-x-hidden overflow-y-auto pb-20 md:pb-6 custom-scrollbar w-full">
-          <div className="max-w-[900px] mx-auto w-full px-4 md:px-6">
+          <div className="max-w-lg mx-auto w-full px-3 sm:px-4">
             {renderView()}
           </div>
         </main>
