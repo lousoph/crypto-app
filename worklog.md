@@ -54,3 +54,24 @@ Stage Summary:
 - All APIs tested and working: fear-greed (value:12 Extreme Fear), prices, ai-tips (6 tips), news (4 items), cmc/global
 - Caddy proxies port 81 → 3000 for external access
 - Updated .zscripts/dev.sh to use production build with server.mjs for future container restarts
+
+---
+Task ID: 1
+Agent: Main Agent
+Task: Fix "Impossible de se connecter" - site not working
+
+Work Log:
+- Diagnosed server status: server.mjs daemon had crash loop (EADDRINUSE) due to multiple instances
+- Killed all stale processes including crash-looping server.mjs instances
+- Created serve-prod.js for simpler production server startup
+- Started Next.js production server on port 3000 (PID 6910)
+- Verified all systems: port 3000 (200), port 81 Caddy proxy (200), auth CSRF (200)
+- Tested full login flow: registration, email verification, credentials login all working
+- Updated next.config.ts with allowedDevOrigins for cross-origin preview support
+- Updated dev.sh with cleaner production server startup loop
+
+Stage Summary:
+- Server is running and responding on port 3000
+- Caddy proxy on port 81 correctly forwards to port 3000
+- Authentication system fully functional (register, verify, login)
+- Test user: test@test.com / Test1234! (verified, user_free role)

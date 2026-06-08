@@ -26,131 +26,64 @@ log_step_end() {
         echo ""
 }
 
-start_mini_services() {
-        local mini_services_dir="$PROJECT_DIR/mini-services"
-        local started_count=0
-
-        log_step_start "Starting mini-services"
-        if [ ! -d "$mini_services_dir" ]; then
-                echo "Mini-services directory not found, skipping..."
-                log_step_end "Starting mini-services"
-                return 0
-        fi
-
-        echo "Found mini-services directory, scanning for sub-services..."
-
-        for service_dir in "$mini_services_dir"/*; do
-                if [ ! -d "$service_dir" ]; then
-                        continue
-                fi
-
-                local service_name
-                service_name=$(basename "$service_dir")
-                echo "Checking service: $service_name"
-
-                if [ ! -f "$service_dir/package.json" ]; then
-                        echo "[$service_name] No package.json found, skipping..."
-                        continue
-                fi
-
-                if ! grep -q '"dev"' "$service_dir/package.json"; then
-                        echo "[$service_name] No dev script found, skipping..."
-                        continue
-                fi
-
-                echo "Starting $service_name in background..."
-                (
-                        cd "$service_dir"
-                        echo "[$service_name] Installing dependencies..."
-                        bun install
-                        echo "[$service_name] Running bun run dev..."
-                        exec bun run dev
-                ) >"$PROJECT_DIR/.zscripts/mini-service-${service_name}.log" 2>&1 &
-
-                local service_pid=$!
-                echo "[$service_name] Started in background (PID: $service_pid)"
-                echo "[$service_name] Log: $PROJECT_DIR/.zscripts/mini-service-${service_name}.log"
-                disown "$service_pid" 2>/dev/null || true
-                started_count=$((started_count + 1))
-        done
-
-        echo "Mini-services startup completed. Started $started_count service(s)."
-        log_step_end "Starting mini-services"
-}
-
-wait_for_service() {
-        local host="$1"
-        local port="$2"
-        local service_name="$3"
-        local max_attempts="${4:-60}"
-        local attempt=1
-
-        echo "Waiting for $service_name to be ready on $host:$port..."
-
-        while [ "$attempt" -le "$max_attempts" ]; do
-                if curl -s --connect-timeout 2 --max-time 5 "http://$host:$port" >/dev/null 2>&1; then
-                        echo "$service_name is ready!"
-                        return 0
-                fi
-
-                echo "Attempt $attempt/$max_attempts: $service_name not ready yet, waiting..."
-                sleep 1
-                attempt=$((attempt + 1))
-        done
-
-        echo "ERROR: $service_name failed to start within $max_attempts seconds"
-        return 1
-}
-
 cd "$PROJECT_DIR"
 
-if ! command -v bun >/dev/null 2>&1; then
-        echo "ERROR: bun is not installed or not in PATH"
-        exit 1
-fi
-
+# Install dependencies
 log_step_start "bun install"
 echo "[BUN] Installing dependencies..."
 bun install
 log_step_end "bun install"
 
+# Setup database
 log_step_start "bun run db:push"
 echo "[BUN] Setting up database..."
 bun run db:push
 log_step_end "bun run db:push"
 
-# Use production build with custom server for stability
+# Build for production
 log_step_start "Building for production"
 echo "[BUN] Building Next.js..."
 NODE_OPTIONS='--max-old-space-size=2048' bun run build
 log_step_end "Building for production"
 
+# Generate Prisma client
+log_step_start "Prisma generate"
+echo "[PRISMA] Generating client..."
+bun run db:generate
+log_step_end "Prisma generate"
+
+# Start production server in a restart loop
 log_step_start "Starting Next.js production server"
 echo "[SERVER] Starting production server on port 3000..."
 
-# Start the production server with auto-restart loop
 (
   cd "$PROJECT_DIR"
   while true; do
-    NODE_ENV=production NODE_OPTIONS='--max-old-space-size=512' node server.mjs </dev/null &>>/tmp/server.log
-    echo "[$(date)] Server exited, restarting in 2s..." >> /tmp/server.log
-    sleep 2
+    NODE_ENV=production NODE_OPTIONS='--max-old-space-size=384' \
+      node -e "
+        const next = require('next');
+        const http = require('http');
+        process.on('uncaughtException', (e) => { console.error('UNCAUGHT:', e.message); process.exit(1); });
+        process.on('unhandledRejection', (r) => { console.error('UNHANDLED:', r); process.exit(1); });
+        async function start() {
+          const app = next({ dev: false, hostname: '0.0.0.0', port: 3000 });
+          const handle = app.getRequestHandler();
+          await app.prepare();
+          const server = http.createServer(handle);
+          await new Promise((resolve, reject) => {
+            server.listen(3000, '0.0.0.0', () => { console.log('READY on 0.0.0.0:3000'); resolve(); });
+            server.on('error', reject);
+          });
+          process.on('SIGTERM', () => { console.log('SIGTERM'); server.close(() => process.exit(0)); });
+        }
+        start().catch(err => { console.error('FATAL:', err.message); process.exit(1); });
+      " </dev/null &>>/tmp/next-prod.log
+    echo "[$(date)] Server exited, restarting in 3s..." >> /tmp/next-prod.log
+    sleep 3
   done
-) </dev/null &>>/tmp/server.log &
-DEV_PID=$!
-disown "$DEV_PID" 2>/dev/null || true
+) </dev/null &>>/tmp/next-prod.log &
+SERVER_PID=$!
+disown "$SERVER_PID" 2>/dev/null || true
 log_step_end "Starting Next.js production server"
 
-log_step_start "Waiting for Next.js server"
-wait_for_service "localhost" "3000" "Next.js server"
-log_step_end "Waiting for Next.js server"
-
-log_step_start "Health check"
-echo "[SERVER] Performing health check..."
-curl -fsS localhost:3000 >/dev/null
-echo "[SERVER] Health check passed"
-log_step_end "Health check"
-
-start_mini_services
-
-echo "Next.js production server is running (PID: $DEV_PID)."
+echo "Production server started (PID: $SERVER_PID)"
