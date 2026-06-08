@@ -117,9 +117,9 @@ const fmtPct = (n: number) => (n >= 0 ? '+' : '') + (n * 100).toFixed(2) + '%'
 const fmtQty = (n: number) => {
   if (n === 0) return '0'
   if (n >= 1000) return new Intl.NumberFormat('fr-FR', { maximumFractionDigits: 2 }).format(n)
-  if (n >= 1) return new Intl.NumberFormat('fr-FR', { minimumFractionDigits: 2, maximumFractionDigits: 4 }).format(n)
-  // For very small quantities, show up to 8 decimals without scientific notation
-  return n.toFixed(8).replace(/0+$/, '').replace(/\.$/, '')
+  if (n >= 1) return new Intl.NumberFormat('fr-FR', { minimumFractionDigits: 2, maximumFractionDigits: 6 }).format(n)
+  // For very small quantities, show up to 10 decimals without scientific notation
+  return n.toFixed(10).replace(/0+$/, '').replace(/\.$/, '')
 }
 const fmtSmall = (n: number) => n < 0.01 ? n.toFixed(8).replace(/0+$/, '').replace(/\.$/, '') : n < 1 ? n.toFixed(4) : n.toFixed(2)
 const fmtPrice = (n: number) => n >= 1 ? fmt(n) : fmtSmall(n)
