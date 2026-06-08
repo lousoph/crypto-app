@@ -679,8 +679,8 @@ function DashboardView({ tokens: allTokens, userRole }: { tokens: TokenData[]; u
               </CardTitle>
             </CardHeader>
             <CardContent className="p-4 pt-0">
-              <div className="overflow-x-auto -mx-4 px-4">
-                <Table>
+              <div className="overflow-x-auto -mx-4 px-4 md:-mx-6 md:px-6">
+                <Table className="min-w-[500px]">
                   <TableHeader>
                     <TableRow>
                       <TableHead className="text-[10px] md:text-xs">Token</TableHead>
@@ -705,12 +705,12 @@ function DashboardView({ tokens: allTokens, userRole }: { tokens: TokenData[]; u
                             </div>
                           </div>
                         </TableCell>
-                        <TableCell className="text-xs text-right text-muted-foreground">${fmt(t.montantInvesti)}</TableCell>
-                        <TableCell className="text-xs text-right text-muted-foreground hidden sm:table-cell">{fmtQty(t.quantite)}</TableCell>
-                        <TableCell className="text-xs text-right text-muted-foreground hidden md:table-cell">${fmtPrice(t.pru)}</TableCell>
-                        <TableCell className="text-xs text-right font-medium text-foreground">${fmtPrice(t.currentPrice)}</TableCell>
-                        <TableCell className="text-xs text-right text-muted-foreground hidden lg:table-cell">${fmt(t.valeurActuelle)}</TableCell>
-                        <TableCell className={`text-xs text-right font-semibold ${plColor(t.pl)}`}>{t.pl >= 0 ? '+' : ''}${fmt(Math.abs(t.pl))}</TableCell>
+                        <TableCell className="text-xs sm:text-sm text-right text-muted-foreground whitespace-nowrap">${fmt(t.montantInvesti)}</TableCell>
+                        <TableCell className="text-xs sm:text-sm text-right text-muted-foreground hidden sm:table-cell whitespace-nowrap">{fmtQty(t.quantite)}</TableCell>
+                        <TableCell className="text-xs sm:text-sm text-right text-muted-foreground hidden md:table-cell whitespace-nowrap">${fmtPrice(t.pru)}</TableCell>
+                        <TableCell className="text-xs sm:text-sm text-right font-medium text-foreground whitespace-nowrap">${fmtPrice(t.currentPrice)}</TableCell>
+                        <TableCell className="text-xs sm:text-sm text-right text-muted-foreground hidden lg:table-cell whitespace-nowrap">${fmt(t.valeurActuelle)}</TableCell>
+                        <TableCell className={`text-xs sm:text-sm text-right font-semibold whitespace-nowrap ${plColor(t.pl)}`}>{t.pl >= 0 ? '+' : ''}${fmt(Math.abs(t.pl))}</TableCell>
                         <TableCell className="text-right">
                           <Badge variant="secondary" className={`text-[10px] font-bold ${plBg(t.rentabilite)}`}>
                             {fmtPct(t.rentabilite)}
@@ -1779,7 +1779,7 @@ function ProfileView({ userRole }: { userRole: string }) {
                 </p>
               ) : (
                 <div className="mt-3 space-y-2">
-                  <div className="grid grid-cols-4 gap-1.5">
+                  <div className="grid grid-cols-2 sm:grid-cols-4 gap-1.5">
                     {[
                       { months: 1, price: 9.99, badge: '' },
                       { months: 3, price: 26.97, badge: '-10%' },
@@ -2010,7 +2010,7 @@ function AdminUsersView() {
 
       {/* Edit User Dialog */}
       <Dialog open={!!editUser} onOpenChange={(open) => { if (!open) setEditUser(null) }}>
-        <DialogContent className="sm:max-w-md rounded-xl">
+        <DialogContent className="dialog-mobile-fullscreen sm:max-w-md rounded-xl">
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2"><Pencil className="w-4 h-4 text-violet-500" />Modifier l'utilisateur</DialogTitle>
             <DialogDescription>Modifier les informations du compte de {editUser?.email}</DialogDescription>
@@ -2049,7 +2049,7 @@ function AdminUsersView() {
 
       {/* Delete Confirmation Dialog */}
       <Dialog open={!!deleteConfirm} onOpenChange={(open) => { if (!open) setDeleteConfirm(null) }}>
-        <DialogContent className="sm:max-w-sm rounded-xl">
+        <DialogContent className="dialog-mobile-fullscreen sm:max-w-sm rounded-xl">
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2 text-red-500"><AlertTriangle className="w-5 h-5" />Supprimer cet utilisateur ?</DialogTitle>
             <DialogDescription>Cette action est irréversible. Toutes les données de l'utilisateur (transactions, sessions) seront définitivement supprimées.</DialogDescription>
@@ -2138,7 +2138,7 @@ function AdminTokensView() {
         ))}
       </div>
       <Dialog open={showForm} onOpenChange={setShowForm}>
-        <DialogContent className="sm:max-w-md rounded-xl">
+        <DialogContent className="dialog-mobile-fullscreen sm:max-w-md rounded-xl">
           <DialogHeader><DialogTitle>Ajouter un token</DialogTitle></DialogHeader>
           <form onSubmit={handleCreate} className="space-y-3">
             <Input placeholder="Ticker (ex: BTC)" value={formTicker} onChange={(e) => setFormTicker(e.target.value.toUpperCase())} className="h-10 rounded-xl bg-input border-border" required />
@@ -2221,7 +2221,7 @@ function AdminExchangesView() {
         ))}
       </div>
       <Dialog open={showForm} onOpenChange={setShowForm}>
-        <DialogContent className="sm:max-w-md rounded-xl">
+        <DialogContent className="dialog-mobile-fullscreen sm:max-w-md rounded-xl">
           <DialogHeader><DialogTitle>Ajouter un exchange</DialogTitle></DialogHeader>
           <form onSubmit={handleCreate} className="space-y-3">
             <Input placeholder="Nom (ex: BINANCE)" value={formName} onChange={(e) => setFormName(e.target.value.toUpperCase())} className="h-10 rounded-xl bg-input border-border" required />
@@ -2432,7 +2432,7 @@ function MobileHeader({ view, setView, isAdmin, onLogout }: { view: View; setVie
 
       {/* Dropdown Menu */}
       {menuOpen && (
-        <div className="absolute top-14 right-0 w-56 rounded-xl glass-strong border border-border shadow-xl p-2 z-50">
+        <div className="absolute top-14 right-0 w-56 max-w-[calc(100vw-2rem)] rounded-xl glass-strong border border-border shadow-xl p-2 z-50">
           {isAdmin && (
             <>
               <p className="text-[10px] font-semibold text-muted-foreground px-3 py-1 uppercase tracking-wider">Admin</p>
@@ -2513,7 +2513,7 @@ export function CryptoApp() {
   }
 
   return (
-    <div className="min-h-screen flex flex-col md:flex-row bg-background">
+    <div className="min-h-screen flex flex-col md:flex-row bg-background overflow-x-hidden">
       {/* Ambient Background */}
       <div className="ambient-bg">
         <div className="aurora-blob" style={{ top: '10%', left: '5%', width: '35%', height: '35%', background: 'rgba(124,92,252,0.06)', animationDuration: '15s' }} />
@@ -2524,13 +2524,13 @@ export function CryptoApp() {
       <Sidebar view={view} setView={setView} isAdmin={isAdmin} onLogout={logout} />
 
       {/* Main Area */}
-      <div className="flex-1 flex flex-col min-h-screen md:min-h-0">
+      <div className="flex-1 flex flex-col min-h-screen md:min-h-0 overflow-x-hidden">
         {/* Mobile Header */}
         <MobileHeader view={view} setView={setView} isAdmin={isAdmin} onLogout={logout} />
 
         {/* Content */}
-        <main className="flex-1 overflow-y-auto pb-20 md:pb-0 custom-scrollbar">
-          <div className="max-w-5xl mx-auto w-full">
+        <main className="flex-1 overflow-x-hidden overflow-y-auto pb-20 md:pb-6 custom-scrollbar">
+          <div className="max-w-[900px] mx-auto w-full">
             {renderView()}
           </div>
         </main>
