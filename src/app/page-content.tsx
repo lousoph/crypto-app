@@ -6,7 +6,7 @@ import {
   LogOut, TrendingUp, TrendingDown, DollarSign, Wallet,
   Plus, Trash2, RefreshCw, BarChart3, Crown, AlertTriangle,
   Check, X, Menu, Search, Activity, Zap, Brain, Mail,
-  Sun, Moon, Sparkles, ChevronDown, ChevronUp, Eye,
+  Sun, Moon, Sparkles, ChevronDown, ChevronUp, Eye, EyeOff,
   Gauge, ArrowUpCircle, ArrowDownCircle, Minus, ExternalLink, Star, Pencil,
   Home, Newspaper, Lightbulb, Clock, Globe, TrendingUp, ArrowRight
 } from 'lucide-react'
@@ -201,6 +201,7 @@ function LoginScreen({ onLogin, onRegister }: {
   const [isRegister, setIsRegister] = useState(false)
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
+  const [showPassword, setShowPassword] = useState(false)
   const [name, setName] = useState('')
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)
@@ -219,6 +220,8 @@ function LoginScreen({ onLogin, onRegister }: {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault(); setError(''); setLoading(true)
     try {
+      if (!email || !email.trim()) { setError('Veuillez entrer votre email'); return }
+      if (!password || password.length < 1) { setError('Veuillez entrer votre mot de passe'); return }
       if (isRegister) {
         const result = await onRegister(email, password, name)
         if (result?.requiresVerification) {
@@ -228,9 +231,16 @@ function LoginScreen({ onLogin, onRegister }: {
         } else { toast.success('Compte créé avec succès !') }
       } else {
         const ok = await onLogin(email, password)
-        if (!ok) setError('Email ou mot de passe incorrect')
+        if (!ok) {
+          const msg = 'Email ou mot de passe incorrect'
+          setError(msg)
+          toast.error(msg)
+        }
       }
-    } catch (err: any) { setError(err.message) } finally { setLoading(false) }
+    } catch (err: any) {
+      setError(err.message)
+      toast.error(err.message)
+    } finally { setLoading(false) }
   }
 
   const handleVerify = async () => {
@@ -338,11 +348,18 @@ function LoginScreen({ onLogin, onRegister }: {
               </div>
               <div className="space-y-2">
                 <Label htmlFor="password" className="text-xs font-medium text-muted-foreground">Mot de passe</Label>
-                <Input id="password" type="password" value={password} onChange={(e) => setPassword(e.target.value)} placeholder="••••••••" required
-                  className="border rounded-xl h-11 bg-input" />
+                <div className="relative">
+                  <Input id="password" type={showPassword ? 'text' : 'password'} value={password} onChange={(e) => setPassword(e.target.value)} placeholder="••••••••" required
+                    className="border rounded-xl h-11 bg-input pr-10" />
+                  <button type="button" onClick={() => setShowPassword(!showPassword)}
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors p-0.5"
+                    tabIndex={-1} aria-label={showPassword ? 'Masquer le mot de passe' : 'Afficher le mot de passe'}>
+                    {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                  </button>
+                </div>
               </div>
               {error && (
-                <div className="flex items-center gap-2 text-red-400 text-sm p-3 rounded-xl border" style={{ background: ts.errorBg, borderColor: ts.errorBorder }}>
+                <div className="flex items-center gap-2 text-red-600 dark:text-red-400 text-sm font-medium p-3 rounded-xl border border-red-200 dark:border-red-800/50 bg-red-50 dark:bg-red-950/30">
                   <AlertTriangle className="w-4 h-4 shrink-0" />{error}
                 </div>
               )}
