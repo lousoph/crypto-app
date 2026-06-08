@@ -2530,7 +2530,7 @@ export function CryptoApp() {
 
         {/* Content */}
         <main className="flex-1 overflow-x-hidden overflow-y-auto pb-20 md:pb-6 custom-scrollbar w-full">
-          <div className="max-w-3xl mx-auto w-full px-4 sm:px-6">
+          <div className="max-w-4xl mx-auto w-full px-4 sm:px-6">
             {renderView()}
           </div>
         </main>
