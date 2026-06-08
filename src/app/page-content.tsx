@@ -114,7 +114,14 @@ function useThemeStyles() {
 // ============================================================
 const fmt = (n: number) => new Intl.NumberFormat('fr-FR', { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(n)
 const fmtPct = (n: number) => (n >= 0 ? '+' : '') + (n * 100).toFixed(2) + '%'
-const fmtSmall = (n: number) => n < 0.01 ? n.toExponential(2) : n < 1 ? n.toFixed(4) : n.toFixed(2)
+const fmtQty = (n: number) => {
+  if (n === 0) return '0'
+  if (n >= 1000) return new Intl.NumberFormat('fr-FR', { maximumFractionDigits: 2 }).format(n)
+  if (n >= 1) return new Intl.NumberFormat('fr-FR', { minimumFractionDigits: 2, maximumFractionDigits: 4 }).format(n)
+  // For very small quantities, show up to 8 decimals without scientific notation
+  return n.toFixed(8).replace(/0+$/, '').replace(/\.$/, '')
+}
+const fmtSmall = (n: number) => n < 0.01 ? n.toFixed(8).replace(/0+$/, '').replace(/\.$/, '') : n < 1 ? n.toFixed(4) : n.toFixed(2)
 const fmtPrice = (n: number) => n >= 1 ? fmt(n) : fmtSmall(n)
 const plColor = (v: number) => v >= 0 ? 'text-emerald-500 dark:text-emerald-400' : 'text-red-500 dark:text-red-400'
 const plBg = (v: number) => v >= 0 ? 'bg-emerald-500/10 text-emerald-500' : 'bg-red-500/10 text-red-500'
@@ -699,7 +706,7 @@ function DashboardView({ tokens: allTokens, userRole }: { tokens: TokenData[]; u
                           </div>
                         </TableCell>
                         <TableCell className="text-xs text-right text-muted-foreground">${fmt(t.montantInvesti)}</TableCell>
-                        <TableCell className="text-xs text-right text-muted-foreground hidden sm:table-cell">{fmtSmall(t.quantite)}</TableCell>
+                        <TableCell className="text-xs text-right text-muted-foreground hidden sm:table-cell">{fmtQty(t.quantite)}</TableCell>
                         <TableCell className="text-xs text-right text-muted-foreground hidden md:table-cell">${fmtPrice(t.pru)}</TableCell>
                         <TableCell className="text-xs text-right font-medium text-foreground">${fmtPrice(t.currentPrice)}</TableCell>
                         <TableCell className="text-xs text-right text-muted-foreground hidden lg:table-cell">${fmt(t.valeurActuelle)}</TableCell>
@@ -923,7 +930,7 @@ function TransactionsView({ userRole }: { userRole: string }) {
                   </div>
                   <div className="text-right shrink-0">
                     <p className="text-sm font-semibold text-foreground">${fmt(tx.montantInvesti)}</p>
-                    <p className="text-[10px] text-muted-foreground">{fmtSmall(tx.quantite)} @ ${fmtPrice(tx.coursAchat)}</p>
+                    <p className="text-[10px] text-muted-foreground">{fmtQty(tx.quantite)} @ ${fmtPrice(tx.coursAchat)}</p>
                   </div>
                   <Button variant="ghost" size="icon" className="h-8 w-8 text-muted-foreground hover:text-red-500" onClick={() => handleDelete(tx.id)}>
                     <Trash2 className="w-4 h-4" />
