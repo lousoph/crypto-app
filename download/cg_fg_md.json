@@ -1,0 +1,18 @@
+{
+  "code": 200,
+  "data": {
+    "description": "",
+    "html": "<html><head><meta name=\"color-scheme\" content=\"light dark\"></head><body><pre style=\"word-wrap: break-word; white-space: pre-wrap;\"># Crypto Fear & Greed Index\n\nThis endpoint provides data for the Crypto Fear & Greed Index\n\n***Cache / Update Frequency:*** every day for all the API plans.\n\n***This endpoint is available on the following*** [API plans](https://www.coinglass.com/pricing)：\n\n| Plans     | Hobbyist | Startup | Standard | Professional | Enterprise |\n| :-------- | :------- | :------ | :------- | :----------- | :--------- |\n| Available | ✅        | ✅       | ✅        | ✅            | ✅          |\n\n# Response Data\n\n```json\n{\n  \"code\": \"0\",                             \n  \"msg\": \"success\",                        \n  \"data\": [\n    {\n      \"data_list\": [4611285.1141, ...],         // Fear and Greed Index values\n      \"price_list\": [4788636.51145, ...],         // Corresponding price data\n      \"time_list\": [1636588800, ...]        // Timestamps\n    }\n  ]\n}\n\n```\n\n# OpenAPI definition\n\n```json\n{\n  \"openapi\": \"3.1.0\",\n  \"info\": {\n    \"title\": \"coinglass\",\n    \"version\": \"3.0\"\n  },\n  \"servers\": [\n    {\n      \"url\": \"https://open-api-v4.coinglass.com\"\n    }\n  ],\n  \"components\": {\n    \"securitySchemes\": {\n      \"sec0\": {\n        \"type\": \"apiKey\",\n        \"in\": \"header\",\n        \"name\": \"CG-API-KEY\"\n      }\n    }\n  },\n  \"security\": [\n    {\n      \"sec0\": []\n    }\n  ],\n  \"paths\": {\n    \"/api/index/fear-greed-history\": {\n      \"get\": {\n        \"summary\": \"Crypto Fear & Greed Index\",\n        \"description\": \"\",\n        \"operationId\": \"cryptofear-greedindex\",\n        \"responses\": {\n          \"200\": {\n            \"description\": \"200\",\n            \"content\": {\n              \"application/json\": {\n                \"examples\": {\n                  \"Result\": {\n                    \"value\": \"{\\n  \\\"code\\\": \\\"0\\\",                             \\n  \\\"msg\\\": \\\"success\\\",                        \\n  \\\"data\\\": [\\n    {\\n      \\\"data_list\\\": [4611285.1141, ...],         // Fear and Greed Index values\\n      \\\"price_list\\\": [4788636.51145, ...],         // Corresponding price data\\n      \\\"time_list\\\": [1636588800, ...]        // Timestamps\\n    }\\n  ]\\n}\"\n                  }\n                },\n                \"schema\": {\n                  \"type\": \"object\",\n                  \"properties\": {}\n                }\n              }\n            }\n          },\n          \"400\": {\n            \"description\": \"400\",\n            \"content\": {\n              \"application/json\": {\n                \"examples\": {\n                  \"Result\": {\n                    \"value\": \"{}\"\n                  }\n                },\n                \"schema\": {\n                  \"type\": \"object\",\n                  \"properties\": {}\n                }\n              }\n            }\n          }\n        },\n        \"deprecated\": false\n      }\n    }\n  },\n  \"x-readme\": {\n    \"headers\": [],\n    \"explorer-enabled\": true,\n    \"proxy-enabled\": true\n  },\n  \"x-readme-fauxas\": true\n}\n```</pre></body></html>",
+    "title": "",
+    "url": "https://docs.coinglass.com/reference/cryptofear-greedindex.md",
+    "usage": {
+      "tokens": 749
+    }
+  },
+  "meta": {
+    "usage": {
+      "tokens": 749
+    }
+  },
+  "status": 20000
+}

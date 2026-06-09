@@ -1,0 +1,92 @@
+[
+  {
+    "url": "https://docs.coinglass.com/reference/cryptofear-greedindex",
+    "name": "Crypto Fear & Greed Index - CoinGlass-API",
+    "snippet": "This endpoint provides data for the Crypto Fear & Greed Index. Recent Requests. Log in to see full request history. Time, Status, User Agent ...",
+    "host_name": "docs.coinglass.com",
+    "rank": 0,
+    "date": "",
+    "favicon": ""
+  },
+  {
+    "url": "https://www.coinglass.com/pricing",
+    "name": "Crypto Data API: Futures, Spot & Options | L2 & L3 Order Book",
+    "snippet": "CoinGlass API provides tick-by-tick raw trade data, order book depth, open interest, funding rates, liquidation data, order flow metrics, and footprint ...",
+    "host_name": "www.coinglass.com",
+    "rank": 1,
+    "date": "",
+    "favicon": ""
+  },
+  {
+    "url": "https://www.coinglass.com/pro/i/FearGreedIndex",
+    "name": "Fear and Greed Index | CoinGlass",
+    "snippet": "The CoinGlass Fear and Greed Index analyzes Bitcoin market sentiment by combining factors such as price volatility, trading volume, and market momentum.",
+    "host_name": "www.coinglass.com",
+    "rank": 2,
+    "date": "",
+    "favicon": ""
+  },
+  {
+    "url": "https://www.coinglass.com/learn/CoinGlass-API-Full-Guide-en",
+    "name": "CoinGlass API Complete Guide",
+    "snippet": "CoinGlass API provides professional-grade coverage of core derivatives market metrics, including perpetual swaps, futures, and trading behavior data. Main ...",
+    "host_name": "www.coinglass.com",
+    "rank": 3,
+    "date": "",
+    "favicon": ""
+  },
+  {
+    "url": "https://dlthub.com/context/source/coinglass",
+    "name": "Coinglass Python API Docs | dltHub",
+    "snippet": "CoinGlass API offers endpoints for futures, spot markets, and ETF data; key endpoints include open interest, funding rates, and liquidation ...",
+    "host_name": "dlthub.com",
+    "rank": 4,
+    "date": "",
+    "favicon": ""
+  },
+  {
+    "url": "https://github.com/dineshpinto/coinglass-api",
+    "name": "dineshpinto/coinglass-api: RESTful Python client for  - GitHub",
+    "snippet": "Unofficial Python client for Coinglass API. Wrapper around the Coinglass API to fetch data about crypto derivatives. All data is output in pandas DataFrames ( ...",
+    "host_name": "github.com",
+    "rank": 5,
+    "date": "",
+    "favicon": ""
+  },
+  {
+    "url": "https://www.coinglass.com/CryptoApi",
+    "name": "Crypto Data API: Futures, Spot, Options & ETF - CoinGlass",
+    "snippet": "CoinGlass API provides institutional-grade, full-market crypto data across futures, spot, options, ETF and on-chain markets, including tick-level L2/L3 ...",
+    "host_name": "www.coinglass.com",
+    "rank": 6,
+    "date": "",
+    "favicon": ""
+  },
+  {
+    "url": "https://coinglass.readme.io/reference/api-new-version",
+    "name": "CoinGlass API v4.0 - ReadMe",
+    "snippet": "Upgraded Documentation: Navigate our comprehensive documentation effortlessly, with detailed guides and examples to streamline your integration. Developer- ...",
+    "host_name": "coinglass.readme.io",
+    "rank": 7,
+    "date": "",
+    "favicon": ""
+  },
+  {
+    "url": "https://alternative.me/crypto/fear-and-greed-index",
+    "name": "Crypto Fear & Greed Index - Bitcoin Sentiment - Alternative.me",
+    "snippet": "For more endpoints of the API, visit our free crypto API documentation page. Problems with the fear and greed API? Just drop us a mail at support ...",
+    "host_name": "alternative.me",
+    "rank": 8,
+    "date": "",
+    "favicon": ""
+  },
+  {
+    "url": "https://docs.coinglass.com/reference",
+    "name": "Reference - CoinGlass",
+    "snippet": "For AI agents: visit https://docs.coinglass.com/llms.txt for an index of all pages formatted in Markdown and endpoints in OpenAPI. Jump to Content.",
+    "host_name": "docs.coinglass.com",
+    "rank": 9,
+    "date": "",
+    "favicon": ""
+  }
+]
