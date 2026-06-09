@@ -1176,80 +1176,82 @@ function TransactionsView({ userRole }: { userRole: string }) {
 
       {/* Add Transaction Dialog */}
       <Dialog open={showForm} onOpenChange={setShowForm}>
-        <DialogContent className="dialog-mobile-fullscreen sm:max-w-md rounded-xl">
-          <DialogHeader>
+        <DialogContent className="dialog-mobile-fullscreen sm:max-w-md rounded-xl flex flex-col max-h-[100dvh] overflow-hidden">
+          <DialogHeader className="shrink-0">
             <DialogTitle className="flex items-center gap-2"><Plus className="w-5 h-5 text-violet-500" />Nouvelle transaction</DialogTitle>
             <DialogDescription>Ajoutez un achat crypto à votre portefeuille</DialogDescription>
           </DialogHeader>
-          <form onSubmit={handleSubmit} className="space-y-4">
-            <div className="space-y-2">
-              <Label className="text-xs font-medium">Date</Label>
-              <Input type="date" value={formDate} onChange={(e) => setFormDate(e.target.value)} className="h-10 rounded-xl bg-input border-border" required />
-            </div>
-            <div className="space-y-2">
-              <Label className="text-xs font-medium">Token</Label>
-              <Popover open={tokenSearchOpen} onOpenChange={setTokenSearchOpen}>
-                <PopoverTrigger asChild>
-                  <Button variant="outline" role="combobox" aria-expanded={tokenSearchOpen}
-                    className="h-10 rounded-xl w-full justify-between font-normal text-muted-foreground">
-                    {formToken ? (() => {
-                      const t = tokens.find(tk => tk.ticker === formToken)
-                      return t ? <div className="flex items-center gap-2"><TokenLogo ticker={t.ticker} size={16} /><span>{t.ticker}</span><span className="text-muted-foreground text-xs">{t.name}</span></div> : formToken
-                    })() : 'Sélectionner un token'}
-                    <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
-                  </Button>
-                </PopoverTrigger>
-                <PopoverContent className="w-[--radix-popover-trigger-width] p-0" align="start">
-                  <Command>
-                    <CommandInput placeholder="Rechercher un token..." value={tokenSearch} onValueChange={setTokenSearch} />
-                    <CommandList>
-                      <CommandEmpty>Aucun token trouvé.</CommandEmpty>
-                      <CommandGroup className="max-h-60 overflow-y-auto">
-                        {filteredTokens.map(t => (
-                          <CommandItem key={t.ticker} value={`${t.ticker} ${t.name}`}
-                            onSelect={() => { setFormToken(t.ticker); setTokenSearch(''); setTokenSearchOpen(false) }}>
-                            <Check className={cn("mr-2 h-4 w-4 shrink-0", formToken === t.ticker ? "opacity-100" : "opacity-0")} />
-                            <TokenLogo ticker={t.ticker} size={16} />
-                            <span className="ml-1">{t.ticker}</span>
-                            <span className="ml-1 text-muted-foreground text-xs">{t.name}</span>
-                          </CommandItem>
-                        ))}
-                      </CommandGroup>
-                    </CommandList>
-                  </Command>
-                </PopoverContent>
-              </Popover>
-            </div>
-            <div className="grid grid-cols-2 gap-3">
+          <form onSubmit={handleSubmit} className="flex flex-col flex-1 min-h-0">
+            <div className="flex-1 overflow-y-auto space-y-4 pr-1">
               <div className="space-y-2">
-                <Label className="text-xs font-medium">Montant ($)</Label>
-                <Input type="number" step="0.01" placeholder="100" value={formAmount} onChange={(e) => setFormAmount(e.target.value)}
-                  className="h-10 rounded-xl bg-input border-border" required />
+                <Label className="text-xs font-medium">Date</Label>
+                <Input type="date" value={formDate} onChange={(e) => setFormDate(e.target.value)} className="h-10 rounded-xl bg-input border-border" required />
               </div>
               <div className="space-y-2">
-                <Label className="text-xs font-medium">Prix d'achat ($)</Label>
-                <Input type="number" step="0.00001" placeholder="0.00" value={formBuyPrice} onChange={(e) => setFormBuyPrice(e.target.value)}
-                  className="h-10 rounded-xl bg-input border-border" required />
+                <Label className="text-xs font-medium">Token</Label>
+                <Popover open={tokenSearchOpen} onOpenChange={setTokenSearchOpen}>
+                  <PopoverTrigger asChild>
+                    <Button variant="outline" role="combobox" aria-expanded={tokenSearchOpen}
+                      className="h-10 rounded-xl w-full justify-between font-normal text-muted-foreground">
+                      {formToken ? (() => {
+                        const t = tokens.find(tk => tk.ticker === formToken)
+                        return t ? <div className="flex items-center gap-2"><TokenLogo ticker={t.ticker} size={16} /><span>{t.ticker}</span><span className="text-muted-foreground text-xs">{t.name}</span></div> : formToken
+                      })() : 'Sélectionner un token'}
+                      <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                    </Button>
+                  </PopoverTrigger>
+                  <PopoverContent className="w-[--radix-popover-trigger-width] p-0" align="start">
+                    <Command>
+                      <CommandInput placeholder="Rechercher un token..." value={tokenSearch} onValueChange={setTokenSearch} />
+                      <CommandList>
+                        <CommandEmpty>Aucun token trouvé.</CommandEmpty>
+                        <CommandGroup className="max-h-60 overflow-y-auto">
+                          {filteredTokens.map(t => (
+                            <CommandItem key={t.ticker} value={`${t.ticker} ${t.name}`}
+                              onSelect={() => { setFormToken(t.ticker); setTokenSearch(''); setTokenSearchOpen(false) }}>
+                              <Check className={cn("mr-2 h-4 w-4 shrink-0", formToken === t.ticker ? "opacity-100" : "opacity-0")} />
+                              <TokenLogo ticker={t.ticker} size={16} />
+                              <span className="ml-1">{t.ticker}</span>
+                              <span className="ml-1 text-muted-foreground text-xs">{t.name}</span>
+                            </CommandItem>
+                          ))}
+                        </CommandGroup>
+                      </CommandList>
+                    </Command>
+                  </PopoverContent>
+                </Popover>
+              </div>
+              <div className="grid grid-cols-2 gap-3">
+                <div className="space-y-2">
+                  <Label className="text-xs font-medium">Montant ($)</Label>
+                  <Input type="number" step="0.01" placeholder="100" value={formAmount} onChange={(e) => setFormAmount(e.target.value)}
+                    className="h-10 rounded-xl bg-input border-border" required />
+                </div>
+                <div className="space-y-2">
+                  <Label className="text-xs font-medium">Prix d'achat ($)</Label>
+                  <Input type="number" step="0.00001" placeholder="0.00" value={formBuyPrice} onChange={(e) => setFormBuyPrice(e.target.value)}
+                    className="h-10 rounded-xl bg-input border-border" required />
+                </div>
+              </div>
+              {formAmount && formBuyPrice && parseFloat(formBuyPrice) > 0 && (
+                <p className="text-xs text-muted-foreground">Quantité : {(parseFloat(formAmount) / parseFloat(formBuyPrice)).toFixed(6)}</p>
+              )}
+              <div className="space-y-2">
+                <Label className="text-xs font-medium">Exchange (optionnel)</Label>
+                <Select value={formExchange} onValueChange={setFormExchange}>
+                  <SelectTrigger className="h-10 rounded-xl"><SelectValue placeholder="Sélectionner" /></SelectTrigger>
+                  <SelectContent>
+                    {exchanges.map(e => <SelectItem key={e.id} value={e.id}>{e.name}</SelectItem>)}
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="space-y-2">
+                <Label className="text-xs font-medium">Notes (optionnel)</Label>
+                <Input placeholder="Notes..." value={formNotes} onChange={(e) => setFormNotes(e.target.value)}
+                  className="h-10 rounded-xl bg-input border-border" />
               </div>
             </div>
-            {formAmount && formBuyPrice && parseFloat(formBuyPrice) > 0 && (
-              <p className="text-xs text-muted-foreground">Quantité : {(parseFloat(formAmount) / parseFloat(formBuyPrice)).toFixed(6)}</p>
-            )}
-            <div className="space-y-2">
-              <Label className="text-xs font-medium">Exchange (optionnel)</Label>
-              <Select value={formExchange} onValueChange={setFormExchange}>
-                <SelectTrigger className="h-10 rounded-xl"><SelectValue placeholder="Sélectionner" /></SelectTrigger>
-                <SelectContent>
-                  {exchanges.map(e => <SelectItem key={e.id} value={e.id}>{e.name}</SelectItem>)}
-                </SelectContent>
-              </Select>
-            </div>
-            <div className="space-y-2">
-              <Label className="text-xs font-medium">Notes (optionnel)</Label>
-              <Input placeholder="Notes..." value={formNotes} onChange={(e) => setFormNotes(e.target.value)}
-                className="h-10 rounded-xl bg-input border-border" />
-            </div>
-            <DialogFooter className="gap-2">
+            <DialogFooter className="gap-2 shrink-0 pt-3 border-t border-border mt-2">
               <DialogClose asChild><Button type="button" variant="ghost" className="rounded-xl h-10">Annuler</Button></DialogClose>
               <Button type="submit" className="btn-primary-glow text-foreground rounded-xl h-10" style={{ background: 'linear-gradient(135deg,#7c5cfc,#06b6d4)' }} disabled={formLoading}>
                 {formLoading ? <RefreshCw className="w-4 h-4 animate-spin mr-2" /> : <Plus className="w-4 h-4 mr-2" />}Ajouter
