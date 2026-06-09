@@ -898,18 +898,18 @@ function DashboardView({ tokens: allTokens, userRole }: { tokens: TokenData[]; u
                 <BarChart3 className="w-4 h-4 text-violet-500" />Portefeuille
               </CardTitle>
             </CardHeader>
-            <CardContent className="p-3 md:p-4 pt-0 -mx-3 md:-mx-4 px-3 md:px-4">
-                <div className="overflow-x-auto -mx-3 md:-mx-4 px-3 md:px-4">
-                <Table className="min-w-[480px]">
+            <CardContent className="p-0 md:p-3 md:pt-0">
+                <div className="overflow-x-auto">
+                <Table className="min-w-[420px]">
                   <TableHeader>
                     <TableRow>
                       <TableHead className="text-[10px]">Token</TableHead>
                       <TableHead className="text-[10px] text-right">Investi</TableHead>
-                      <TableHead className="text-[10px] text-right">Qté</TableHead>
-                      <TableHead className="text-[10px] text-right hidden sm:table-cell">PRU</TableHead>
+                      <TableHead className="text-[10px] text-right hidden sm:table-cell">Qté</TableHead>
+                      <TableHead className="text-[10px] text-right hidden md:table-cell">PRU</TableHead>
                       <TableHead className="text-[10px] text-right">Prix</TableHead>
-                      <TableHead className="text-[10px] text-right hidden sm:table-cell">Valeur</TableHead>
-                      <TableHead className="text-[10px] text-right">P&L</TableHead>
+                      <TableHead className="text-[10px] text-right hidden lg:table-cell">Valeur</TableHead>
+                      <TableHead className="text-[10px] text-right hidden md:table-cell">P&L</TableHead>
                       <TableHead className="text-[10px] text-right">ROI</TableHead>
                     </TableRow>
                   </TableHeader>
@@ -930,7 +930,7 @@ function DashboardView({ tokens: allTokens, userRole }: { tokens: TokenData[]; u
                         <TableCell className="text-xs sm:text-sm text-right text-muted-foreground hidden md:table-cell whitespace-nowrap">${fmtPrice(t.pru)}</TableCell>
                         <TableCell className="text-xs sm:text-sm text-right font-medium text-foreground whitespace-nowrap">${fmtPrice(t.currentPrice)}</TableCell>
                         <TableCell className="text-xs sm:text-sm text-right text-muted-foreground hidden lg:table-cell whitespace-nowrap">${fmt(t.valeurActuelle)}</TableCell>
-                        <TableCell className={`text-xs sm:text-sm text-right font-semibold whitespace-nowrap ${plColor(t.pl)}`}>{t.pl >= 0 ? '+' : ''}${fmt(Math.abs(t.pl))}</TableCell>
+                        <TableCell className={`text-xs sm:text-sm text-right font-semibold whitespace-nowrap hidden md:table-cell ${plColor(t.pl)}`}>{t.pl >= 0 ? '+' : ''}${fmt(Math.abs(t.pl))}</TableCell>
                         <TableCell className="text-right">
                           <Badge variant="secondary" className={`text-[10px] font-bold ${plBg(t.rentabilite)}`}>
                             {fmtPct(t.rentabilite)}
