@@ -130,7 +130,7 @@ const plBg = (v: number) => v >= 0 ? 'bg-emerald-500/10 text-emerald-500' : 'bg-
 const CHART_COLORS = ['#7c5cfc','#06b6d4','#f59e0b','#10b981','#ef4444','#3b82f6','#ec4899','#14b8a6','#f97316','#6366f1']
 
 const TOKEN_LOGO_URL = (symbol: string) =>
-  `https://cdn.jsdelivr.net/gh/atomiclabs/cryptocurrency-icons@1a63530be6e374711a8554f31b17e4cb92c25fa5/128/color/${symbol.toLowerCase()}.png`
+  `https://cdn.jsdelivr.net/gh/spothq/cryptocurrency-icons@master/128/color/${symbol.toLowerCase()}.png`
 
 // ============================================================
 // TOKEN LOGO COMPONENT
@@ -919,7 +919,7 @@ function DashboardView({ tokens: allTokens, userRole }: { tokens: TokenData[]; u
                       <TableRow key={t.ticker} className="data-row-hover">
                         <TableCell className="px-1 md:px-2 py-1.5 md:py-2">
                           <div className="flex items-center gap-1 md:gap-2">
-                            <TokenLogo ticker={t.ticker} size={18} />
+                            <TokenLogo ticker={t.ticker} size={22} />
                             <div className="min-w-0">
                               <p className="text-[10px] md:text-xs font-semibold text-foreground truncate leading-tight">{t.ticker}</p>
                               <p className="text-[8px] md:text-[10px] text-muted-foreground truncate leading-tight max-md:hidden">{t.name}</p>
@@ -988,7 +988,7 @@ function DashboardView({ tokens: allTokens, userRole }: { tokens: TokenData[]; u
                 <div className="flex flex-wrap gap-2 mt-2 justify-center">
                   {pieChartData.map((t, i) => (
                     <div key={t.name} className="flex items-center gap-1">
-                      <div className="w-2.5 h-2.5 rounded-full" style={{ background: CHART_COLORS[i % CHART_COLORS.length] }} />
+                      <TokenLogo ticker={t.name} size={14} />
                       <span className="text-[10px] text-muted-foreground">{t.name}</span>
                     </div>
                   ))}
