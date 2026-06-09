@@ -967,7 +967,18 @@ function DashboardView({ tokens: allTokens, userRole }: { tokens: TokenData[]; u
                       <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
                       <XAxis dataKey="name" tick={{ fontSize: 10, fill: 'var(--muted-foreground)' }} />
                       <YAxis tick={{ fontSize: 10, fill: 'var(--muted-foreground)' }} />
-                      <Tooltip contentStyle={{ background: ts.chartTooltipBg, border: `1px solid ${ts.chartTooltipBorder}`, borderRadius: 12, fontSize: 12 }} />
+                      <Tooltip
+                        contentStyle={{
+                          background: ts.chartTooltipBg,
+                          border: `1px solid ${ts.chartTooltipBorder}`,
+                          borderRadius: 12,
+                          fontSize: 12,
+                          color: ts.isDark ? '#e5e5e5' : '#1e293b',
+                        }}
+                        itemStyle={{ color: ts.isDark ? '#e5e5e5' : '#1e293b' }}
+                        labelStyle={{ color: ts.isDark ? '#e5e5e5' : '#1e293b' }}
+                        formatter={(value: number, name: string) => [`${fmtPct(value)}`, name]}
+                      />
                       <Bar dataKey="pl" radius={[4, 4, 0, 0]}>
                         {barChartData.map((entry, i) => <Cell key={i} fill={entry.pl >= 0 ? '#10b981' : '#ef4444'} />)}
                       </Bar>
@@ -986,10 +997,21 @@ function DashboardView({ tokens: allTokens, userRole }: { tokens: TokenData[]; u
                 <div className="h-48 md:h-52 lg:h-56">
                   <ResponsiveContainer width="100%" height="100%">
                     <PieChart>
-                      <Pie data={pieChartData} cx="50%" cy="50%" innerRadius={50} outerRadius={80} paddingAngle={3} dataKey="value">
+                      <Pie data={pieChartData} cx="50%" cy="50%" innerRadius={50} outerRadius={80} paddingAngle={3} dataKey="value" nameKey="name">
                         {pieChartData.map((_, i) => <Cell key={i} fill={CHART_COLORS[i % CHART_COLORS.length]} />)}
                       </Pie>
-                      <Tooltip contentStyle={{ background: ts.chartTooltipBg, border: `1px solid ${ts.chartTooltipBorder}`, borderRadius: 12, fontSize: 12 }} />
+                      <Tooltip
+                        contentStyle={{
+                          background: ts.chartTooltipBg,
+                          border: `1px solid ${ts.chartTooltipBorder}`,
+                          borderRadius: 12,
+                          fontSize: 12,
+                          color: ts.isDark ? '#e5e5e5' : '#1e293b',
+                        }}
+                        itemStyle={{ color: ts.isDark ? '#e5e5e5' : '#1e293b' }}
+                        labelStyle={{ color: ts.isDark ? '#e5e5e5' : '#1e293b' }}
+                        formatter={(value: number, name: string) => [`${fmt(value)} €`, name]}
+                      />
                     </PieChart>
                   </ResponsiveContainer>
                 </div>
