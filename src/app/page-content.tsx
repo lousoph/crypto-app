@@ -1352,7 +1352,7 @@ function AIAnalysisView({ tokens, userRole, setView }: { tokens: TokenData[]; us
               setView('profile')
             }}
           >
-            <Crown className="w-4 h-4" />Passer en Premium
+            <Crown className="w-4 h-4" />Devenir Premium
           </button>
         </Card>
       </div>
