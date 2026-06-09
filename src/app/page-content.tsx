@@ -2121,13 +2121,6 @@ function AdminUsersView() {
   const [users, setUsers] = useState<AdminUser[]>([])
   const [loading, setLoading] = useState(true)
   const [search, setSearch] = useState('')
-  const [editUser, setEditUser] = useState<AdminUser | null>(null)
-  const [editName, setEditName] = useState('')
-  const [editEmail, setEditEmail] = useState('')
-  const [editRole, setEditRole] = useState('')
-  const [editPassword, setEditPassword] = useState('')
-  const [showEditPassword, setShowEditPassword] = useState(false)
-  const [editLoading, setEditLoading] = useState(false)
   const [deleteConfirm, setDeleteConfirm] = useState<string | null>(null)
   const [deleteLoading, setDeleteLoading] = useState(false)
 
@@ -2145,36 +2138,6 @@ function AdminUsersView() {
       if (res.ok) { toast.success('Utilisateur modifié'); fetchUsers() }
       else toast.error(data.error || 'Erreur')
     } catch { toast.error('Erreur réseau') }
-  }
-
-  const handleOpenEdit = (u: AdminUser) => {
-    setEditUser(u)
-    setEditName(u.name || '')
-    setEditEmail(u.email)
-    setEditRole(u.role)
-    setEditPassword('')
-  }
-
-  const handleSaveEdit = async () => {
-    if (!editUser) return
-    setEditLoading(true)
-    try {
-      const updates: { name: string; email: string; role: string; newPassword?: string } = {
-        name: editName,
-        email: editEmail,
-        role: editRole,
-      }
-      if (editPassword.trim()) {
-        if (editPassword.length < 6) {
-          toast.error('Le mot de passe doit contenir au moins 6 caractères')
-          setEditLoading(false)
-          return
-        }
-        updates.newPassword = editPassword
-      }
-      await handleUpdate(editUser.id, updates)
-      setEditUser(null)
-    } finally { setEditLoading(false) }
   }
 
   const handleToggleSuspend = async (u: AdminUser) => {
@@ -2250,10 +2213,6 @@ function AdminUsersView() {
                       <SelectItem value="admin">Admin</SelectItem>
                     </SelectContent>
                   </Select>
-                  <Button variant="outline" size="sm" className="h-8 text-xs rounded-lg gap-1"
-                    onClick={() => handleOpenEdit(u)}>
-                    <Pencil className="w-3 h-3" /><span className="hidden md:inline">Modifier</span>
-                  </Button>
                   <Button variant={u.suspended ? 'default' : 'outline'} size="sm"
                     className={`h-8 text-xs rounded-lg ${u.suspended ? 'bg-emerald-600 hover:bg-emerald-700 text-white' : 'text-amber-600 border-amber-500/30 hover:bg-amber-500/10'}`}
                     onClick={() => handleToggleSuspend(u)}>
@@ -2266,9 +2225,6 @@ function AdminUsersView() {
                 </div>
                 {/* Actions — mobile */}
                 <div className="flex sm:hidden items-center gap-1 shrink-0">
-                  <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => handleOpenEdit(u)}>
-                    <Pencil className="w-4 h-4 text-muted-foreground" />
-                  </Button>
                   <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => handleToggleSuspend(u)}>
                     {u.suspended ? <Check className="w-4 h-4 text-emerald-500" /> : <AlertTriangle className="w-4 h-4 text-amber-500" />}
                   </Button>
@@ -2281,68 +2237,6 @@ function AdminUsersView() {
           </Card>
         ))}
       </div>
-
-      {/* Edit User Dialog */}
-      <Dialog open={!!editUser} onOpenChange={(open) => { if (!open) setEditUser(null) }}>
-        <DialogContent className="dialog-mobile-fullscreen sm:max-w-md rounded-xl">
-          <DialogHeader>
-            <DialogTitle className="flex items-center gap-2"><Pencil className="w-4 h-4 text-violet-500" />Modifier l'utilisateur</DialogTitle>
-            <DialogDescription>Modifier les informations du compte de {editUser?.email}</DialogDescription>
-          </DialogHeader>
-          <div className="space-y-4">
-            <div className="space-y-2">
-              <Label className="text-xs font-medium text-muted-foreground">Nom</Label>
-              <Input value={editName} onChange={(e) => setEditName(e.target.value)} placeholder="Nom de l'utilisateur"
-                className="h-10 rounded-xl bg-input border-border" />
-            </div>
-            <div className="space-y-2">
-              <Label className="text-xs font-medium text-muted-foreground">Email</Label>
-              <Input type="email" value={editEmail} onChange={(e) => setEditEmail(e.target.value)} placeholder="Email"
-                className="h-10 rounded-xl bg-input border-border" />
-            </div>
-            <div className="space-y-2">
-              <Label className="text-xs font-medium text-muted-foreground">Rôle</Label>
-              <Select value={editRole} onValueChange={setEditRole}>
-                <SelectTrigger className="h-10 rounded-xl bg-input border-border"><SelectValue /></SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="user_free">Gratuit</SelectItem>
-                  <SelectItem value="user_premium">Premium</SelectItem>
-                  <SelectItem value="admin">Admin</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-            <div className="space-y-2">
-              <Label className="text-xs font-medium text-muted-foreground flex items-center gap-1">
-                <Shield className="w-3 h-3" />Nouveau mot de passe
-              </Label>
-              <div className="relative">
-                <Input
-                  type={showEditPassword ? 'text' : 'password'}
-                  value={editPassword}
-                  onChange={(e) => setEditPassword(e.target.value)}
-                  placeholder="Laisser vide pour ne pas changer"
-                  className="h-10 rounded-xl bg-input border-border pr-10"
-                />
-                <button
-                  type="button"
-                  onClick={() => setShowEditPassword(!showEditPassword)}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors p-0.5"
-                  tabIndex={-1}
-                >
-                  {showEditPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
-                </button>
-              </div>
-              <p className="text-[10px] text-muted-foreground/60">Minimum 6 caractères. Laisser vide pour conserver le mot de passe actuel.</p>
-            </div>
-          </div>
-          <DialogFooter className="gap-2">
-            <Button variant="outline" onClick={() => setEditUser(null)} className="rounded-xl h-10">Annuler</Button>
-            <Button onClick={handleSaveEdit} className="rounded-xl h-10 text-white" style={{ background: 'linear-gradient(135deg,#7c5cfc,#06b6d4)' }} disabled={editLoading}>
-              {editLoading ? <RefreshCw className="w-4 h-4 animate-spin mr-2" /> : <Check className="w-4 h-4 mr-2" />}Enregistrer
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
 
       {/* Delete Confirmation Dialog */}
       <Dialog open={!!deleteConfirm} onOpenChange={(open) => { if (!open) setDeleteConfirm(null) }}>

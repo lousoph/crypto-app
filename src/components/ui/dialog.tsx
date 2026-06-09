@@ -63,7 +63,7 @@ function DialogContent({
         className={cn(
           "bg-background data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95 fixed z-50 grid w-full gap-4 border shadow-lg duration-200 overflow-y-auto",
           // Centered dialog (default for desktop)
-          "top-[50%] left-[50%] max-w-[calc(100%-2rem)] -translate-x-1/2 -translate-y-1/2 rounded-lg p-6 sm:max-w-lg",
+          "top-[50%] left-[50%] max-w-[calc(100%-2rem)] translate-x-[-50%] translate-y-[-50%] rounded-lg p-6 sm:max-w-lg",
           // Fullscreen on mobile only when requested
           wantsFullscreen && "max-sm:inset-0 max-sm:m-0 max-sm:max-w-full max-sm:h-full max-sm:rounded-none max-sm:p-4 max-sm:translate-x-0 max-sm:translate-y-0 max-sm:top-0 max-sm:left-0",
           className
