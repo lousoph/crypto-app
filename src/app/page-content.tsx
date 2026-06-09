@@ -2149,6 +2149,12 @@ function AdminUsersView() {
   const [search, setSearch] = useState('')
   const [deleteConfirm, setDeleteConfirm] = useState<string | null>(null)
   const [deleteLoading, setDeleteLoading] = useState(false)
+  const [editUser, setEditUser] = useState<AdminUser | null>(null)
+  const [editName, setEditName] = useState('')
+  const [editEmail, setEditEmail] = useState('')
+  const [editRole, setEditRole] = useState('')
+  const [editPassword, setEditPassword] = useState('')
+  const [editLoading, setEditLoading] = useState(false)
 
   const fetchUsers = useCallback(async () => {
     setLoading(true)
@@ -2168,6 +2174,25 @@ function AdminUsersView() {
 
   const handleToggleSuspend = async (u: AdminUser) => {
     await handleUpdate(u.id, { suspended: !u.suspended })
+  }
+
+  const openEdit = (u: AdminUser) => {
+    setEditUser(u); setEditName(u.name || ''); setEditEmail(u.email); setEditRole(u.role); setEditPassword('')
+  }
+
+  const handleEditSubmit = async (e: React.FormEvent) => {
+    e.preventDefault()
+    if (!editUser) return
+    if (!editEmail.trim()) { toast.error("L'email est requis"); return }
+    setEditLoading(true)
+    try {
+      const updates: any = { name: editName.trim() || null, email: editEmail.trim(), role: editRole }
+      if (editPassword.trim()) updates.newPassword = editPassword.trim()
+      const res = await fetch('/api/admin/users', { method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ id: editUser.id, ...updates }) })
+      const data = await res.json()
+      if (res.ok) { toast.success('Utilisateur modifié'); setEditUser(null); fetchUsers() }
+      else toast.error(data.error || 'Erreur')
+    } catch { toast.error('Erreur réseau') } finally { setEditLoading(false) }
   }
 
   const handleDelete = async (id: string) => {
@@ -2239,6 +2264,10 @@ function AdminUsersView() {
                       <SelectItem value="admin">Admin</SelectItem>
                     </SelectContent>
                   </Select>
+                  <Button variant="outline" size="sm" className="h-8 text-xs rounded-lg text-violet-500 border-violet-500/30 hover:bg-violet-500/10"
+                    onClick={() => openEdit(u)}>
+                    <Pencil className="w-3.5 h-3.5" />
+                  </Button>
                   <Button variant={u.suspended ? 'default' : 'outline'} size="sm"
                     className={`h-8 text-xs rounded-lg ${u.suspended ? 'bg-emerald-600 hover:bg-emerald-700 text-white' : 'text-amber-600 border-amber-500/30 hover:bg-amber-500/10'}`}
                     onClick={() => handleToggleSuspend(u)}>
@@ -2251,6 +2280,9 @@ function AdminUsersView() {
                 </div>
                 {/* Actions — mobile */}
                 <div className="flex sm:hidden items-center gap-1 shrink-0">
+                  <Button variant="ghost" size="icon" className="h-8 w-8 text-violet-500" onClick={() => openEdit(u)}>
+                    <Pencil className="w-4 h-4" />
+                  </Button>
                   <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => handleToggleSuspend(u)}>
                     {u.suspended ? <Check className="w-4 h-4 text-emerald-500" /> : <AlertTriangle className="w-4 h-4 text-amber-500" />}
                   </Button>
@@ -2263,6 +2295,52 @@ function AdminUsersView() {
           </Card>
         ))}
       </div>
+
+      {/* Edit User Dialog */}
+      <Dialog open={!!editUser} onOpenChange={(open) => { if (!open) setEditUser(null) }}>
+        <DialogContent className="dialog-mobile-fullscreen sm:max-w-md rounded-xl">
+          <DialogHeader className="shrink-0">
+            <DialogTitle className="flex items-center gap-2"><Pencil className="w-5 h-5 text-violet-500" />Modifier l'utilisateur</DialogTitle>
+            <DialogDescription>Modifiez les informations de {editUser?.name || editUser?.email}</DialogDescription>
+          </DialogHeader>
+          <form onSubmit={handleEditSubmit} className="flex flex-col flex-1 min-h-0 gap-4">
+            <div className="flex-1 overflow-y-auto space-y-4">
+              <div className="space-y-2">
+                <Label className="text-xs font-medium">Nom</Label>
+                <Input value={editName} onChange={(e) => setEditName(e.target.value)} placeholder="Nom de l'utilisateur"
+                  className="h-10 rounded-xl bg-input border-border" />
+              </div>
+              <div className="space-y-2">
+                <Label className="text-xs font-medium">Email</Label>
+                <Input type="email" value={editEmail} onChange={(e) => setEditEmail(e.target.value)} placeholder="email@exemple.com" required
+                  className="h-10 rounded-xl bg-input border-border" />
+              </div>
+              <div className="space-y-2">
+                <Label className="text-xs font-medium">Rôle</Label>
+                <Select value={editRole} onValueChange={setEditRole}>
+                  <SelectTrigger className="h-10 rounded-xl"><SelectValue /></SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="user_free">Gratuit</SelectItem>
+                    <SelectItem value="user_premium">Premium</SelectItem>
+                    <SelectItem value="admin">Admin</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="space-y-2">
+                <Label className="text-xs font-medium">Nouveau mot de passe <span className="text-muted-foreground">(optionnel)</span></Label>
+                <Input type="password" value={editPassword} onChange={(e) => setEditPassword(e.target.value)} placeholder="Laisser vide pour ne pas changer"
+                  className="h-10 rounded-xl bg-input border-border" />
+              </div>
+            </div>
+            <div className="shrink-0 flex gap-2 justify-end pt-3 border-t border-border">
+              <DialogClose asChild><Button type="button" variant="ghost" className="rounded-xl h-10">Annuler</Button></DialogClose>
+              <Button type="submit" className="btn-primary-glow text-foreground rounded-xl h-10" style={{ background: 'linear-gradient(135deg,#7c5cfc,#06b6d4)' }} disabled={editLoading}>
+                {editLoading ? <RefreshCw className="w-4 h-4 animate-spin mr-2" /> : <Check className="w-4 h-4 mr-2" />}Enregistrer
+              </Button>
+            </div>
+          </form>
+        </DialogContent>
+      </Dialog>
 
       {/* Delete Confirmation Dialog */}
       <Dialog open={!!deleteConfirm} onOpenChange={(open) => { if (!open) setDeleteConfirm(null) }}>
