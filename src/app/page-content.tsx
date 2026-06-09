@@ -1292,7 +1292,7 @@ function TransactionsView({ userRole }: { userRole: string }) {
 // ============================================================
 // AI ANALYSIS VIEW (Premium)
 // ============================================================
-function AIAnalysisView({ tokens, userRole }: { tokens: TokenData[]; userRole: string }) {
+function AIAnalysisView({ tokens, userRole, setView }: { tokens: TokenData[]; userRole: string; setView: (v: View) => void }) {
   const [selectedTicker, setSelectedTicker] = useState('')
   const [analysis, setAnalysis] = useState<AIAnalysisResult | null>(null)
   const [loading, setLoading] = useState(false)
@@ -2836,7 +2836,7 @@ export function CryptoApp() {
       case 'home': return <HomeView tokens={tokens} />
       case 'dashboard': return <DashboardView tokens={tokens} userRole={userRole} />
       case 'transactions': return <TransactionsView userRole={userRole} />
-      case 'ai-analysis': return <AIAnalysisView tokens={tokens} userRole={userRole} />
+      case 'ai-analysis': return <AIAnalysisView tokens={tokens} userRole={userRole} setView={setView} />
       case 'profile': return <ProfileView userRole={userRole} />
       case 'admin-users': return isAdmin ? <AdminUsersView /> : <DashboardView tokens={tokens} userRole={userRole} />
       case 'admin-tokens': return isAdmin ? <AdminTokensView /> : <DashboardView tokens={tokens} userRole={userRole} />
