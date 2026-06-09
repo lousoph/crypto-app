@@ -2628,7 +2628,7 @@ function Sidebar({ view, setView, isAdmin, onLogout }: { view: View; setView: (v
   const ts = useThemeStyles()
 
   return (
-    <aside className="glass-sidebar hidden md:flex flex-col w-52 h-screen sticky top-0 shrink-0">
+    <aside className="glass-sidebar hidden md:flex flex-col w-52 h-screen fixed top-0 left-0 z-30 shrink-0">
       {/* Logo */}
       <div className="p-4">
         <div className="flex items-center gap-3">
@@ -2839,7 +2839,7 @@ export function CryptoApp() {
       <Sidebar view={view} setView={setView} isAdmin={isAdmin} onLogout={logout} />
 
       {/* Main Area */}
-      <div className="flex-1 flex flex-col overflow-x-hidden min-w-0">
+      <div className="flex-1 flex flex-col overflow-x-hidden min-w-0 md:ml-52">
         {/* Mobile Header */}
         <MobileHeader view={view} setView={setView} isAdmin={isAdmin} onLogout={logout} />
 
