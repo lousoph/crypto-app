@@ -8,7 +8,7 @@ import {
   LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip,
   ResponsiveContainer, Legend, Area, AreaChart
 } from 'recharts'
-import { Gauge, TrendingUp } from 'lucide-react'
+import { Gauge, TrendingUp, ArrowUpCircle, ArrowDownCircle, Minus, Info } from 'lucide-react'
 import { cn } from '@/lib/utils'
 
 // ============================================================
@@ -89,6 +89,16 @@ function getValueLabel(value: number): string {
 
 function getClassificationLabel(cls: string): string {
   return CATEGORY_LABELS[cls] || cls
+}
+
+function getSignal(v: number) {
+  if (v <= 20) return { label: 'Achat Fort', emoji: '🟢', advice: "Marché en panique extrême — Opportunité d'achat historique", color: '#10b981', type: 'buy' }
+  if (v <= 35) return { label: 'Achat', emoji: '🟢', advice: 'Peur dominante — Bon moment pour accumuler', color: '#22c55e', type: 'buy' }
+  if (v <= 45) return { label: 'Achat Modéré', emoji: '🟡', advice: 'Légère peur — Positions progressives recommandées', color: '#eab308', type: 'cautious_buy' }
+  if (v <= 55) return { label: 'Neutre', emoji: '🟡', advice: 'Sentiment neutre — Maintenir les positions actuelles', color: '#eab308', type: 'neutral' }
+  if (v <= 65) return { label: 'Prudence', emoji: '🟠', advice: 'Cupidité croissante — Réduire les achats', color: '#f97316', type: 'cautious_sell' }
+  if (v <= 80) return { label: 'Vente Partielle', emoji: '🔴', advice: 'Cupidité forte — Prendre des profits partiels', color: '#ef4444', type: 'sell' }
+  return { label: 'Vente Forte', emoji: '🔴', advice: 'Cupidité extrême — Risque de correction élevé', color: '#dc2626', type: 'sell' }
 }
 
 // ============================================================
@@ -535,6 +545,23 @@ export default function FearGreedIndex({ showChart = true }: { showChart?: boole
                 </span>
               </div>
             </div>
+
+            {/* Buy/Sell Signal */}
+            {(() => {
+              const signal = getSignal(currentValue)
+              return (
+                <div className="mt-4 rounded-lg p-3 border" style={{ background: `${signal.color}08`, borderColor: `${signal.color}25` }}>
+                  <div className="flex items-center gap-2 mb-1">
+                    <span className="text-sm">{signal.emoji}</span>
+                    <span className="text-xs font-bold" style={{ color: signal.color }}>{signal.label}</span>
+                    {(signal.type === 'buy' || signal.type === 'cautious_buy') && <ArrowUpCircle className="w-3.5 h-3.5 ml-auto" style={{ color: signal.color }} />}
+                    {(signal.type === 'sell' || signal.type === 'cautious_sell') && <ArrowDownCircle className="w-3.5 h-3.5 ml-auto" style={{ color: signal.color }} />}
+                    {signal.type === 'neutral' && <Minus className="w-3.5 h-3.5 ml-auto" style={{ color: signal.color }} />}
+                  </div>
+                  <p className="text-[11px] text-muted-foreground leading-relaxed">{signal.advice}</p>
+                </div>
+              )
+            })()}
           </CardContent>
         </Card>
 
