@@ -687,7 +687,6 @@ body {
   -webkit-backdrop-filter: blur(24px);
   border-top: 1px solid rgba(0, 0, 0, 0.10);
   box-shadow: 0 -2px 16px rgba(0, 0, 0, 0.06);
-  position: relative;
 }
 
 .bottom-nav::before {
