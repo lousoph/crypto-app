@@ -1181,8 +1181,8 @@ function TransactionsView({ userRole }: { userRole: string }) {
             <DialogTitle className="flex items-center gap-2"><Plus className="w-5 h-5 text-violet-500" />Nouvelle transaction</DialogTitle>
             <DialogDescription>Ajoutez un achat crypto à votre portefeuille</DialogDescription>
           </DialogHeader>
-          <form onSubmit={handleSubmit} className="space-y-4">
-            <div className="space-y-4">
+          <form onSubmit={handleSubmit} className="flex flex-col flex-1 min-h-0 gap-4">
+            <div className="flex-1 overflow-y-auto space-y-4">
               <div className="space-y-2">
                 <Label className="text-xs font-medium">Date</Label>
                 <Input type="date" value={formDate} onChange={(e) => setFormDate(e.target.value)} className="h-10 rounded-xl bg-input border-border" required />
@@ -1252,7 +1252,7 @@ function TransactionsView({ userRole }: { userRole: string }) {
               </div>
             </div>
             {/* Boutons toujours visibles en bas */}
-            <div className="sticky bottom-0 -mx-4 px-4 py-3 bg-background border-t border-border flex gap-2 justify-end">
+            <div className="shrink-0 flex gap-2 justify-end pt-3 border-t border-border">
               <DialogClose asChild><Button type="button" variant="ghost" className="rounded-xl h-10">Annuler</Button></DialogClose>
               <Button type="submit" className="btn-primary-glow text-foreground rounded-xl h-10" style={{ background: 'linear-gradient(135deg,#7c5cfc,#06b6d4)' }} disabled={formLoading}>
                 {formLoading ? <RefreshCw className="w-4 h-4 animate-spin mr-2" /> : <Plus className="w-4 h-4 mr-2" />}Ajouter
