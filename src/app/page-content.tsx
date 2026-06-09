@@ -899,8 +899,8 @@ function DashboardView({ tokens: allTokens, userRole }: { tokens: TokenData[]; u
               </CardTitle>
             </CardHeader>
             <CardContent className="p-0 md:p-3 md:pt-0">
-                <div className="overflow-x-auto">
-                <Table className="min-w-[420px]">
+                <div className="overflow-x-auto scrollbar-none">
+                <Table className="min-w-[480px] sm:min-w-[420px]">
                   <TableHeader>
                     <TableRow>
                       <TableHead className="text-[10px]">Token</TableHead>
@@ -917,20 +917,20 @@ function DashboardView({ tokens: allTokens, userRole }: { tokens: TokenData[]; u
                     {d.tokens.map(t => (
                       <TableRow key={t.ticker} className="data-row-hover">
                         <TableCell>
-                          <div className="flex items-center gap-2">
-                            <TokenLogo ticker={t.ticker} size={24} />
+                          <div className="flex items-center gap-1.5 sm:gap-2">
+                            <TokenLogo ticker={t.ticker} size={20} />
                             <div className="min-w-0">
-                              <p className="text-xs font-semibold text-foreground truncate">{t.ticker}</p>
-                              <p className="text-[10px] text-muted-foreground truncate hidden sm:block">{t.name}</p>
+                              <p className="text-[11px] sm:text-xs font-semibold text-foreground truncate">{t.ticker}</p>
+                              <p className="text-[9px] sm:text-[10px] text-muted-foreground truncate max-sm:hidden">{t.name}</p>
                             </div>
                           </div>
                         </TableCell>
-                        <TableCell className="text-xs sm:text-sm text-right text-muted-foreground whitespace-nowrap">${fmt(t.montantInvesti)}</TableCell>
-                        <TableCell className="text-xs sm:text-sm text-right text-muted-foreground whitespace-nowrap">{fmtQty(t.quantite)}</TableCell>
-                        <TableCell className="text-xs sm:text-sm text-right text-muted-foreground whitespace-nowrap">${fmtPrice(t.pru)}</TableCell>
-                        <TableCell className="text-xs sm:text-sm text-right font-medium text-foreground whitespace-nowrap">${fmtPrice(t.currentPrice)}</TableCell>
-                        <TableCell className="text-xs sm:text-sm text-right text-muted-foreground whitespace-nowrap">${fmt(t.valeurActuelle)}</TableCell>
-                        <TableCell className={`text-xs sm:text-sm text-right font-semibold whitespace-nowrap ${plColor(t.pl)}`}>{t.pl >= 0 ? '+' : ''}${fmt(Math.abs(t.pl))}</TableCell>
+                        <TableCell className="text-[11px] sm:text-sm text-right text-muted-foreground whitespace-nowrap">${fmt(t.montantInvesti)}</TableCell>
+                        <TableCell className="text-[11px] sm:text-sm text-right text-muted-foreground whitespace-nowrap">{fmtQty(t.quantite)}</TableCell>
+                        <TableCell className="text-[11px] sm:text-sm text-right text-muted-foreground whitespace-nowrap">${fmtPrice(t.pru)}</TableCell>
+                        <TableCell className="text-[11px] sm:text-sm text-right font-medium text-foreground whitespace-nowrap">${fmtPrice(t.currentPrice)}</TableCell>
+                        <TableCell className="text-[11px] sm:text-sm text-right text-muted-foreground whitespace-nowrap">${fmt(t.valeurActuelle)}</TableCell>
+                        <TableCell className={`text-[11px] sm:text-sm text-right font-semibold whitespace-nowrap ${plColor(t.pl)}`}>{t.pl >= 0 ? '+' : ''}${fmt(Math.abs(t.pl))}</TableCell>
                         <TableCell className="text-right">
                           <Badge variant="secondary" className={`text-[10px] font-bold ${plBg(t.rentabilite)}`}>
                             {fmtPct(t.rentabilite)}
