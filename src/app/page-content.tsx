@@ -1142,23 +1142,22 @@ function TransactionsView({ userRole }: { userRole: string }) {
         <div className="space-y-2">
           {filteredTx.map(tx => (
             <Card key={tx.id} className="glass-card border-border rounded-xl">
-              <CardContent className="p-3 md:p-4">
-                <div className="flex items-center gap-3">
-                  <TokenLogo ticker={tx.tokenTicker} size={36} />
+              <CardContent className="p-2.5 md:p-3">
+                <div className="flex items-center gap-2 md:gap-3 whitespace-nowrap">
+                  <TokenLogo ticker={tx.tokenTicker} size={28} className="shrink-0" />
                   <div className="flex-1 min-w-0">
-                    <div className="flex items-center gap-2">
-                      <span className="text-sm font-semibold text-foreground">{tx.tokenTicker}</span>
-                      {tx.exchange && <Badge variant="secondary" className="text-[10px]">{tx.exchange.name}</Badge>}
+                    <div className="flex items-center gap-1.5 whitespace-nowrap">
+                      <span className="text-xs md:text-sm font-semibold text-foreground truncate">{tx.tokenTicker}</span>
+                      {tx.exchange && <Badge variant="secondary" className="text-[9px] md:text-[10px] shrink-0">{tx.exchange.name}</Badge>}
                     </div>
-                    <p className="text-xs text-muted-foreground">{new Date(tx.date).toLocaleDateString('fr-FR')}</p>
-                    {tx.notes && <p className="text-xs text-muted-foreground/60 truncate mt-0.5">{tx.notes}</p>}
+                    <p className="text-[10px] md:text-xs text-muted-foreground whitespace-nowrap">{new Date(tx.date).toLocaleDateString('fr-FR')}</p>
                   </div>
                   <div className="text-right shrink-0">
-                    <p className="text-sm font-semibold text-foreground">${fmt(tx.montantInvesti)}</p>
-                    <p className="text-[10px] text-muted-foreground">{fmtQty(tx.quantite)} @ ${fmtPrice(tx.coursAchat)}</p>
+                    <p className="text-xs md:text-sm font-semibold text-foreground whitespace-nowrap">${fmt(tx.montantInvesti)}</p>
+                    <p className="text-[9px] md:text-[10px] text-muted-foreground whitespace-nowrap">{fmtQty(tx.quantite)} @ ${fmtPrice(tx.coursAchat)}</p>
                   </div>
-                  <Button variant="ghost" size="icon" className="h-8 w-8 text-muted-foreground hover:text-red-500" onClick={() => handleDelete(tx.id)}>
-                    <Trash2 className="w-4 h-4" />
+                  <Button variant="ghost" size="icon" className="h-7 w-7 md:h-8 md:w-8 shrink-0 text-muted-foreground hover:text-red-500" onClick={() => handleDelete(tx.id)}>
+                    <Trash2 className="w-3.5 h-3.5" />
                   </Button>
                 </div>
               </CardContent>
