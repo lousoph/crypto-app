@@ -578,7 +578,7 @@ function LiquidityHeatmap() {
               const isCurrentCol = (idx % stepsPerRow) === currentCol
               const isCurrent = isCurrentRow && isCurrentCol
               return (
-                <TooltipUIProvider key={idx}>
+                <TooltipProvider key={idx}>
                   <TooltipTrigger asChild>
                     <div
                       className={`heatmap-cell rounded-sm flex items-center justify-center text-[7px] font-mono leading-none ${
@@ -610,7 +610,7 @@ function LiquidityHeatmap() {
                     <p className="font-mono">${cell.price.toLocaleString('fr-FR')}</p>
                     <p className="text-muted-foreground">{cell.side === 'buy' ? '🟢 Achat' : '🔴 Vente'} — {(cell.intensity * 100).toFixed(0)}%</p>
                   </TooltipContent>
-                </TooltipUIProvider>
+                </TooltipProvider>
               )
             })}
           </div>
