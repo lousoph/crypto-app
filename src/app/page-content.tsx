@@ -2772,12 +2772,12 @@ export function CryptoApp() {
       <Sidebar view={view} setView={setView} isAdmin={isAdmin} onLogout={logout} />
 
       {/* Main Area */}
-      <div className="flex-1 flex flex-col min-h-screen md:min-h-0 overflow-x-hidden min-w-0">
+      <div className="flex-1 flex flex-col overflow-x-hidden min-w-0">
         {/* Mobile Header */}
         <MobileHeader view={view} setView={setView} isAdmin={isAdmin} onLogout={logout} />
 
         {/* Content */}
-        <main className="flex-1 overflow-x-hidden overflow-y-auto pb-20 md:pb-6 custom-scrollbar w-full">
+        <main className="flex-1 overflow-x-hidden pb-20 md:pb-6 md:overflow-y-auto custom-scrollbar w-full">
           <div className="w-full px-3 sm:px-4 md:px-6 lg:px-8 mx-auto max-w-full md:max-w-3xl lg:max-w-4xl xl:max-w-5xl 2xl:max-w-6xl">
             {renderView()}
           </div>
