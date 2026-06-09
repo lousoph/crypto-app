@@ -43,6 +43,14 @@ export async function POST(req: NextRequest) {
     const body = await req.json()
     const { date, tokenTicker, montantInvesti, coursAchat, exchangeId, notes } = body
 
+    // Validate inputs
+    if (!date || !tokenTicker) {
+      return NextResponse.json({ error: "Date et token requis" }, { status: 400 })
+    }
+    if (!montantInvesti || montantInvesti <= 0 || !coursAchat || coursAchat <= 0) {
+      return NextResponse.json({ error: "Montant et prix doivent être positifs" }, { status: 400 })
+    }
+
     // Freemium limit check
     if (role === "user_free") {
       const existingTransactions = await db.transaction.findMany({ where: { userId } })
@@ -102,6 +110,14 @@ export async function PUT(req: NextRequest) {
     const userId = (session.user as any).id
     const body = await req.json()
     const { id, date, tokenTicker, montantInvesti, coursAchat, exchangeId, notes } = body
+
+    // Validate inputs
+    if (!date || !tokenTicker) {
+      return NextResponse.json({ error: "Date et token requis" }, { status: 400 })
+    }
+    if (!montantInvesti || montantInvesti <= 0 || !coursAchat || coursAchat <= 0) {
+      return NextResponse.json({ error: "Montant et prix doivent être positifs" }, { status: 400 })
+    }
 
     // Verify ownership
     const existing = await db.transaction.findFirst({ where: { id, userId } })

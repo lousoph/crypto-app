@@ -8,7 +8,7 @@ import {
   Check, X, Menu, Search, Activity, Zap, Brain, Mail,
   Sun, Moon, Sparkles, ChevronDown, ChevronUp, Eye, EyeOff,
   Gauge, ArrowUpCircle, ArrowDownCircle, Minus, ExternalLink, Star, Pencil,
-  Home, Newspaper, Lightbulb, Clock, Globe, ArrowRight, Bell, Download, Flame, FlameKindling
+  Home, Newspaper, Lightbulb, Clock, Globe, ArrowRight, Bell, Download, Flame, FlameKindling, ChevronsUpDown
 } from 'lucide-react'
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
 import { Tooltip as TooltipUI, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip'
@@ -17,6 +17,8 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Badge } from '@/components/ui/badge'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
+import { Command, CommandInput, CommandList, CommandEmpty, CommandGroup, CommandItem } from '@/components/ui/command'
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogFooter, DialogClose, DialogDescription } from '@/components/ui/dialog'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
@@ -31,6 +33,7 @@ import {
 } from 'recharts'
 import { signIn, signOut, useSession } from 'next-auth/react'
 import { useTheme } from '@/components/theme-provider'
+import { cn } from '@/lib/utils'
 
 // ============================================================
 // TYPES
@@ -1034,6 +1037,7 @@ function TransactionsView({ userRole }: { userRole: string }) {
   const [formNotes, setFormNotes] = useState('')
   const [formLoading, setFormLoading] = useState(false)
   const [tokenSearch, setTokenSearch] = useState('')
+  const [tokenSearchOpen, setTokenSearchOpen] = useState(false)
 
   const fetchData = useCallback(async () => {
     setLoading(true)
@@ -1059,11 +1063,15 @@ function TransactionsView({ userRole }: { userRole: string }) {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     if (!formToken || !formAmount || !formBuyPrice) { toast.error('Veuillez remplir tous les champs requis'); return }
+    const amount = parseFloat(formAmount)
+    const price = parseFloat(formBuyPrice)
+    if (isNaN(amount) || amount <= 0) { toast.error('Le montant doit être supérieur à 0'); return }
+    if (isNaN(price) || price <= 0) { toast.error('Le prix d\'achat doit être supérieur à 0'); return }
     setFormLoading(true)
     try {
       const res = await fetch('/api/transactions', {
         method: 'POST', headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ date: formDate, tokenTicker: formToken, montantInvesti: parseFloat(formAmount), coursAchat: parseFloat(formBuyPrice), exchangeId: formExchange || null, notes: formNotes || null }),
+        body: JSON.stringify({ date: formDate, tokenTicker: formToken, montantInvesti: amount, coursAchat: price, exchangeId: formExchange || null, notes: formNotes || null }),
       })
       const data = await res.json()
       if (res.ok) {
@@ -1084,7 +1092,7 @@ function TransactionsView({ userRole }: { userRole: string }) {
   }
 
   const resetForm = () => {
-    setFormDate(new Date().toISOString().split('T')[0]); setFormToken(''); setFormAmount(''); setFormBuyPrice(''); setFormExchange(''); setFormNotes(''); setTokenSearch('')
+    setFormDate(new Date().toISOString().split('T')[0]); setFormToken(''); setFormAmount(''); setFormBuyPrice(''); setFormExchange(''); setFormNotes(''); setTokenSearch(''); setTokenSearchOpen(false)
   }
 
   const uniqueTickers = [...new Set(transactions.map(t => t.tokenTicker))]
@@ -1180,26 +1188,37 @@ function TransactionsView({ userRole }: { userRole: string }) {
             </div>
             <div className="space-y-2">
               <Label className="text-xs font-medium">Token</Label>
-              <div className="relative">
-                <Select value={formToken} onValueChange={setFormToken}>
-                  <SelectTrigger className="h-10 rounded-xl w-full"><SelectValue placeholder="Sélectionner un token" /></SelectTrigger>
-                  <SelectContent>
-                    <div className="p-2">
-                      <Input placeholder="Rechercher..." value={tokenSearch} onChange={(e) => setTokenSearch(e.target.value)}
-                        className="h-8 rounded-lg text-sm mb-2" />
-                    </div>
-                    {filteredTokens.map(t => (
-                      <SelectItem key={t.ticker} value={t.ticker}>
-                        <div className="flex items-center gap-2">
-                          <TokenLogo ticker={t.ticker} size={16} />
-                          <span>{t.ticker}</span>
-                          <span className="text-muted-foreground text-xs">{t.name}</span>
-                        </div>
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
+              <Popover open={tokenSearchOpen} onOpenChange={setTokenSearchOpen}>
+                <PopoverTrigger asChild>
+                  <Button variant="outline" role="combobox" aria-expanded={tokenSearchOpen}
+                    className="h-10 rounded-xl w-full justify-between font-normal text-muted-foreground">
+                    {formToken ? (() => {
+                      const t = tokens.find(tk => tk.ticker === formToken)
+                      return t ? <div className="flex items-center gap-2"><TokenLogo ticker={t.ticker} size={16} /><span>{t.ticker}</span><span className="text-muted-foreground text-xs">{t.name}</span></div> : formToken
+                    })() : 'Sélectionner un token'}
+                    <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                  </Button>
+                </PopoverTrigger>
+                <PopoverContent className="w-[--radix-popover-trigger-width] p-0" align="start">
+                  <Command>
+                    <CommandInput placeholder="Rechercher un token..." value={tokenSearch} onValueChange={setTokenSearch} />
+                    <CommandList>
+                      <CommandEmpty>Aucun token trouvé.</CommandEmpty>
+                      <CommandGroup className="max-h-60 overflow-y-auto">
+                        {filteredTokens.map(t => (
+                          <CommandItem key={t.ticker} value={`${t.ticker} ${t.name}`}
+                            onSelect={() => { setFormToken(t.ticker); setTokenSearch(''); setTokenSearchOpen(false) }}>
+                            <Check className={cn("mr-2 h-4 w-4 shrink-0", formToken === t.ticker ? "opacity-100" : "opacity-0")} />
+                            <TokenLogo ticker={t.ticker} size={16} />
+                            <span className="ml-1">{t.ticker}</span>
+                            <span className="ml-1 text-muted-foreground text-xs">{t.name}</span>
+                          </CommandItem>
+                        ))}
+                      </CommandGroup>
+                    </CommandList>
+                  </Command>
+                </PopoverContent>
+              </Popover>
             </div>
             <div className="grid grid-cols-2 gap-3">
               <div className="space-y-2">
