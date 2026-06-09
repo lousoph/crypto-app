@@ -129,16 +129,20 @@ const plBg = (v: number) => v >= 0 ? 'bg-emerald-500/10 text-emerald-500' : 'bg-
 
 const CHART_COLORS = ['#7c5cfc','#06b6d4','#f59e0b','#10b981','#ef4444','#3b82f6','#ec4899','#14b8a6','#f97316','#6366f1']
 
-const TOKEN_LOGO_URL = (symbol: string) =>
+const TOKEN_LOGO_PRIMARY = (symbol: string) =>
   `https://cdn.jsdelivr.net/gh/spothq/cryptocurrency-icons@master/128/color/${symbol.toLowerCase()}.png`
+const TOKEN_LOGO_FALLBACK = (symbol: string) =>
+  `https://www.cryptocompare.com/media/37776598/${symbol.toUpperCase()}.png`
 
 // ============================================================
 // TOKEN LOGO COMPONENT
 // ============================================================
 function TokenLogo({ ticker, size = 24, className = '' }: { ticker: string; size?: number; className?: string }) {
   const [imgError, setImgError] = useState(false)
+  const [useFallback, setUseFallback] = useState(false)
+  const gradients: Record<string, string> = { BTC: '#f59e0b', ETH: '#627eea', SOL: '#9945ff', BNB: '#f0b90b', XRP: '#00aae4', ADA: '#0033ad', DOGE: '#c3a634', AVAX: '#e84142', DOT: '#e6007a', MATIC: '#8247e5', ATOM: '#2e3148', LINK: '#2a5ada', UNI: '#ff007a', NEAR: '#00c08b', LTC: '#bfbbbb', TRX: '#ef0027', SHIB: '#f00500' }
+
   if (imgError) {
-    const gradients: Record<string, string> = { BTC: '#f59e0b', ETH: '#627eea', SOL: '#9945ff' }
     return (
       <div
         className={`flex items-center justify-center text-white font-bold shrink-0 ${className}`}
@@ -149,9 +153,9 @@ function TokenLogo({ ticker, size = 24, className = '' }: { ticker: string; size
     )
   }
   return (
-    <img src={TOKEN_LOGO_URL(ticker)} alt={ticker} width={size} height={size}
+    <img src={useFallback ? TOKEN_LOGO_FALLBACK(ticker) : TOKEN_LOGO_PRIMARY(ticker)} alt={ticker} width={size} height={size}
       className={`rounded-lg shrink-0 ${className}`} style={{ width: size, height: size }}
-      onError={() => setImgError(true)} loading="lazy" />
+      onError={() => { if (!useFallback) { setUseFallback(true) } else { setImgError(true) } }} loading="lazy" />
   )
 }
 
