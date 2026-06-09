@@ -15,22 +15,22 @@ datasource db {
 // Rôles : user_free, user_premium, admin
 // ============================================================
 model User {
-  id            String   @id @default(cuid())
-  email         String   @unique
-  name          String?
-  passwordHash  String?  // null si auth Google uniquement
-  image         String?
-  role          String   @default("user_free") // 'user_free' | 'user_premium' | 'admin'
+  id               String    @id @default(cuid())
+  email            String    @unique
+  name             String?
+  passwordHash     String? // null si auth Google uniquement
+  image            String?
+  role             String    @default("user_free") // 'user_free' | 'user_premium' | 'admin'
   stripeCustomerId String? // ID client Stripe pour les abonnements
-  suspended     Boolean  @default(false)       // Compte suspendu par l'admin
-  emailVerified DateTime? // null = not verified
-  createdAt     DateTime @default(now())
-  updatedAt     DateTime @updatedAt
+  suspended        Boolean   @default(false) // Compte suspendu par l'admin
+  emailVerified    DateTime? // null = not verified
+  createdAt        DateTime  @default(now())
+  updatedAt        DateTime  @updatedAt
 
   // Relations
-  transactions  Transaction[]
-  accounts      Account[]
-  sessions      Session[]
+  transactions Transaction[]
+  accounts     Account[]
+  sessions     Session[]
 }
 
 // ============================================================
@@ -56,8 +56,8 @@ model Account {
 }
 
 model Session {
-  id           String  @id @default(cuid())
-  sessionToken String  @unique
+  id           String   @id @default(cuid())
+  sessionToken String   @unique
   userId       String
   expires      DateTime
 
@@ -77,16 +77,16 @@ model VerificationToken {
 // Géré par l'admin + API externe (CoinGecko/CryptoCompare)
 // ============================================================
 model Token {
-  id           String   @id @default(cuid())
-  ticker       String   @unique // ex: BTC, ETH, SOL, TAO
-  name         String              // ex: Bitcoin, Ethereum
-  coingeckoId  String?             // ID CoinGecko pour le rafraîchissement automatique
-  cryptoCompareId String?          // ID CryptoCompare (alternative)
-  currentPrice Float?              // Prix actuel en USD (mis à jour par cron)
-  priceUpdatedAt DateTime?         // Dernière mise à jour du prix
-  active       Boolean  @default(true) // Token actif/inactif
-  createdAt    DateTime @default(now())
-  updatedAt    DateTime @updatedAt
+  id              String    @id @default(cuid())
+  ticker          String    @unique // ex: BTC, ETH, SOL, TAO
+  name            String // ex: Bitcoin, Ethereum
+  coingeckoId     String? // ID CoinGecko pour le rafraîchissement automatique
+  cryptoCompareId String? // ID CryptoCompare (alternative)
+  currentPrice    Float? // Prix actuel en USD (mis à jour par cron)
+  priceUpdatedAt  DateTime? // Dernière mise à jour du prix
+  active          Boolean   @default(true) // Token actif/inactif
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
 
   // Relations
   transactions Transaction[]
@@ -112,22 +112,22 @@ model Exchange {
 // Basé sur l'onglet BDD du fichier Excel
 // ============================================================
 model Transaction {
-  id              String   @id @default(cuid())
-  userId          String                        // Propriétaire de la transaction
-  date            DateTime                      // Date de l'achat
-  tokenTicker     String                        // ex: BTC, ETH (dénormalisé pour faciliter les requêtes)
-  montantInvesti  Float                         // Montant investi en USD (ex: 15.70)
-  coursAchat      Float                         // Prix du token au moment de l'achat (ex: 82603.9)
-  quantite        Float                         // Quantité achetée = montantInvesti / coursAchat
-  exchangeId      String?                       // Plateforme d'échange (optionnel)
-  notes           String?                       // Notes optionnelles
-  createdAt       DateTime @default(now())
-  updatedAt       DateTime @updatedAt
+  id             String   @id @default(cuid())
+  userId         String // Propriétaire de la transaction
+  date           DateTime // Date de l'achat
+  tokenTicker    String // ex: BTC, ETH (dénormalisé pour faciliter les requêtes)
+  montantInvesti Float // Montant investi en USD (ex: 15.70)
+  coursAchat     Float // Prix du token au moment de l'achat (ex: 82603.9)
+  quantite       Float // Quantité achetée = montantInvesti / coursAchat
+  exchangeId     String? // Plateforme d'échange (optionnel)
+  notes          String? // Notes optionnelles
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
 
   // Relations
-  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
-  token     Token     @relation(fields: [tokenTicker], references: [ticker], onDelete: Restrict)
-  exchange  Exchange? @relation(fields: [exchangeId], references: [id], onDelete: SetNull)
+  user     User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  token    Token     @relation(fields: [tokenTicker], references: [ticker], onDelete: Restrict)
+  exchange Exchange? @relation(fields: [exchangeId], references: [id], onDelete: SetNull)
 
   @@index([userId])
   @@index([tokenTicker])

@@ -1,50 +1,44 @@
 import { NextResponse } from 'next/server'
 import { db } from '@/lib/db'
 import bcrypt from 'bcryptjs'
+import { getServerSession } from 'next-auth'
+import { authOptions } from '@/lib/auth'
 
 export async function POST(request: Request) {
   try {
-    const { userId, newEmail, currentPassword } = await request.json()
+    const session = await getServerSession(authOptions)
+    if (!session?.user) {
+      return NextResponse.json({ error: 'Non authentifié' }, { status: 401 })
+    }
 
-    if (!userId || !newEmail || !currentPassword) {
-      return NextResponse.json(
-        { error: 'Tous les champs sont requis' },
-        { status: 400 }
-      )
+    const userId = (session.user as any).id
+    const { newEmail, currentPassword } = await request.json()
+
+    if (!newEmail) {
+      return NextResponse.json({ error: 'Nouvel email requis' }, { status: 400 })
     }
 
     // Find user
     const user = await db.user.findUnique({ where: { id: userId } })
     if (!user) {
-      return NextResponse.json(
-        { error: 'Utilisateur non trouvé' },
-        { status: 404 }
-      )
+      return NextResponse.json({ error: 'Utilisateur non trouvé' }, { status: 404 })
     }
 
-    // Verify current password (skip if OAuth-only user)
+    // Verify current password (skip if OAuth-only user without password)
     if (user.passwordHash) {
+      if (!currentPassword) {
+        return NextResponse.json({ error: 'Mot de passe actuel requis pour cette action' }, { status: 400 })
+      }
       const isValid = await bcrypt.compare(currentPassword, user.passwordHash)
       if (!isValid) {
-        return NextResponse.json(
-          { error: 'Mot de passe incorrect' },
-          { status: 401 }
-        )
+        return NextResponse.json({ error: 'Mot de passe incorrect' }, { status: 401 })
       }
-    } else {
-      return NextResponse.json(
-        { error: 'Ce compte utilise une authentification OAuth. Impossible de vérifier le mot de passe.' },
-        { status: 400 }
-      )
     }
 
     // Check if email is already taken by another user
     const existingUser = await db.user.findUnique({ where: { email: newEmail } })
     if (existingUser && existingUser.id !== userId) {
-      return NextResponse.json(
-        { error: 'Cet email est déjà utilisé par un autre compte' },
-        { status: 409 }
-      )
+      return NextResponse.json({ error: 'Cet email est déjà utilisé par un autre compte' }, { status: 409 })
     }
 
     // Update email
@@ -65,7 +59,7 @@ export async function POST(request: Request) {
   } catch (error: any) {
     console.error('Update email error:', error)
     return NextResponse.json(
-      { error: error.message || 'Erreur lors de la mise à jour de l\'email' },
+      { error: error.message || "Erreur lors de la mise à jour de l'email" },
       { status: 500 }
     )
   }

@@ -1848,7 +1848,7 @@ function ProfileView({ userRole }: { userRole: string }) {
     try {
       const res = await fetch('/api/user/update-email', {
         method: 'POST', headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ newEmail }),
+        body: JSON.stringify({ newEmail, currentPassword }),
       })
       const data = await res.json()
       if (res.ok) { toast.success('Email mis à jour !'); setNewEmail('') }
@@ -2081,6 +2081,7 @@ function ProfileView({ userRole }: { userRole: string }) {
       <Card className="glass-card border-border rounded-xl">
         <CardHeader className="p-4 pb-2"><CardTitle className="text-sm font-semibold">Changer l'email</CardTitle></CardHeader>
         <CardContent className="p-4 pt-0 space-y-3">
+          <Input type="password" placeholder="Mot de passe actuel" value={currentPassword} onChange={(e) => setCurrentPassword(e.target.value)} className="h-10 rounded-xl bg-input border-border" />
           <Input type="email" placeholder="Nouvel email" value={newEmail} onChange={(e) => setNewEmail(e.target.value)} className="h-10 rounded-xl bg-input border-border" />
           <Button onClick={handleChangeEmail} className="rounded-xl h-9 text-xs" disabled={emailLoading} variant="outline">
             {emailLoading ? <RefreshCw className="w-3 h-3 animate-spin mr-2" /> : null}Modifier
