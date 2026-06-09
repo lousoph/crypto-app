@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server"
 
-// GET /api/fear-greed — Fetch Crypto Fear & Greed Index from alternative.me
+// GET /api/fear-greed — Fetch Crypto Fear & Greed Index from alternative.me (backward compatible)
 export async function GET() {
   try {
     const res = await fetch("https://api.alternative.me/fng/?limit=30&format=json", {
