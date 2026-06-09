@@ -8,9 +8,10 @@ import {
   Check, X, Menu, Search, Activity, Zap, Brain, Mail,
   Sun, Moon, Sparkles, ChevronDown, ChevronUp, Eye, EyeOff,
   Gauge, ArrowUpCircle, ArrowDownCircle, Minus, ExternalLink, Star, Pencil,
-  Home, Newspaper, Lightbulb, Clock, Globe, TrendingUp, ArrowRight
+  Home, Newspaper, Lightbulb, Clock, Globe, ArrowRight, Bell, Download, Flame, FlameKindling
 } from 'lucide-react'
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
+import { Tooltip as TooltipUI, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
@@ -449,6 +450,190 @@ function EmailVerificationScreen({ email, onVerified }: { email: string; onVerif
         </div>
       </div>
     </div>
+  )
+}
+
+// ============================================================
+// LIQUIDITY HEATMAP COMPONENT
+// ============================================================
+function LiquidityHeatmap() {
+  const [activeFilter, setActiveFilter] = useState<string>('24h')
+  const ts = useThemeStyles()
+
+  const currentPrice = 104250
+  const volatility = 4.2
+  const liquidations24h = 187
+
+  const priceRange = { min: 95000, max: 115000, step: 250 }
+  const gridCols = 10
+  const gridRows = 8
+  const cellWidth = 100 / gridCols
+  const cellHeight = 100 / gridRows
+
+  const totalSteps = Math.floor((priceRange.max - priceRange.min) / priceRange.step)
+  const stepsPerRow = Math.floor(totalSteps / gridRows)
+
+  const generateHeatmapData = () => {
+    const cells: { price: number; intensity: number; side: 'buy' | 'sell'; liquidity: string }[] = []
+    for (let row = 0; row < gridRows; row++) {
+    for (let col = 0; col < stepsPerRow; col++) {
+      const price = priceRange.max - (row * stepsPerRow + col) * priceRange.step
+      if (price < priceRange.min || price > priceRange.max) continue
+      const distance = Math.abs(price - currentPrice) / (currentPrice * 0.01)
+      const isAbove = price > currentPrice
+      const side = isAbove ? ('sell' as const) : ('buy' as const)
+      // Simulate clusters of liquidity near round numbers
+      const roundDist = Math.abs(price % 1000) / 1000
+      const clusterBonus = roundDist < 0.02 ? 0.3 : roundDist < 0.05 ? 0.15 : 0
+      const proximityBonus = Math.max(0, 1 - distance * 0.04) * 0.3
+      const noise = Math.sin(price * 7.3 + row * 13.7) * 0.5 + 0.5
+      const intensity = Math.min(1, Math.max(0.05, proximityBonus + clusterBonus + noise * 0.35))
+      const liquidity = intensity > 0.7 ? '$XXM+' : intensity > 0.4 ? '$XXM' : intensity > 0.2 ? '$X.XM' : '$X.XK'
+      cells.push({ price, intensity, side, liquidity })
+    }
+    }
+    return cells
+  }
+
+  const cells = useMemo(() => generateHeatmapData(), [])
+
+  const getCellColor = (intensity: number, side: 'buy' | 'sell') => {
+    const maxI = 1
+    const n = intensity / maxI
+    if (side === 'buy') {
+      if (n > 0.7) return `rgba(16, 185, 129, ${0.3 + n * 0.7})`
+      if (n > 0.4) return `rgba(52, 211, 153, ${0.2 + n * 0.6})`
+      if (n > 0.2) return `rgba(132, 204, 22, ${0.15 + n * 0.45})`
+      return `rgba(134, 239, 172, ${0.08 + n * 0.25})`
+    } else {
+      if (n > 0.7) return `rgba(239, 68, 68, ${0.3 + n * 0.7})`
+      if (n > 0.4) return `rgba(248, 113, 113, ${0.2 + n * 0.6})`
+      if (n > 0.2) return `rgba(250, 204, 21, ${0.15 + n * 0.45})`
+      return `rgba(251, 191, 36, ${0.08 + n * 0.25})`
+    }
+  }
+
+  const getBorderWidth = (price: number) => {
+    const mod = price % 5000
+    if (mod === 0) return 2
+    if (mod === 2500) return 1.5
+    return 1
+  }
+
+  const currentRow = Math.floor((priceRange.max - currentPrice) / priceRange.step)
+  const currentCol = currentRow % stepsPerRow
+
+  return (
+    <Card className="glass-card card-hover border-border rounded-xl overflow-hidden">
+      <div className="h-0.5" style={{ background: 'linear-gradient(90deg,#ef4444,#f59e0b,#10b981,#06b6d4)' }} />
+      <CardContent className="p-4">
+        <div className="flex items-center justify-between mb-3 flex-wrap gap-2">
+          <div className="flex items-center gap-2">
+            <div className="w-10 h-10 rounded-xl flex items-center justify-center" style={{ background: ts.iconBgViolet }}>
+              <Flame className="w-5 h-5 text-violet-500" />
+            </div>
+            <div>
+              <p className="text-sm font-bold text-foreground">Carte de Liquidité Bitcoin</p>
+              <p className="text-[10px] text-muted-foreground">Zones de liquidité estimées en temps réel</p>
+            </div>
+          </div>
+          <div className="flex items-center gap-1">
+            {['24h', '7d', '30d'].map(f => (
+              <button
+                key={f}
+                onClick={() => setActiveFilter(f)}
+                className={`px-3 py-1 rounded-lg text-[10px] font-medium transition-all ${
+                  activeFilter === f
+                    ? 'bg-violet-500/15 text-violet-600 dark:text-violet-400 border border-violet-500/30'
+                    : 'bg-muted/50 text-muted-foreground border border-border hover:bg-muted'
+                }`}
+              >{f}</button>
+            ))}
+          </div>
+        </div>
+
+        <div className="flex items-center gap-4 mb-3 text-[10px]">
+          <div className="flex items-center gap-1 text-muted-foreground">
+            <Activity className="w-3 h-3" />
+            <span>Volatilité: <span className="font-semibold text-foreground">{volatility}%</span></span>
+          </div>
+          <div className="flex items-center gap-1 text-muted-foreground">
+            <FlameKindling className="w-3 h-3" />
+            <span>Liquidations 24h: <span className="font-semibold text-foreground">${liquidations24h}M</span></span>
+          </div>
+        </div>
+
+        {/* Current price indicator */
+        <div className="flex items-center gap-2 mb-3 px-2 py-1.5 rounded-lg" style={{ background: 'rgba(124,92,252,0.06)' }}>
+          <span className="text-[10px] text-muted-foreground">BTC/USD</span>
+          <span className="text-xs font-bold text-violet-600 dark:text-violet-400">${currentPrice.toLocaleString('fr-FR')}</span>
+          <span className="live-dot w-1.5 h-1.5 rounded-full bg-violet-500" />
+        </div>
+
+        {/* Heatmap Grid */}
+        <div className="rounded-lg overflow-hidden border border-border/50 p-1" style={{ background: 'rgba(0,0,0,0.02)' }}>
+          <div className="grid gap-px" style={{ gridTemplateColumns: `repeat(${gridCols}, minmax(0, 1fr))` }}>
+            {cells.map((cell, idx) => {
+              const isCurrentRow = Math.floor(idx / stepsPerRow) === Math.floor(currentRow / stepsPerRow)
+              const isCurrentCol = (idx % stepsPerRow) === currentCol
+              const isCurrent = isCurrentRow && isCurrentCol
+              return (
+                <TooltipUIProvider key={idx}>
+                  <TooltipTrigger asChild>
+                    <div
+                      className={`heatmap-cell rounded-sm flex items-center justify-center text-[7px] font-mono leading-none ${
+                        isCurrent ? 'heatmap-current-line' : ''
+                      }`}
+                      style={{
+                        height: '28px',
+                        background: getCellColor(cell.intensity, cell.side),
+                        borderBottomWidth: getBorderWidth(cell.price) + 'px',
+                        borderBottomColor: isCurrent
+                          ? 'rgba(124, 92, 252, 0.8)'
+                          : ts.isDark ? 'rgba(124,92,252,0.06)' : 'rgba(109,77,224,0.04)',
+                        color: cell.intensity > 0.5
+                          ? (ts.isDark ? '#fff' : '#1e293b')
+                          : (ts.isDark ? 'rgba(255,255,255,0.5)' : 'rgba(0,0,0,0.4)'),
+                      }}
+                      title={`$${cell.price.toLocaleString('fr-FR')} — Liquidité: ${cell.side === 'buy' ? 'Achat' : 'Vente'} (${(cell.intensity * 100).toFixed(0)}%)`}
+                    >
+                      {cell.price % 1000 === 0 ? (
+                        <span className="font-bold" style={{ textShadow: ts.isDark ? '0 0 6px rgba(255,255,255,0.2)' : 'none' }}>
+                          {(cell.price / 1000).toFixed(0)}k
+                        </span>
+                      ) : (
+                        <span className="opacity-70">{(cell.price / 1000).toFixed(1)}k</span>
+                      )}
+                    </div>
+                  </TooltipTrigger>
+                  <TooltipContent side="top" className="text-[10px] px-2 py-1 max-w-[180px]">
+                    <p className="font-mono">${cell.price.toLocaleString('fr-FR')}</p>
+                    <p className="text-muted-foreground">{cell.side === 'buy' ? '🟢 Achat' : '🔴 Vente'} — {(cell.intensity * 100).toFixed(0)}%</p>
+                  </TooltipContent>
+                </TooltipUIProvider>
+              )
+            })}
+          </div>
+        </div>
+
+        {/* Color Legend */
+        <div className="flex items-center justify-between mt-3">
+          <div className="flex items-center gap-2">
+            <span className="text-[9px] text-emerald-500 font-medium">Achat</span>
+            <div className="flex gap-0.5">
+              {[0.1, 0.3, 0.5, 0.7, 0.9].map(v => (
+                <div key={v} className="w-4 h-2 rounded-sm" style={{ background: getCellColor(v, 'buy') }} />
+              ))}
+            </div>
+            <span className="text-[9px] text-red-500 font-medium">Vente</span>
+          </div>
+          <div className="flex items-center gap-1.5 text-[9px] text-muted-foreground">
+            <div className="w-2 h-2 rounded-sm" style={{ background: 'rgba(124,92,252,0.3)', boxShadow: '0 0 6px rgba(124,92,252,0.4)' }} />
+            <span>Prix actuel</span>
+          </div>
+        </div>
+      </CardContent>
+    </Card>
   )
 }
 
@@ -1370,8 +1555,14 @@ function HomeView({ tokens: allTokens }: { tokens: TokenData[] }) {
         </Card>
       </div>
 
+      {/* Liquidity Heatmap */}
+      <LiquidityHeatmap />
+
+      {/* Section Separator */}
+      <hr className="section-separator" />
+
       {/* AI Tips Section */}
-      <Card className="glass-card border-border rounded-xl overflow-hidden">
+      <Card className="glass-card card-hover border-border rounded-xl overflow-hidden">
         <div className="h-0.5" style={{ background: 'linear-gradient(90deg,#7c5cfc,#06b6d4,#a78bfa)' }} />
         <CardHeader className="p-3 pb-2">
           <CardTitle className="text-xs font-semibold flex items-center gap-2">
@@ -1405,8 +1596,11 @@ function HomeView({ tokens: allTokens }: { tokens: TokenData[] }) {
         </CardContent>
       </Card>
 
+      {/* Section Separator */}
+      <hr className="section-separator" />
+
       {/* Crypto News Section */}
-      <Card className="glass-card border-border rounded-xl overflow-hidden">
+      <Card className="glass-card card-hover border-border rounded-xl overflow-hidden">
         <div className="h-0.5" style={{ background: 'linear-gradient(90deg,#06b6d4,#f59e0b,#06b6d4)' }} />
         <CardHeader className="p-3 pb-2">
           <div className="flex items-center justify-between">
@@ -1766,12 +1960,12 @@ function ProfileView({ userRole }: { userRole: string }) {
             </div>
 
             {/* Premium Plan */}
-            <div className={`p-3 rounded-xl border transition-all ${isPremium ? 'border-amber-500/30 bg-amber-500/5' : 'border-border hover:border-amber-500/20'}`}>
+            <div className={`p-3 rounded-xl border transition-all pricing-card-premium relative ${isPremium ? 'border-amber-500/30 bg-amber-500/5' : 'border-border hover:border-amber-500/20'}`}>
               <div className="flex items-center justify-between mb-2">
                 <span className="text-xs font-bold text-foreground flex items-center gap-1">
                   <Star className="w-3 h-3 text-amber-500" />Premium
                 </span>
-                <Badge variant="secondary" className={`text-[9px] px-1.5 ${isPremium ? 'bg-amber-500/10 text-amber-500' : 'bg-amber-500/10 text-amber-500'}`}>
+                <Badge variant="secondary" className={`text-[9px] px-1.5 font-bold ${isPremium ? 'bg-amber-500/10 text-amber-500' : 'bg-amber-500/15 text-amber-500 animate-pulse'}`}>
                   {isPremium ? 'Actif' : 'Recommandé'}
                 </Badge>
               </div>
@@ -1836,6 +2030,37 @@ function ProfileView({ userRole }: { userRole: string }) {
           </div>
         </CardContent>
       </Card>
+
+      {/* Premium Offer Banner */}
+      <div className="premium-banner rounded-xl p-4 md:p-5 relative" style={{ background: 'linear-gradient(135deg, rgba(124,92,252,0.08), rgba(6,182,212,0.06), rgba(168,85,247,0.04), rgba(245,158,11,0.03))' }}>
+        <div className="flex items-start gap-3">
+          <div className="w-11 h-11 rounded-xl flex items-center justify-center shrink-0" style={{ background: 'rgba(124,92,252,0.12)' }}>
+            <Brain className="w-5 h-5 text-violet-500" />
+          </div>
+          <div className="flex-1 min-w-0">
+            <p className="text-sm font-bold text-foreground mb-2">🔓 Débloquez tout le potentiel de Prédict AI</p>
+            <div className="flex flex-wrap gap-3 mb-3">
+              <div className="flex items-center gap-1.5">
+                <Brain className="w-4 h-4 text-violet-500" />
+                <span className="text-[11px] text-muted-foreground">Analyses IA avancées</span>
+              </div>
+              <div className="flex items-center gap-1.5">
+                <Activity className="w-4 h-4 text-cyan-500" />
+                <span className="text-[11px] text-muted-foreground">Signaux de trading en temps réel</span>
+              </div>
+              <div className="flex items-center gap-1.5">
+                <Bell className="w-4 h-4 text-amber-500" />
+                <span className="text-[11px] text-muted-foreground">Alertes personnalisées</span>
+              </div>
+              <div className="flex items-center gap-1.5">
+                <Download className="w-4 h-4 text-emerald-500" />
+                <span className="text-[11px] text-muted-foreground">Export de vos données</span>
+              </div>
+            </div>
+            <p className="text-[10px] text-muted-foreground/70">Rejoignez le plan Premium pour accéder à ces fonctionnalités exclusives.</p>
+          </div>
+        </div>
+      </div>
 
       {/* Change Email */}
       <Card className="glass-card border-border rounded-xl">

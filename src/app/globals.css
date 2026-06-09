@@ -3171,3 +3171,550 @@ html:not(.dark) .breathe-glow {
 .theme-transitioning, .theme-transitioning *, .theme-transitioning *::before, .theme-transitioning *::after {
   transition-duration: 0.3s !important;
 }
+
+/* ============================================================
+   ENHANCED VISUAL EFFECTS — DRAMATIC GLOW UPGRADE
+   ============================================================ */
+
+/* --- 1. Glass-card neon border MORE visible in light mode --- */
+html:not(.dark) .glass-card::before {
+  background: linear-gradient(
+    135deg,
+    rgba(109, 77, 224, 0.35) 0%,
+    rgba(6, 182, 212, 0.28) 30%,
+    rgba(168, 85, 247, 0.22) 60%,
+    rgba(6, 182, 212, 0.18) 100%
+  );
+  opacity: 1 !important;
+}
+
+html:not(.dark) .glass-card::after {
+  content: '';
+  position: absolute;
+  inset: -1px;
+  border-radius: inherit;
+  padding: 1px;
+  background: linear-gradient(
+    135deg,
+    rgba(109, 77, 224, 0.12) 0%,
+    rgba(6, 182, 212, 0.08) 50%,
+    rgba(168, 85, 247, 0.10) 100%
+  );
+  -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  -webkit-mask-composite: xor;
+  mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  mask-composite: exclude;
+  pointer-events: none;
+  box-shadow: inset 0 0 12px rgba(109, 77, 224, 0.04);
+}
+
+/* --- 2. Sidebar nav items glow effect --- */
+.glass-sidebar button {
+  position: relative;
+  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.glass-sidebar button::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+  pointer-events: none;
+  box-shadow: inset 0 0 20px rgba(124, 92, 252, 0.06);
+}
+
+.glass-sidebar button:hover::after {
+  opacity: 1;
+}
+
+.dark .glass-sidebar button:hover::after {
+  box-shadow: inset 0 0 24px rgba(124, 92, 252, 0.10), 0 0 12px rgba(124, 92, 252, 0.06);
+}
+
+html:not(.dark) .glass-sidebar button:hover::after {
+  box-shadow: inset 0 0 16px rgba(109, 77, 224, 0.05);
+}
+
+.glass-sidebar button.nav-active-indicator::after {
+  opacity: 1;
+  box-shadow: inset 0 0 24px rgba(124, 92, 252, 0.08);
+}
+
+html:not(.dark) .glass-sidebar button.nav-active-indicator::after {
+  box-shadow: inset 0 0 18px rgba(109, 77, 224, 0.06);
+}
+
+/* --- 3. KPI number values inner glow --- */
+.kpi-value-animate {
+  text-shadow: 0 0 20px rgba(124, 92, 252, 0.15), 0 0 40px rgba(124, 92, 252, 0.05);
+}
+
+html:not(.dark) .kpi-value-animate {
+  text-shadow: 0 0 16px rgba(109, 77, 224, 0.12);
+}
+
+.dark .kpi-value-animate {
+  text-shadow: 0 0 20px rgba(124, 92, 252, 0.18), 0 0 40px rgba(124, 92, 252, 0.08);
+}
+
+.kpi-value-animate.text-emerald-500,
+.kpi-value-animate.text-emerald-400 {
+  text-shadow: 0 0 16px rgba(16, 185, 129, 0.2), 0 0 32px rgba(16, 185, 129, 0.06) !important;
+}
+
+.kpi-value-animate.text-red-500,
+.kpi-value-animate.text-red-400 {
+  text-shadow: 0 0 16px rgba(239, 68, 68, 0.2), 0 0 32px rgba(239, 68, 68, 0.06) !important;
+}
+
+/* --- 4. Table row hover — left border glow indicator --- */
+tbody tr {
+  position: relative;
+  transition: all 0.25s ease;
+}
+
+tbody tr:hover td:first-child {
+  box-shadow: inset 3px 0 0 -1px rgba(124, 92, 252, 0.5);
+}
+
+tbody tr:hover td:first-child::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  width: 3px;
+  background: linear-gradient(180deg, #7c5cfc, #06b6d4);
+  border-radius: 0 2px 2px 0;
+  box-shadow: 0 0 8px rgba(124, 92, 252, 0.4);
+}
+
+tbody tr:hover td {
+  background: rgba(124, 92, 252, 0.05) !important;
+}
+
+.dark tbody tr:hover td {
+  background: rgba(124, 92, 252, 0.08) !important;
+}
+
+html:not(.dark) tbody tr:hover td {
+  background: rgba(109, 77, 224, 0.04) !important;
+}
+
+/* --- 5. Gradient line separator between sections --- */
+.section-separator {
+  height: 1px;
+  border: none;
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    rgba(124, 92, 252, 0.08) 10%,
+    rgba(124, 92, 252, 0.20) 30%,
+    rgba(6, 182, 212, 0.25) 50%,
+    rgba(124, 92, 252, 0.20) 70%,
+    rgba(124, 92, 252, 0.08) 90%,
+    transparent 100%
+  );
+  box-shadow: 0 0 12px rgba(124, 92, 252, 0.08), 0 0 4px rgba(6, 182, 212, 0.06);
+  margin: 0;
+}
+
+.dark .section-separator {
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    rgba(124, 92, 252, 0.06) 10%,
+    rgba(124, 92, 252, 0.15) 30%,
+    rgba(6, 182, 212, 0.18) 50%,
+    rgba(124, 92, 252, 0.15) 70%,
+    rgba(124, 92, 252, 0.06) 90%,
+    transparent 100%
+  );
+  box-shadow: 0 0 16px rgba(124, 92, 252, 0.10), 0 0 6px rgba(6, 182, 212, 0.08);
+}
+
+html:not(.dark) .section-separator {
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    rgba(109, 77, 224, 0.10) 10%,
+    rgba(109, 77, 224, 0.25) 30%,
+    rgba(8, 145, 178, 0.20) 50%,
+    rgba(109, 77, 224, 0.25) 70%,
+    rgba(109, 77, 224, 0.10) 90%,
+    transparent 100%
+  );
+  box-shadow: 0 0 10px rgba(109, 77, 224, 0.08);
+}
+
+/* --- 6. Enhanced pricing cards with stronger neon borders --- */
+.pricing-card-premium {
+  border: 1px solid rgba(245, 158, 11, 0.25) !important;
+  box-shadow: 0 0 0 1px rgba(245, 158, 11, 0.08),
+              0 4px 20px rgba(245, 158, 11, 0.10),
+              0 0 40px rgba(245, 158, 11, 0.06) !important;
+}
+
+.dark .pricing-card-premium {
+  border-color: rgba(245, 158, 11, 0.30) !important;
+  box-shadow: 0 0 0 1px rgba(245, 158, 11, 0.12),
+              0 4px 24px rgba(245, 158, 11, 0.15),
+              0 0 50px rgba(245, 158, 11, 0.08) !important;
+}
+
+html:not(.dark) .pricing-card-premium {
+  border-color: rgba(217, 119, 6, 0.30) !important;
+  box-shadow: 0 0 0 1px rgba(217, 119, 6, 0.10),
+              0 4px 16px rgba(217, 119, 6, 0.12),
+              0 0 30px rgba(217, 119, 6, 0.06) !important;
+}
+
+.pricing-card-premium::before {
+  content: '';
+  position: absolute;
+  inset: -1px;
+  border-radius: inherit;
+  padding: 1.5px;
+  background: linear-gradient(
+    135deg,
+    rgba(245, 158, 11, 0.40) 0%,
+    rgba(245, 158, 11, 0.15) 25%,
+    rgba(217, 119, 6, 0.30) 50%,
+    rgba(245, 158, 11, 0.15) 75%,
+    rgba(245, 158, 11, 0.40) 100%
+  );
+  background-size: 200% 200%;
+  animation: premiumBorderShimmer 4s ease infinite;
+  -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  -webkit-mask-composite: xor;
+  mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  mask-composite: exclude;
+  pointer-events: none;
+  z-index: 1;
+}
+
+@keyframes premiumBorderShimmer {
+  0% { background-position: 0% 0%; }
+  50% { background-position: 100% 100%; }
+  100% { background-position: 0% 0%; }
+}
+
+/* --- 7. All card borders slightly more visible in both themes --- */
+.glass-card {
+  border-color: rgba(109, 77, 224, 0.14) !important;
+}
+
+.dark .glass-card {
+  border-color: rgba(124, 92, 252, 0.15) !important;
+}
+
+html:not(.dark) .glass-card {
+  border-color: rgba(0, 0, 0, 0.12) !important;
+}
+
+.glass-card:hover {
+  border-color: rgba(124, 92, 252, 0.28) !important;
+}
+
+.dark .glass-card:hover {
+  border-color: rgba(124, 92, 252, 0.32) !important;
+}
+
+html:not(.dark) .glass-card:hover {
+  border-color: rgba(109, 77, 224, 0.28) !important;
+}
+
+/* --- Heatmap cell styles --- */
+.heatmap-cell {
+  transition: all 0.2s ease;
+  cursor: default;
+  position: relative;
+}
+
+.heatmap-cell:hover {
+  transform: scale(1.08);
+  z-index: 2;
+  box-shadow: 0 0 12px rgba(124, 92, 252, 0.3);
+}
+
+.heatmap-current-line {
+  position: relative;
+  box-shadow: 0 0 12px rgba(124, 92, 252, 0.6), 0 0 24px rgba(124, 92, 252, 0.3);
+}
+
+@keyframes heatmapGlow {
+  0%, 100% { box-shadow: 0 0 8px rgba(124, 92, 252, 0.5), 0 0 16px rgba(124, 92, 252, 0.2); }
+  50% { box-shadow: 0 0 14px rgba(124, 92, 252, 0.7), 0 0 28px rgba(124, 92, 252, 0.3); }
+}
+
+.heatmap-current-line::after {
+  content: '';
+  position: absolute;
+  left: -4px;
+  right: -4px;
+  top: 50%;
+  height: 4px;
+  transform: translateY(-50%);
+  background: linear-gradient(90deg, transparent, #7c5cfc, #06b6d4, #7c5cfc, transparent);
+  border-radius: 2px;
+  animation: heatmapGlow 2.5s ease-in-out infinite;
+}
+
+/* --- Premium banner glow --- */
+.premium-banner {
+  position: relative;
+  overflow: hidden;
+}
+
+.premium-banner::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  padding: 2px;
+  background: linear-gradient(
+    135deg,
+    rgba(124, 92, 252, 0.30) 0%,
+    rgba(6, 182, 212, 0.25) 25%,
+    rgba(168, 85, 247, 0.20) 50%,
+    rgba(6, 182, 212, 0.25) 75%,
+    rgba(124, 92, 252, 0.30) 100%
+  );
+  background-size: 200% 200%;
+  animation: premiumBorderShimmer 4s ease infinite;
+  -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  -webkit-mask-composite: xor;
+  mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  mask-composite: exclude;
+  pointer-events: none;
+}
+
+/* ============================================================
+   ENHANCED LIGHT MODE — STRONGER NEON EFFECTS
+   ============================================================ */
+
+/* Light mode neon borders — MORE visible */
+html:not(.dark) .glass-card::before {
+  background: linear-gradient(
+    135deg,
+    rgba(109, 77, 224, 0.30) 0%,
+    rgba(6, 182, 212, 0.22) 30%,
+    rgba(168, 85, 247, 0.18) 60%,
+    rgba(6, 182, 212, 0.15) 100%
+  );
+  opacity: 1;
+}
+
+html:not(.dark) .glass-strong::before {
+  background: linear-gradient(
+    135deg,
+    rgba(109, 77, 224, 0.35) 0%,
+    rgba(6, 182, 212, 0.28) 30%,
+    rgba(168, 85, 247, 0.22) 60%,
+    rgba(6, 182, 212, 0.18) 100%
+  );
+}
+
+/* Light mode table rows — visible hover with left glow indicator */
+html:not(.dark) tr:hover td {
+  background: rgba(109, 77, 224, 0.06) !important;
+  box-shadow: inset 3px 0 0 rgba(124, 92, 252, 0.25);
+}
+
+html:not(.dark) .data-row-hover:hover {
+  background: rgba(109, 77, 224, 0.06) !important;
+  box-shadow: inset 3px 0 0 rgba(124, 92, 252, 0.25);
+}
+
+/* Dark mode table rows — gradient glow on hover */
+.dark tr:hover td {
+  background: linear-gradient(90deg, rgba(124, 92, 252, 0.06), rgba(6, 182, 212, 0.03), transparent) !important;
+  box-shadow: inset 3px 0 0 rgba(124, 92, 252, 0.30);
+}
+
+/* Light mode section separator — gradient glow line */
+.section-separator {
+  border: none !important;
+  height: 1px !important;
+  background: linear-gradient(90deg, transparent, rgba(124, 92, 252, 0.20), rgba(6, 182, 212, 0.15), rgba(124, 92, 252, 0.20), transparent);
+  box-shadow: 0 0 8px rgba(124, 92, 252, 0.06);
+  margin: 1rem 0;
+}
+
+.dark .section-separator {
+  background: linear-gradient(90deg, transparent, rgba(124, 92, 252, 0.18), rgba(6, 182, 212, 0.12), rgba(124, 92, 252, 0.18), transparent);
+  box-shadow: 0 0 12px rgba(124, 92, 252, 0.08);
+}
+
+/* Light mode glass-strong — stronger shadow */
+html:not(.dark) .glass-strong {
+  box-shadow: 0 2px 8px rgba(109, 77, 224, 0.10), 0 12px 40px rgba(0, 0, 0, 0.08), 0 0 0 1px rgba(109, 77, 224, 0.08);
+}
+
+/* Light mode KPI number glow */
+html:not(.dark) .kpi-value-animate {
+  text-shadow: 0 0 20px rgba(109, 77, 224, 0.08);
+}
+
+.dark .kpi-value-animate {
+  text-shadow: 0 0 20px rgba(124, 92, 252, 0.12);
+}
+
+/* ============================================================
+   PRICING CARD PREMIUM — ANIMATED GLOW BORDER
+   ============================================================ */
+.pricing-card-premium {
+  position: relative;
+  overflow: hidden;
+}
+
+.pricing-card-premium::before {
+  content: '';
+  position: absolute;
+  inset: -1px;
+  border-radius: inherit;
+  padding: 2px;
+  background: linear-gradient(
+    135deg,
+    rgba(245, 158, 11, 0.40) 0%,
+    rgba(217, 119, 6, 0.30) 25%,
+    rgba(251, 191, 36, 0.35) 50%,
+    rgba(217, 119, 6, 0.30) 75%,
+    rgba(245, 158, 11, 0.40) 100%
+  );
+  background-size: 200% 200%;
+  animation: premiumBorderShimmer 4s ease infinite;
+  -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  -webkit-mask-composite: xor;
+  mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  mask-composite: exclude;
+  pointer-events: none;
+  z-index: 1;
+}
+
+.pricing-card-premium::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background: radial-gradient(ellipse at top, rgba(245, 158, 11, 0.06), transparent 60%);
+  pointer-events: none;
+  z-index: 0;
+}
+
+.pricing-card-premium {
+  box-shadow: 0 0 20px rgba(245, 158, 11, 0.08), 0 4px 16px rgba(245, 158, 11, 0.05);
+}
+
+.dark .pricing-card-premium {
+  box-shadow: 0 0 30px rgba(245, 158, 11, 0.10), 0 4px 16px rgba(0, 0, 0, 0.3);
+}
+
+/* ============================================================
+   HEATMAP LIGHT MODE — BETTER READABILITY
+   ============================================================ */
+html:not(.dark) .heatmap-cell {
+  border-bottom-color: rgba(109, 77, 224, 0.08) !important;
+}
+
+html:not(.dark) .heatmap-current-line {
+  box-shadow: 0 0 10px rgba(109, 77, 224, 0.5), 0 0 20px rgba(109, 77, 224, 0.2);
+}
+
+html:not(.dark) .heatmap-current-line::after {
+  background: linear-gradient(90deg, transparent, #6d4de0, #0891b2, #6d4de0, transparent);
+}
+
+/* Heatmap grid background — light mode */
+html:not(.dark) [style*="rgba(0,0,0,0.02)"] {
+  background: rgba(109, 77, 224, 0.03) !important;
+}
+
+/* ============================================================
+   PREMIUM BANNER — ENHANCED GLOW IN LIGHT MODE
+   ============================================================ */
+html:not(.dark) .premium-banner::before {
+  background: linear-gradient(
+    135deg,
+    rgba(109, 77, 224, 0.30) 0%,
+    rgba(6, 182, 212, 0.25) 25%,
+    rgba(168, 85, 247, 0.20) 50%,
+    rgba(6, 182, 212, 0.25) 75%,
+    rgba(109, 77, 224, 0.30) 100%
+  );
+}
+
+html:not(.dark) .premium-banner {
+  box-shadow: 0 4px 20px rgba(109, 77, 224, 0.10), 0 0 0 1px rgba(109, 77, 224, 0.06);
+}
+
+/* ============================================================
+   SIDEBAR NAV — GLOW ON HOVER (both modes)
+   ============================================================ */
+.glass-sidebar a,
+.glass-sidebar button {
+  position: relative;
+  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.glass-sidebar a:hover,
+.glass-sidebar button:hover {
+  box-shadow: 0 0 12px rgba(124, 92, 252, 0.08);
+}
+
+html:not(.dark) .glass-sidebar a:hover,
+html:not(.dark) .glass-sidebar button:hover {
+  box-shadow: 0 0 12px rgba(109, 77, 224, 0.10);
+  background: rgba(109, 77, 224, 0.06);
+}
+
+/* ============================================================
+   DIALOG CONTENT — ENHANCED BORDER IN BOTH MODES
+   ============================================================ */
+[data-slot="dialog-content"] {
+  position: relative;
+}
+
+[data-slot="dialog-content"]::before {
+  content: '';
+  position: absolute;
+  inset: -1px;
+  border-radius: inherit;
+  padding: 1px;
+  background: linear-gradient(
+    135deg,
+    rgba(124, 92, 252, 0.20) 0%,
+    rgba(6, 182, 212, 0.15) 30%,
+    rgba(168, 85, 247, 0.12) 60%,
+    rgba(6, 182, 212, 0.10) 100%
+  );
+  -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  -webkit-mask-composite: xor;
+  mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  mask-composite: exclude;
+  pointer-events: none;
+  z-index: 1;
+}
+
+.dark [data-slot="dialog-content"]::before {
+  background: linear-gradient(
+    135deg,
+    rgba(124, 92, 252, 0.30) 0%,
+    rgba(6, 182, 212, 0.25) 30%,
+    rgba(168, 85, 247, 0.20) 60%,
+    rgba(6, 182, 212, 0.15) 100%
+  );
+}
+
+/* ============================================================
+   SCROLL AREA — NEON BORDER
+   ============================================================ */
+html:not(.dark) [data-radix-scroll-area-viewport]::-webkit-scrollbar-thumb {
+  background: linear-gradient(180deg, rgba(109, 77, 224, 0.25), rgba(6, 182, 212, 0.15));
+}
+
+.dark [data-radix-scroll-area-viewport]::-webkit-scrollbar-thumb {
+  background: linear-gradient(180deg, rgba(124, 92, 252, 0.35), rgba(6, 182, 212, 0.20));
+}
