@@ -1585,20 +1585,17 @@ function HomeView({ tokens: allTokens }: { tokens: TokenData[] }) {
         </div>
       )}
 
-      {/* Fear & Greed + Live Ticker Row */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-        <FearGreedWidget />
-        <Card className="glass-card card-hover border-border rounded-xl">
-          <CardHeader className="p-3 pb-2">
-            <CardTitle className="text-xs font-semibold flex items-center gap-2">
-              <Activity className="w-3.5 h-3.5 text-cyan-500" />Prix en direct
-            </CardTitle>
-          </CardHeader>
+      {/* Live Ticker */}
+      <Card className="glass-card card-hover border-border rounded-xl">
+        <CardHeader className="p-3 pb-2">
+          <CardTitle className="text-xs font-semibold flex items-center gap-2">
+            <Activity className="w-3.5 h-3.5 text-cyan-500" />Prix en direct
+          </CardTitle>
+        </CardHeader>
           <CardContent className="p-3 pt-0">
             <LivePriceTicker tokens={allTokens} />
           </CardContent>
         </Card>
-      </div>
 
       {/* Section Separator */}
       <hr className="section-separator" />
