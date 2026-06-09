@@ -898,83 +898,42 @@ function DashboardView({ tokens: allTokens, userRole }: { tokens: TokenData[]; u
                 <BarChart3 className="w-4 h-4 text-violet-500" />Portefeuille
               </CardTitle>
             </CardHeader>
-            <CardContent className="p-3 md:p-4 pt-0">
-                {/* Mobile: card layout — no horizontal scroll */}
-                <div className="sm:hidden space-y-2">
-                  {d.tokens.map(t => (
-                    <div key={t.ticker} className="rounded-lg border border-border/50 p-2.5 bg-muted/20 space-y-2">
-                      <div className="flex items-center justify-between">
-                        <div className="flex items-center gap-2">
-                          <TokenLogo ticker={t.ticker} size={22} />
-                          <div>
-                            <p className="text-xs font-semibold text-foreground">{t.ticker}</p>
-                            <p className="text-[9px] text-muted-foreground">{t.name}</p>
-                          </div>
-                        </div>
-                        <Badge variant="secondary" className={`text-[10px] font-bold ${plBg(t.rentabilite)}`}>
-                          {fmtPct(t.rentabilite)}
-                        </Badge>
-                      </div>
-                      <div className="grid grid-cols-4 gap-x-2 gap-y-1 text-[10px]">
-                        <div>
-                          <p className="text-muted-foreground">Qté</p>
-                          <p className="font-medium text-foreground">{fmtQty(t.quantite)}</p>
-                        </div>
-                        <div>
-                          <p className="text-muted-foreground">PRU</p>
-                          <p className="font-medium text-foreground">${fmtPrice(t.pru)}</p>
-                        </div>
-                        <div>
-                          <p className="text-muted-foreground">Valeur</p>
-                          <p className="font-medium text-foreground">${fmt(t.valeurActuelle)}</p>
-                        </div>
-                        <div>
-                          <p className="text-muted-foreground">P&L</p>
-                          <p className={`font-semibold ${plColor(t.pl)}`}>{t.pl >= 0 ? '+' : ''}${fmt(Math.abs(t.pl))}</p>
-                        </div>
-                      </div>
-                      <div className="flex items-center justify-between text-[10px] text-muted-foreground pt-0.5 border-t border-border/30">
-                        <span>Investi: <span className="text-foreground font-medium">${fmt(t.montantInvesti)}</span></span>
-                        <span>Prix: <span className="text-foreground font-medium">${fmtPrice(t.currentPrice)}</span></span>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-                {/* Desktop: table layout */}
-                <div className="hidden sm:block">
-                <Table>
+            <CardContent className="p-2 md:p-4 pt-0">
+                {/* Compact table — all screens, all columns on one line */}
+                <div className="overflow-x-auto scrollbar-none -mx-2 px-2">
+                <Table className="w-full">
                   <TableHeader>
                     <TableRow>
-                      <TableHead className="text-[10px]">Token</TableHead>
-                      <TableHead className="text-[10px] text-right">Investi</TableHead>
-                      <TableHead className="text-[10px] text-right">Qté</TableHead>
-                      <TableHead className="text-[10px] text-right">PRU</TableHead>
-                      <TableHead className="text-[10px] text-right">Prix</TableHead>
-                      <TableHead className="text-[10px] text-right">Valeur</TableHead>
-                      <TableHead className="text-[10px] text-right">P&L</TableHead>
-                      <TableHead className="text-[10px] text-right">ROI</TableHead>
+                      <TableHead className="text-[9px] md:text-[10px] px-1 md:px-2 py-1.5">Token</TableHead>
+                      <TableHead className="text-[9px] md:text-[10px] text-right px-1 md:px-2 py-1.5">Investi</TableHead>
+                      <TableHead className="text-[9px] md:text-[10px] text-right px-1 md:px-2 py-1.5">Qté</TableHead>
+                      <TableHead className="text-[9px] md:text-[10px] text-right px-1 md:px-2 py-1.5">PRU</TableHead>
+                      <TableHead className="text-[9px] md:text-[10px] text-right px-1 md:px-2 py-1.5">Prix</TableHead>
+                      <TableHead className="text-[9px] md:text-[10px] text-right px-1 md:px-2 py-1.5">Valeur</TableHead>
+                      <TableHead className="text-[9px] md:text-[10px] text-right px-1 md:px-2 py-1.5">P&L</TableHead>
+                      <TableHead className="text-[9px] md:text-[10px] text-right px-1 md:px-2 py-1.5">ROI</TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
                     {d.tokens.map(t => (
                       <TableRow key={t.ticker} className="data-row-hover">
-                        <TableCell>
-                          <div className="flex items-center gap-2">
-                            <TokenLogo ticker={t.ticker} size={24} />
+                        <TableCell className="px-1 md:px-2 py-1.5 md:py-2">
+                          <div className="flex items-center gap-1 md:gap-2">
+                            <TokenLogo ticker={t.ticker} size={18} />
                             <div className="min-w-0">
-                              <p className="text-xs font-semibold text-foreground truncate">{t.ticker}</p>
-                              <p className="text-[10px] text-muted-foreground truncate">{t.name}</p>
+                              <p className="text-[10px] md:text-xs font-semibold text-foreground truncate leading-tight">{t.ticker}</p>
+                              <p className="text-[8px] md:text-[10px] text-muted-foreground truncate leading-tight max-md:hidden">{t.name}</p>
                             </div>
                           </div>
                         </TableCell>
-                        <TableCell className="text-xs sm:text-sm text-right text-muted-foreground whitespace-nowrap">${fmt(t.montantInvesti)}</TableCell>
-                        <TableCell className="text-xs sm:text-sm text-right text-muted-foreground whitespace-nowrap">{fmtQty(t.quantite)}</TableCell>
-                        <TableCell className="text-xs sm:text-sm text-right text-muted-foreground whitespace-nowrap">${fmtPrice(t.pru)}</TableCell>
-                        <TableCell className="text-xs sm:text-sm text-right font-medium text-foreground whitespace-nowrap">${fmtPrice(t.currentPrice)}</TableCell>
-                        <TableCell className="text-xs sm:text-sm text-right text-muted-foreground whitespace-nowrap">${fmt(t.valeurActuelle)}</TableCell>
-                        <TableCell className={`text-xs sm:text-sm text-right font-semibold whitespace-nowrap ${plColor(t.pl)}`}>{t.pl >= 0 ? '+' : ''}${fmt(Math.abs(t.pl))}</TableCell>
-                        <TableCell className="text-right">
-                          <Badge variant="secondary" className={`text-[10px] font-bold ${plBg(t.rentabilite)}`}>
+                        <TableCell className="text-[10px] md:text-xs text-right text-muted-foreground whitespace-nowrap px-1 md:px-2 py-1.5 md:py-2">${fmt(t.montantInvesti)}</TableCell>
+                        <TableCell className="text-[10px] md:text-xs text-right text-muted-foreground whitespace-nowrap px-1 md:px-2 py-1.5 md:py-2">{fmtQty(t.quantite)}</TableCell>
+                        <TableCell className="text-[10px] md:text-xs text-right text-muted-foreground whitespace-nowrap px-1 md:px-2 py-1.5 md:py-2">${fmtPrice(t.pru)}</TableCell>
+                        <TableCell className="text-[10px] md:text-xs text-right font-medium text-foreground whitespace-nowrap px-1 md:px-2 py-1.5 md:py-2">${fmtPrice(t.currentPrice)}</TableCell>
+                        <TableCell className="text-[10px] md:text-xs text-right text-muted-foreground whitespace-nowrap px-1 md:px-2 py-1.5 md:py-2">${fmt(t.valeurActuelle)}</TableCell>
+                        <TableCell className={`text-[10px] md:text-xs text-right font-semibold whitespace-nowrap px-1 md:px-2 py-1.5 md:py-2 ${plColor(t.pl)}`}>{t.pl >= 0 ? '+' : ''}${fmt(Math.abs(t.pl))}</TableCell>
+                        <TableCell className="text-right px-1 md:px-2 py-1.5 md:py-2">
+                          <Badge variant="secondary" className={`text-[9px] md:text-[10px] font-bold ${plBg(t.rentabilite)}`}>
                             {fmtPct(t.rentabilite)}
                           </Badge>
                         </TableCell>
