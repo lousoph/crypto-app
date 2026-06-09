@@ -905,11 +905,11 @@ function DashboardView({ tokens: allTokens, userRole }: { tokens: TokenData[]; u
                     <TableRow>
                       <TableHead className="text-[10px]">Token</TableHead>
                       <TableHead className="text-[10px] text-right">Investi</TableHead>
-                      <TableHead className="text-[10px] text-right hidden sm:table-cell">Qté</TableHead>
-                      <TableHead className="text-[10px] text-right hidden md:table-cell">PRU</TableHead>
+                      <TableHead className="text-[10px] text-right">Qté</TableHead>
+                      <TableHead className="text-[10px] text-right">PRU</TableHead>
                       <TableHead className="text-[10px] text-right">Prix</TableHead>
-                      <TableHead className="text-[10px] text-right hidden lg:table-cell">Valeur</TableHead>
-                      <TableHead className="text-[10px] text-right hidden md:table-cell">P&L</TableHead>
+                      <TableHead className="text-[10px] text-right">Valeur</TableHead>
+                      <TableHead className="text-[10px] text-right">P&L</TableHead>
                       <TableHead className="text-[10px] text-right">ROI</TableHead>
                     </TableRow>
                   </TableHeader>
@@ -926,11 +926,11 @@ function DashboardView({ tokens: allTokens, userRole }: { tokens: TokenData[]; u
                           </div>
                         </TableCell>
                         <TableCell className="text-xs sm:text-sm text-right text-muted-foreground whitespace-nowrap">${fmt(t.montantInvesti)}</TableCell>
-                        <TableCell className="text-xs sm:text-sm text-right text-muted-foreground hidden sm:table-cell whitespace-nowrap">{fmtQty(t.quantite)}</TableCell>
-                        <TableCell className="text-xs sm:text-sm text-right text-muted-foreground hidden md:table-cell whitespace-nowrap">${fmtPrice(t.pru)}</TableCell>
+                        <TableCell className="text-xs sm:text-sm text-right text-muted-foreground whitespace-nowrap">{fmtQty(t.quantite)}</TableCell>
+                        <TableCell className="text-xs sm:text-sm text-right text-muted-foreground whitespace-nowrap">${fmtPrice(t.pru)}</TableCell>
                         <TableCell className="text-xs sm:text-sm text-right font-medium text-foreground whitespace-nowrap">${fmtPrice(t.currentPrice)}</TableCell>
-                        <TableCell className="text-xs sm:text-sm text-right text-muted-foreground hidden lg:table-cell whitespace-nowrap">${fmt(t.valeurActuelle)}</TableCell>
-                        <TableCell className={`text-xs sm:text-sm text-right font-semibold whitespace-nowrap hidden md:table-cell ${plColor(t.pl)}`}>{t.pl >= 0 ? '+' : ''}${fmt(Math.abs(t.pl))}</TableCell>
+                        <TableCell className="text-xs sm:text-sm text-right text-muted-foreground whitespace-nowrap">${fmt(t.valeurActuelle)}</TableCell>
+                        <TableCell className={`text-xs sm:text-sm text-right font-semibold whitespace-nowrap ${plColor(t.pl)}`}>{t.pl >= 0 ? '+' : ''}${fmt(Math.abs(t.pl))}</TableCell>
                         <TableCell className="text-right">
                           <Badge variant="secondary" className={`text-[10px] font-bold ${plBg(t.rentabilite)}`}>
                             {fmtPct(t.rentabilite)}
