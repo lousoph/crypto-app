@@ -1597,6 +1597,9 @@ function HomeView({ tokens: allTokens }: { tokens: TokenData[] }) {
           </CardContent>
         </Card>
 
+      {/* Fear & Greed Index */}
+      <FearGreedIndex />
+
       {/* Section Separator */}
       <hr className="section-separator" />
 
@@ -1713,10 +1716,6 @@ function HomeView({ tokens: allTokens }: { tokens: TokenData[] }) {
           )}
         </CardContent>
       </Card>
-
-      {/* Fear & Greed Index - Full Feature */}
-      <hr className="section-separator" />
-      <FearGreedIndex />
 
       {/* Premium CTA Section */}
       <Card className="rounded-xl overflow-hidden relative" style={{ background: 'linear-gradient(135deg, rgba(124,92,252,0.08), rgba(6,182,212,0.06), rgba(168,85,247,0.05))', border: '1px solid rgba(124,92,252,0.15)' }}>
