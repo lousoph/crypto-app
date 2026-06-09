@@ -2645,7 +2645,7 @@ function MobileHeader({ view, setView, isAdmin, onLogout }: { view: View; setVie
   const currentLabel = [...NAV_ITEMS, ...ADMIN_ITEMS].find(n => n.id === view)?.label || 'Dashboard'
 
   return (
-    <header className="md:hidden sticky top-0 z-40 glass border-b border-border">
+    <header className="md:hidden fixed top-0 left-0 right-0 z-40 glass border-b border-border">
       <div className="flex items-center justify-between h-14 px-4">
         <div className="flex items-center gap-2">
           <div className="w-8 h-8 rounded-lg flex items-center justify-center bg-violet-500/10">
@@ -2665,7 +2665,7 @@ function MobileHeader({ view, setView, isAdmin, onLogout }: { view: View; setVie
 
       {/* Dropdown Menu */}
       {menuOpen && (
-        <div className="absolute top-14 right-0 w-56 max-w-[calc(100vw-2rem)] rounded-xl glass-strong border border-border shadow-xl p-2 z-50">
+        <div className="fixed top-14 right-2 w-56 max-w-[calc(100vw-2rem)] rounded-xl glass-strong border border-border shadow-xl p-2 z-50">
           {isAdmin && (
             <>
               <p className="text-[10px] font-semibold text-muted-foreground px-3 py-1 uppercase tracking-wider">Admin</p>
@@ -2777,7 +2777,7 @@ export function CryptoApp() {
         <MobileHeader view={view} setView={setView} isAdmin={isAdmin} onLogout={logout} />
 
         {/* Content */}
-        <main className="flex-1 overflow-x-hidden pb-20 md:pb-6 md:overflow-y-auto custom-scrollbar w-full">
+        <main className="flex-1 overflow-x-hidden pt-14 pb-20 md:pt-0 md:overflow-y-auto md:pb-6 custom-scrollbar w-full">
           <div className="w-full px-3 sm:px-4 md:px-6 lg:px-8 mx-auto max-w-full md:max-w-3xl lg:max-w-4xl xl:max-w-5xl 2xl:max-w-6xl">
             {renderView()}
           </div>
