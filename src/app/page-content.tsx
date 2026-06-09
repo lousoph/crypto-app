@@ -1011,9 +1011,7 @@ function DashboardView({ tokens: allTokens, userRole }: { tokens: TokenData[]; u
             <TokenSignals tokens={d.tokens} />
           </div>
 
-          {/* Fear & Greed Index - Full */}
-          <FearGreedIndex />
-        </>
+          </>
       )}
     </div>
   )
