@@ -1342,9 +1342,18 @@ function AIAnalysisView({ tokens, userRole, setView }: { tokens: TokenData[]; us
           <Crown className="w-16 h-16 mx-auto text-amber-500 mb-4" />
           <h2 className="text-xl font-bold text-foreground mb-2">Fonctionnalité Premium</h2>
           <p className="text-sm text-muted-foreground mb-4">L'analyse IA est réservée aux membres Premium</p>
-          <Button className="btn-primary-glow text-foreground rounded-xl h-11" style={{ background: 'linear-gradient(135deg,#f59e0b,#d97706)' }} onClick={() => setView('profile')}>
-            <Crown className="w-4 h-4 mr-2" />Passer en Premium
-          </Button>
+          <button
+            type="button"
+            className="btn-primary-glow text-foreground rounded-xl h-11 inline-flex items-center justify-center gap-2 whitespace-nowrap text-sm font-medium w-full"
+            style={{ background: 'linear-gradient(135deg,#f59e0b,#d97706)' }}
+            onClick={(e) => {
+              e.stopPropagation()
+              console.log('[Premium] clicked, navigating to profile')
+              setView('profile')
+            }}
+          >
+            <Crown className="w-4 h-4" />Passer en Premium
+          </button>
         </Card>
       </div>
     )
