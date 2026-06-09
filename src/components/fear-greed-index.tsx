@@ -94,7 +94,7 @@ function getClassificationLabel(cls: string): string {
 // ============================================================
 // MAIN COMPONENT
 // ============================================================
-export default function FearGreedIndex() {
+export default function FearGreedIndex({ showChart = true }: { showChart?: boolean }) {
   const { resolvedTheme } = useTheme()
   const isDark = resolvedTheme === 'dark'
 
@@ -595,6 +595,7 @@ export default function FearGreedIndex() {
       </div>
 
       {/* Historical Chart */}
+      {showChart && (
       <Card className="glass-card border-border rounded-xl overflow-hidden">
         <CardContent className="p-4 md:p-5">
           <div className="flex items-center justify-between mb-4 flex-wrap gap-2">
@@ -726,6 +727,7 @@ export default function FearGreedIndex() {
           )}
         </CardContent>
       </Card>
+      )}
     </div>
   )
 }

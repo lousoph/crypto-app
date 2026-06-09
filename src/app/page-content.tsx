@@ -1601,7 +1601,7 @@ function HomeView({ tokens: allTokens }: { tokens: TokenData[] }) {
         </Card>
 
       {/* Fear & Greed Index */}
-      <FearGreedIndex />
+      <FearGreedIndex showChart={false} />
 
       {/* Section Separator */}
       <hr className="section-separator" />
