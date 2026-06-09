@@ -1601,9 +1601,6 @@ function HomeView({ tokens: allTokens }: { tokens: TokenData[] }) {
       {/* Fear & Greed Index */}
       <FearGreedIndex showChart={false} />
 
-      {/* Signal Achat/Vente */}
-      <FearGreedWidget />
-
       {/* Section Separator */}
       <hr className="section-separator" />
 
