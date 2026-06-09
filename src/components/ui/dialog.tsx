@@ -21,7 +21,7 @@ function DialogTrigger({
 function DialogPortal({
   ...props
 }: React.ComponentProps<typeof DialogPrimitive.Portal>) {
-  return <DialogPrimitive.Portal data-slot="dialog-portal" {...props} />
+  return <DialogPrimitive.Portal data-slot="dialog-pool" {...props} />
 }
 
 function DialogClose({
@@ -54,19 +54,21 @@ function DialogContent({
 }: React.ComponentProps<typeof DialogPrimitive.Content> & {
   showCloseButton?: boolean
 }) {
-  const wantsFullscreen = typeof className === 'string' && className.includes('dialog-mobile-fullscreen')
   return (
     <DialogPortal data-slot="dialog-portal">
       <DialogOverlay />
       <DialogPrimitive.Content
         data-slot="dialog-content"
         className={cn(
-          "bg-background data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95 fixed z-50 flex flex-col w-full gap-4 border shadow-lg duration-200 max-h-[100dvh] overflow-hidden sm:overflow-y-auto",
-          // Fullscreen on mobile (< sm), centered on desktop (>= sm)
-          "inset-0 m-0 max-w-full h-full rounded-none p-4 translate-x-0 translate-y-0 top-0 left-0",
-          "sm:inset-auto sm:m-auto sm:max-w-[calc(100%-2rem)] sm:h-auto sm:max-h-[85vh] sm:rounded-lg sm:p-6 sm:translate-x-[-50%] sm:translate-y-[-50%] sm:top-[50%] sm:left-[50%] sm:max-w-lg",
-          // Override fullscreen on desktop when NOT requested
-          !wantsFullscreen && "sm:max-w-lg",
+          "bg-background fixed z-50 flex flex-col border shadow-lg duration-200",
+          "data-[state=open]:animate-in data-[state=closed]:animate-out",
+          "data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0",
+          "data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95",
+          // Mobile: fullscreen
+          "inset-0 m-0 w-full h-full rounded-none p-4",
+          // Desktop (sm+): centered modal
+          "sm:inset-auto sm:m-auto sm:h-auto sm:max-h-[90vh] sm:rounded-lg sm:p-6 sm:top-[50%] sm:left-[50%] sm:translate-x-[-50%] sm:translate-y-[-50%]",
+          "sm:overflow-y-auto",
           className
         )}
         {...props}
