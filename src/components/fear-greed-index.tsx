@@ -1,14 +1,14 @@
 'use client'
 
 import { useState, useEffect, useMemo, useCallback } from 'react'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { Card, CardContent } from '@/components/ui/card'
 import { Skeleton } from '@/components/ui/skeleton'
 import { useTheme } from '@/components/theme-provider'
 import {
-  LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip,
-  ResponsiveContainer, Legend, Area, AreaChart
+  BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip,
+  ResponsiveContainer, ReferenceLine, Cell, Line, ComposedChart, Area
 } from 'recharts'
-import { Gauge, TrendingUp, ArrowUpCircle, ArrowDownCircle, Minus, Info } from 'lucide-react'
+import { ArrowUpCircle, ArrowDownCircle, Minus } from 'lucide-react'
 import { cn } from '@/lib/utils'
 
 // ============================================================
@@ -33,18 +33,22 @@ interface ChartDataPoint {
   fngColor: string
 }
 
-type Period = 'all' | '1m' | '3m' | '1y'
+type Period = 'all' | '1w' | '1m' | '1y'
 
 // ============================================================
-// CONSTANTS
+// COINGLASS-STYLE COLOR SCHEME
 // ============================================================
-const ZONES = [
-  { min: 0, max: 25, label: 'Extrême Peur', color: '#22c55e', colorLight: '#16a34a' },
-  { min: 25, max: 50, label: 'Peur', color: '#84cc16', colorLight: '#65a30d' },
-  { min: 50, max: 75, label: 'Neutre', color: '#eab308', colorLight: '#ca8a04' },
-  { min: 75, max: 100, label: 'Avidité', color: '#f97316', colorLight: '#ea580c' },
-  { min: 100, max: 101, label: 'Extrême Avidité', color: '#ef4444', colorLight: '#dc2626' },
-]
+// Green = Fear side, Yellow = Neutral, Red = Greed side
+const COLORS = {
+  fear: '#58BA63',       // Green for fear
+  neutral: '#FDDD60',    // Yellow for neutral
+  greed: '#FF6E76',      // Red for greed
+  needle: '#FDDD60',     // Yellow needle
+  arcBg: '#E8E8E8',      // Background arc
+  arcDarkBg: '#2A2A2A',  // Background arc (dark mode)
+  textPrimary: '#32383E',
+  textSecondary: '#555E68',
+}
 
 const CATEGORY_LABELS: Record<string, string> = {
   'Extreme Fear': 'Extrême Peur',
@@ -54,37 +58,28 @@ const CATEGORY_LABELS: Record<string, string> = {
   'Extreme Greed': 'Extrême Avidité',
 }
 
-const CATEGORY_COLORS: Record<string, string> = {
-  'Extreme Fear': '#22c55e',
-  'Fear': '#84cc16',
-  'Neutral': '#eab308',
-  'Greed': '#f97316',
-  'Extreme Greed': '#ef4444',
-}
-
-// Stats card categories (French labels matching Coinglass)
 const STATS_CATEGORIES = [
-  { key: 'Extreme Greed', label: "Pour l'avidité extrême", color: '#ef4444', icon: '🔴' },
-  { key: 'Greed', label: 'Avidité', color: '#f97316', icon: '🟠' },
-  { key: 'Neutral', label: 'Neutre', color: '#eab308', icon: '🟡' },
-  { key: 'Fear', label: 'Peur', color: '#84cc16', icon: '🟢' },
-  { key: 'Extreme Fear', label: 'Pour Extrême', color: '#22c55e', icon: '🟩' },
+  { key: 'Extreme Greed', label: 'Extrême Avidité', color: '#FF6E76' },
+  { key: 'Greed', label: 'Avidité', color: '#FF8C8C' },
+  { key: 'Neutral', label: 'Neutre', color: '#FDDD60' },
+  { key: 'Fear', label: 'Peur', color: '#78C97E' },
+  { key: 'Extreme Fear', label: 'Extrême Peur', color: '#58BA63' },
 ]
 
-function getValueColor(value: number): string {
-  if (value <= 25) return '#22c55e'
-  if (value <= 50) return '#84cc16'
-  if (value <= 75) return '#eab308'
-  if (value <= 100) return '#f97316'
-  return '#ef4444'
+function getCoinglassColor(value: number): string {
+  if (value <= 25) return COLORS.fear
+  if (value <= 50) return '#8BC98F' // lighter green
+  if (value <= 55) return COLORS.neutral
+  if (value <= 75) return '#F5A623' // orange
+  return COLORS.greed
 }
 
-function getValueLabel(value: number): string {
-  if (value <= 25) return 'Extrême Peur'
-  if (value <= 50) return 'Peur'
-  if (value <= 75) return 'Neutre'
-  if (value <= 100) return 'Avidité'
-  return 'Extrême Avidité'
+function getBarColor(value: number): string {
+  if (value <= 25) return '#58BA63'   // Extreme Fear - green
+  if (value <= 45) return '#8BC98F'   // Fear - light green
+  if (value <= 55) return '#FDDD60'   // Neutral - yellow
+  if (value <= 75) return '#FF8C8C'   // Greed - light red
+  return '#FF6E76'                    // Extreme Greed - red
 }
 
 function getClassificationLabel(cls: string): string {
@@ -111,14 +106,13 @@ export default function FearGreedIndex({ showChart = true }: { showChart?: boole
   const [fearGreedData, setFearGreedData] = useState<FearGreedData[]>([])
   const [btcPrices, setBtcPrices] = useState<BtcPriceData[]>([])
   const [loading, setLoading] = useState(true)
-  const [activePeriod, setActivePeriod] = useState<Period>('1y')
+  const [activePeriod, setActivePeriod] = useState<Period>('all')
 
   // Fetch data
   useEffect(() => {
     const fetchData = async () => {
       setLoading(true)
       try {
-        // Try the API route first
         let res = await fetch('/api/fear-greed/history')
         if (res.ok) {
           const data = await res.json()
@@ -129,8 +123,7 @@ export default function FearGreedIndex({ showChart = true }: { showChart?: boole
             return
           }
         }
-
-        // Fallback: fetch directly from alternative.me API (CORS-friendly)
+        // Fallback
         res = await fetch('https://api.alternative.me/fng/?limit=365&format=json', {
           signal: AbortSignal.timeout(10000),
         })
@@ -144,7 +137,6 @@ export default function FearGreedIndex({ showChart = true }: { showChart?: boole
               date: new Date(parseInt(d.timestamp) * 1000).toISOString().split('T')[0],
             }))
             setFearGreedData(fg)
-            // Generate BTC prices client-side
             setBtcPrices(fg.map((d: any) => {
               const date = new Date(d.date)
               const baseDate = new Date('2023-01-01').getTime()
@@ -154,11 +146,8 @@ export default function FearGreedIndex({ showChart = true }: { showChart?: boole
             }))
           }
         }
-      } catch {
-        // Ignore errors
-      } finally {
-        setLoading(false)
-      }
+      } catch {}
+      setLoading(false)
     }
     fetchData()
   }, [])
@@ -168,21 +157,19 @@ export default function FearGreedIndex({ showChart = true }: { showChart?: boole
   const currentLabel = fearGreedData.length > 0
     ? getClassificationLabel(fearGreedData[0].classification)
     : 'Neutre'
-  const currentColor = getValueColor(currentValue)
+  const currentColor = getCoinglassColor(currentValue)
 
   // Filter data by period
   const filteredData = useMemo(() => {
     if (fearGreedData.length === 0) return []
-
     const now = new Date()
     let cutoffDate: Date | null = null
-
     switch (activePeriod) {
+      case '1w':
+        cutoffDate = new Date(now.getFullYear(), now.getMonth(), now.getDate() - 7)
+        break
       case '1m':
         cutoffDate = new Date(now.getFullYear(), now.getMonth() - 1, now.getDate())
-        break
-      case '3m':
-        cutoffDate = new Date(now.getFullYear(), now.getMonth() - 3, now.getDate())
         break
       case '1y':
         cutoffDate = new Date(now.getFullYear() - 1, now.getMonth(), now.getDate())
@@ -191,37 +178,28 @@ export default function FearGreedIndex({ showChart = true }: { showChart?: boole
       default:
         cutoffDate = null
     }
-
     const filtered = cutoffDate
       ? fearGreedData.filter(d => new Date(d.date) >= cutoffDate)
       : fearGreedData
-
-    // Reverse so oldest is first (for chart)
     return [...filtered].reverse()
   }, [fearGreedData, activePeriod])
 
-  // Merge F&G data with BTC prices for chart
+  // Chart data
   const chartData = useMemo((): ChartDataPoint[] => {
-    // Create a map of BTC prices by date
     const btcMap = new Map<string, number>()
     btcPrices.forEach(p => btcMap.set(p.date, p.price))
-
     return filteredData.map(d => ({
       date: d.date,
       fngValue: d.value,
       btcPrice: btcMap.get(d.date) || null,
-      fngColor: getValueColor(d.value),
+      fngColor: getBarColor(d.value),
     }))
   }, [filteredData, btcPrices])
 
-  // Stats: days in each category
+  // Category stats
   const categoryStats = useMemo(() => {
     const stats: Record<string, number> = {
-      'Extreme Fear': 0,
-      'Fear': 0,
-      'Neutral': 0,
-      'Greed': 0,
-      'Extreme Greed': 0,
+      'Extreme Fear': 0, 'Fear': 0, 'Neutral': 0, 'Greed': 0, 'Extreme Greed': 0,
     }
     filteredData.forEach(d => {
       if (d.classification && stats.hasOwnProperty(d.classification)) {
@@ -233,109 +211,128 @@ export default function FearGreedIndex({ showChart = true }: { showChart?: boole
 
   const totalDays = filteredData.length
 
-  // Period buttons
+  // Period tabs
   const periods: { key: Period; label: string }[] = [
     { key: 'all', label: 'Tout' },
+    { key: '1w', label: '1 sem' },
     { key: '1m', label: '1 mois' },
-    { key: '3m', label: '3 mois' },
     { key: '1y', label: '1 an' },
   ]
 
-  // Format date for X-axis
   const formatDate = useCallback((dateStr: string) => {
     const d = new Date(dateStr)
-    return d.toLocaleDateString('fr-FR', { day: '2-digit', month: 'short' })
+    return d.toLocaleDateString('fr-FR', { day: 'numeric', month: 'short' })
   }, [])
 
   // ============================================================
-  // SVG SEMICIRCULAR GAUGE
+  // COINGLASS-STYLE SEMICIRCLE GAUGE
   // ============================================================
-  const GaugeChart = ({ value, color, label }: { value: number; color: string; label: string }) => {
-    const size = 220
-    const strokeWidth = 18
-    const radius = (size - strokeWidth) / 2
-    const cx = size / 2
-    const cy = size / 2 + 10
+  const GaugeChart = ({ value, label, color }: { value: number; color: string; label: string }) => {
+    const width = 420
+    const height = 230
+    const cx = width / 2
+    const cy = height - 30
+    const outerRadius = 170
+    const innerRadius = 145
+    const strokeWidth = outerRadius - innerRadius
 
-    // Semicircle: from 180° to 0° (left to right)
-    const startAngle = Math.PI
-    const endAngle = 0
-    const totalAngle = Math.PI
+    // Map value 0-100 to angle PI (left) to 0 (right)
+    const valueAngle = Math.PI - (value / 100) * Math.PI
 
-    // Needle angle: map value 0-100 to PI-0
-    const needleAngle = Math.PI - (value / 100) * Math.PI
+    // Needle dimensions
+    const needleLength = outerRadius - 10
+    const needleX = cx + needleLength * Math.cos(valueAngle)
+    const needleY = cy - needleLength * Math.sin(valueAngle)
 
-    // Needle endpoint
-    const needleLength = radius - 20
-    const needleX = cx + needleLength * Math.cos(needleAngle)
-    const needleY = cy - needleLength * Math.sin(needleAngle)
-
-    // Create arc path for each zone
-    const createArcPath = (startVal: number, endVal: number) => {
-      const a1 = Math.PI - (startVal / 100) * Math.PI
-      const a2 = Math.PI - (endVal / 100) * Math.PI
-      const x1 = cx + radius * Math.cos(a1)
-      const y1 = cy - radius * Math.sin(a1)
-      const x2 = cx + radius * Math.cos(a2)
-      const y2 = cy - radius * Math.sin(a2)
-      const largeArc = (a1 - a2) > Math.PI ? 1 : 0
-      return `M ${x1} ${y1} A ${radius} ${radius} 0 ${largeArc} 1 ${x2} ${y2}`
+    // Arc path helper
+    const describeArc = (startAngle: number, endAngle: number, radius: number) => {
+      const x1 = cx + radius * Math.cos(startAngle)
+      const y1 = cy - radius * Math.sin(startAngle)
+      const x2 = cx + radius * Math.cos(endAngle)
+      const y2 = cy - radius * Math.sin(endAngle)
+      const largeArc = Math.abs(startAngle - endAngle) > Math.PI ? 1 : 0
+      return `M ${x1} ${y1} A ${radius} ${radius} 0 ${largeArc} 0 ${x2} ${y2}`
     }
 
-    // Active arc (filled up to current value)
-    const activeEndAngle = Math.PI - (value / 100) * Math.PI
-    const activeEndX = cx + radius * Math.cos(activeEndAngle)
-    const activeEndY = cy - radius * Math.sin(activeEndAngle)
+    // Background arc
+    const bgArcPath = describeArc(Math.PI, 0, (outerRadius + innerRadius) / 2)
+
+    // Create colored arc segments
+    const segments = [
+      { start: 0, end: 25, color: '#58BA63' },      // Extreme Fear
+      { start: 25, end: 45, color: '#8BC98F' },      // Fear
+      { start: 45, end: 55, color: '#FDDD60' },      // Neutral
+      { start: 55, end: 75, color: '#FF8C8C' },      // Greed
+      { start: 75, end: 100, color: '#FF6E76' },     // Extreme Greed
+    ]
+
+    const activeSegments = segments
+      .map(seg => ({
+        ...seg,
+        actualEnd: Math.min(seg.end, value),
+        actualStart: Math.max(seg.start, 0),
+      }))
+      .filter(seg => seg.actualEnd > seg.actualStart)
 
     return (
-      <svg width={size} height={size * 0.65} viewBox={`0 0 ${size} ${size * 0.65}`} className="mx-auto">
-        {/* Background arcs for each zone */}
-        {ZONES.map((zone, i) => (
-          <path
-            key={i}
-            d={createArcPath(zone.min, Math.min(zone.max, 100))}
-            fill="none"
-            stroke={zone.color}
-            strokeWidth={strokeWidth}
-            strokeLinecap="butt"
-            opacity={0.2}
-          />
-        ))}
+      <svg width="100%" viewBox={`0 0 ${width} ${height}`} className="mx-auto" style={{ maxWidth: width }}>
+        <defs>
+          <filter id="needleShadow" x="-20%" y="-20%" width="140%" height="140%">
+            <feDropShadow dx="0" dy="1" stdDeviation="2" floodColor={color} floodOpacity="0.4" />
+          </filter>
+        </defs>
 
-        {/* Active colored arc segments up to current value */}
-        {ZONES.map((zone, i) => {
-          const zoneEnd = Math.min(zone.max, 100)
-          const segStart = Math.max(zone.min, 0)
-          const segEnd = Math.min(zoneEnd, value)
-          if (segEnd <= segStart) return null
+        {/* Background arc */}
+        <path
+          d={bgArcPath}
+          fill="none"
+          stroke={isDark ? COLORS.arcDarkBg : COLORS.arcBg}
+          strokeWidth={strokeWidth}
+          strokeLinecap="round"
+        />
 
-          const a1 = Math.PI - (segStart / 100) * Math.PI
-          const a2 = Math.PI - (segEnd / 100) * Math.PI
-          const x1 = cx + radius * Math.cos(a1)
-          const y1 = cy - radius * Math.sin(a1)
-          const x2 = cx + radius * Math.cos(a2)
-          const y2 = cy - radius * Math.sin(a2)
-          const largeArc = (a1 - a2) > Math.PI ? 1 : 0
+        {/* Colored segments (background, muted) */}
+        {segments.map((seg, i) => {
+          const a1 = Math.PI - (seg.start / 100) * Math.PI
+          const a2 = Math.PI - (seg.end / 100) * Math.PI
+          const path = describeArc(a1, a2, (outerRadius + innerRadius) / 2)
+          return (
+            <path
+              key={`bg-${i}`}
+              d={path}
+              fill="none"
+              stroke={seg.color}
+              strokeWidth={strokeWidth - 4}
+              strokeLinecap="butt"
+              opacity={0.18}
+            />
+          )
+        })}
 
+        {/* Active colored segments up to current value */}
+        {activeSegments.map((seg, i) => {
+          const a1 = Math.PI - (seg.actualStart / 100) * Math.PI
+          const a2 = Math.PI - (seg.actualEnd / 100) * Math.PI
+          const path = describeArc(a1, a2, (outerRadius + innerRadius) / 2)
           return (
             <path
               key={`active-${i}`}
-              d={`M ${x1} ${y1} A ${radius} ${radius} 0 ${largeArc} 1 ${x2} ${y2}`}
+              d={path}
               fill="none"
-              stroke={zone.color}
-              strokeWidth={strokeWidth}
+              stroke={seg.color}
+              strokeWidth={strokeWidth - 4}
               strokeLinecap="butt"
               opacity={0.85}
             />
           )
         })}
 
-        {/* Tick marks and labels */}
+        {/* Tick marks */}
         {[0, 25, 50, 75, 100].map(val => {
           const angle = Math.PI - (val / 100) * Math.PI
-          const innerR = radius + strokeWidth / 2 + 4
-          const outerR = radius + strokeWidth / 2 + 10
-          const labelR = radius + strokeWidth / 2 + 22
+          const innerR = outerRadius + 6
+          const outerR = outerRadius + 14
+          const labelR = outerRadius + 28
           const x1 = cx + innerR * Math.cos(angle)
           const y1 = cy - innerR * Math.sin(angle)
           const x2 = cx + outerR * Math.cos(angle)
@@ -347,15 +344,15 @@ export default function FearGreedIndex({ showChart = true }: { showChart?: boole
             <g key={val}>
               <line
                 x1={x1} y1={y1} x2={x2} y2={y2}
-                stroke={isDark ? 'rgba(255,255,255,0.2)' : 'rgba(0,0,0,0.2)'}
+                stroke={isDark ? 'rgba(255,255,255,0.15)' : 'rgba(0,0,0,0.15)'}
                 strokeWidth={1.5}
               />
               <text
                 x={lx} y={ly}
                 textAnchor="middle"
                 dominantBaseline="middle"
-                fill={isDark ? 'rgba(255,255,255,0.4)' : 'rgba(0,0,0,0.4)'}
-                fontSize={10}
+                fill={isDark ? 'rgba(255,255,255,0.35)' : 'rgba(0,0,0,0.35)'}
+                fontSize={11}
                 fontWeight={500}
               >
                 {val}
@@ -364,48 +361,41 @@ export default function FearGreedIndex({ showChart = true }: { showChart?: boole
           )
         })}
 
-        {/* Needle */}
-        <g>
-          {/* Needle glow */}
+        {/* Needle - Coinglass style wide yellow bar */}
+        <g filter="url(#needleShadow)">
           <line
             x1={cx} y1={cy}
             x2={needleX} y2={needleY}
-            stroke={color}
-            strokeWidth={4}
-            strokeLinecap="round"
-            opacity={0.3}
-          />
-          {/* Needle line */}
-          <line
-            x1={cx} y1={cy}
-            x2={needleX} y2={needleY}
-            stroke={color}
-            strokeWidth={2.5}
+            stroke={COLORS.needle}
+            strokeWidth={5}
             strokeLinecap="round"
           />
-          {/* Center dot */}
-          <circle cx={cx} cy={cy} r={6} fill={color} />
-          <circle cx={cx} cy={cy} r={3} fill={isDark ? '#06060a' : '#ffffff'} />
         </g>
 
-        {/* Value text */}
+        {/* Center dot */}
+        <circle cx={cx} cy={cy} r={8} fill={COLORS.needle} />
+        <circle cx={cx} cy={cy} r={4} fill={isDark ? '#06060a' : '#ffffff'} />
+
+        {/* Large value number */}
         <text
-          x={cx} y={cy - 20}
+          x={cx} y={cy - 42}
           textAnchor="middle"
-          fill={color}
-          fontSize={42}
-          fontWeight={800}
+          fill={isDark ? '#ffffff' : '#171A1C'}
+          fontSize={48}
+          fontWeight={700}
+          fontFamily="system-ui, -apple-system, sans-serif"
         >
           {value}
         </text>
 
-        {/* Label text */}
+        {/* Sentiment label */}
         <text
-          x={cx} y={cy + 2}
+          x={cx} y={cy - 16}
           textAnchor="middle"
-          fill={isDark ? 'rgba(255,255,255,0.5)' : 'rgba(0,0,0,0.5)'}
-          fontSize={11}
-          fontWeight={500}
+          fill={color}
+          fontSize={14}
+          fontWeight={600}
+          fontFamily="system-ui, -apple-system, sans-serif"
         >
           {label}
         </text>
@@ -414,7 +404,7 @@ export default function FearGreedIndex({ showChart = true }: { showChart?: boole
   }
 
   // ============================================================
-  // CUSTOM TOOLTIP FOR CHART
+  // CUSTOM CHART TOOLTIP
   // ============================================================
   const CustomTooltip = ({ active, payload, label }: any) => {
     if (active && payload && payload.length) {
@@ -423,7 +413,7 @@ export default function FearGreedIndex({ showChart = true }: { showChart?: boole
           className="rounded-lg px-3 py-2 border text-xs shadow-lg"
           style={{
             background: isDark ? 'rgba(6,6,10,0.95)' : 'rgba(255,255,255,0.98)',
-            borderColor: isDark ? 'rgba(124,92,252,0.15)' : 'rgba(109,77,224,0.15)',
+            borderColor: isDark ? 'rgba(124,92,252,0.15)' : 'rgba(0,0,0,0.08)',
           }}
         >
           <p className="font-medium text-foreground mb-1">
@@ -431,10 +421,7 @@ export default function FearGreedIndex({ showChart = true }: { showChart?: boole
           </p>
           {payload.map((entry: any, i: number) => (
             <p key={i} className="flex items-center gap-2">
-              <span
-                className="w-2 h-2 rounded-full shrink-0"
-                style={{ background: entry.color }}
-              />
+              <span className="w-2 h-2 rounded-full shrink-0" style={{ background: entry.color || entry.fill }} />
               <span className="text-muted-foreground">
                 {entry.dataKey === 'fngValue' ? 'Indice F&C' : 'Prix BTC'}:
               </span>
@@ -457,32 +444,20 @@ export default function FearGreedIndex({ showChart = true }: { showChart?: boole
   if (loading) {
     return (
       <div className="space-y-4">
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
-          <div className="lg:col-span-2">
-            <Card className="glass-card border-border rounded-xl">
-              <CardContent className="p-6">
-                <Skeleton className="h-8 w-64 mb-6" />
-                <div className="flex justify-center">
-                  <Skeleton className="h-40 w-56 rounded-full" />
-                </div>
-                <Skeleton className="h-4 w-32 mx-auto mt-2" />
-              </CardContent>
-            </Card>
-          </div>
-          <Card className="glass-card border-border rounded-xl">
-            <CardContent className="p-4 space-y-3">
+        <div className="rounded-xl border p-5" style={{ background: isDark ? 'rgba(6,6,10,0.6)' : 'rgba(255,255,255,0.92)', borderColor: isDark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.06)' }}>
+          <div className="grid grid-cols-1 lg:grid-cols-5 gap-6">
+            <div className="lg:col-span-3">
+              <Skeleton className="h-48 w-full rounded-xl" />
+            </div>
+            <div className="lg:col-span-2 space-y-4">
+              <Skeleton className="h-10 w-full" />
               {[...Array(5)].map((_, i) => (
-                <Skeleton key={i} className="h-12 w-full rounded-lg" />
+                <Skeleton key={i} className="h-6 w-full" />
               ))}
-            </CardContent>
-          </Card>
+            </div>
+          </div>
         </div>
-        <Card className="glass-card border-border rounded-xl">
-          <CardContent className="p-4">
-            <Skeleton className="h-8 w-48 mb-4" />
-            <Skeleton className="h-64 w-full" />
-          </CardContent>
-        </Card>
+        {showChart && <Skeleton className="h-80 w-full rounded-xl" />}
       </div>
     )
   }
@@ -492,34 +467,46 @@ export default function FearGreedIndex({ showChart = true }: { showChart?: boole
   // ============================================================
   return (
     <div className="space-y-4 fade-in-up">
-      {/* Section Header */}
-      <div className="flex items-center gap-3">
-        <div className="w-10 h-10 rounded-xl flex items-center justify-center" style={{ background: isDark ? 'rgba(124,92,252,0.12)' : 'rgba(109,77,224,0.1)' }}>
-          <Gauge className="w-5 h-5 text-violet-500" />
-        </div>
-        <div>
-          <h2 className="text-base font-bold text-foreground">Indice de peur et de cupidité de la crypto</h2>
-          <p className="text-xs text-muted-foreground">Analyse du sentiment du marché en temps réel</p>
-        </div>
-      </div>
+      {/* Title — Coinglass style */}
+      <h2
+        className="text-lg font-bold"
+        style={{ color: isDark ? '#e5e5e5' : '#171A1C' }}
+      >
+        Indice de peur et de cupidité de la crypto
+      </h2>
 
-      {/* Gauge + Stats Row */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
-        {/* Gauge Card */}
-        <Card className="glass-card border-border rounded-xl lg:col-span-2">
-          <CardContent className="p-4 md:p-6">
-            {/* Period Selectors */}
-            <div className="flex items-center gap-1 mb-4">
+      {/* Main Gauge + Stats Container — Coinglass style */}
+      <div
+        className="rounded-xl border overflow-hidden"
+        style={{
+          background: isDark ? 'rgba(6,6,10,0.6)' : '#ffffff',
+          borderColor: isDark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.06)',
+        }}
+      >
+        <div className="grid grid-cols-1 lg:grid-cols-5 gap-0">
+          {/* Left: Gauge (3/5) */}
+          <div className="lg:col-span-3 p-5 md:p-6">
+            {/* Period Tabs — Coinglass style */}
+            <div
+              className="inline-flex rounded-lg p-1 mb-4"
+              style={{ background: isDark ? 'rgba(255,255,255,0.04)' : '#EFF2F5' }}
+            >
               {periods.map(p => (
                 <button
                   key={p.key}
                   onClick={() => setActivePeriod(p.key)}
                   className={cn(
-                    'px-3 py-1 rounded-lg text-xs font-medium transition-all',
+                    'px-4 py-1.5 rounded-md text-sm font-normal transition-all',
                     activePeriod === p.key
-                      ? 'bg-violet-500/15 text-violet-600 dark:text-violet-400 border border-violet-500/30'
-                      : 'bg-muted/50 text-muted-foreground border border-border hover:bg-muted'
+                      ? 'text-foreground shadow-sm'
+                      : 'text-muted-foreground hover:text-foreground'
                   )}
+                  style={activePeriod === p.key ? {
+                    background: isDark ? 'rgba(255,255,255,0.1)' : '#ffffff',
+                    color: isDark ? '#e5e5e5' : '#32383E',
+                  } : {
+                    color: isDark ? 'rgba(255,255,255,0.45)' : '#555E68',
+                  }}
                 >
                   {p.label}
                 </button>
@@ -527,30 +514,19 @@ export default function FearGreedIndex({ showChart = true }: { showChart?: boole
             </div>
 
             {/* SVG Gauge */}
-            <div className="flex justify-center py-2">
-              <GaugeChart value={currentValue} color={currentColor} label={currentLabel} />
-            </div>
-
-            {/* Current Classification Badge */}
-            <div className="flex justify-center mt-1">
-              <div
-                className="inline-flex items-center gap-2 px-4 py-2 rounded-full border"
-                style={{
-                  background: `${currentColor}10`,
-                  borderColor: `${currentColor}30`,
-                }}
-              >
-                <span className="text-sm font-bold" style={{ color: currentColor }}>
-                  {currentValue} — {currentLabel}
-                </span>
-              </div>
-            </div>
+            <GaugeChart value={currentValue} color={currentColor} label={currentLabel} />
 
             {/* Buy/Sell Signal */}
             {(() => {
               const signal = getSignal(currentValue)
               return (
-                <div className="mt-4 rounded-lg p-3 border" style={{ background: `${signal.color}08`, borderColor: `${signal.color}25` }}>
+                <div
+                  className="mt-2 rounded-lg p-3 border"
+                  style={{
+                    background: `${signal.color}08`,
+                    borderColor: `${signal.color}20`,
+                  }}
+                >
                   <div className="flex items-center gap-2 mb-1">
                     <span className="text-sm">{signal.emoji}</span>
                     <span className="text-xs font-bold" style={{ color: signal.color }}>{signal.label}</span>
@@ -562,198 +538,204 @@ export default function FearGreedIndex({ showChart = true }: { showChart?: boole
                 </div>
               )
             })()}
-          </CardContent>
-        </Card>
+          </div>
 
-        {/* Stats Cards */}
-        <Card className="glass-card border-border rounded-xl">
-          <CardHeader className="p-4 pb-2">
-            <CardTitle className="text-xs font-semibold text-foreground flex items-center gap-2">
-              <TrendingUp className="w-3.5 h-3.5 text-violet-500" />
-              Distribution sur la période
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="p-4 pt-1">
-            <div className="space-y-2.5">
-              {STATS_CATEGORIES.map(cat => {
+          {/* Right: Stats (2/5) — Coinglass style simple text rows */}
+          <div
+            className="lg:col-span-2 p-5 md:p-6 lg:border-l"
+            style={{ borderColor: isDark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.06)' }}
+          >
+            <div className="space-y-0">
+              {STATS_CATEGORIES.map((cat, i) => {
                 const days = categoryStats[cat.key] || 0
-                const pct = totalDays > 0 ? ((days / totalDays) * 100).toFixed(1) : '0.0'
+                const pct = totalDays > 0 ? ((days / totalDays) * 100).toFixed(2) : '0.00'
 
                 return (
                   <div
                     key={cat.key}
-                    className="rounded-lg p-2.5 border transition-colors"
-                    style={{
-                      background: `${cat.color}06`,
-                      borderColor: `${cat.color}18`,
-                    }}
+                    className={cn(
+                      'flex items-center justify-between py-3',
+                      i < STATS_CATEGORIES.length - 1 && 'border-b',
+                    )}
+                    style={{ borderColor: isDark ? 'rgba(255,255,255,0.04)' : 'rgba(0,0,0,0.05)' }}
                   >
-                    <div className="flex items-center justify-between mb-1.5">
-                      <div className="flex items-center gap-2">
-                        <span className="text-sm">{cat.icon}</span>
-                        <span className="text-xs font-medium text-foreground">{cat.label}</span>
-                      </div>
-                      <div className="text-right">
-                        <span className="text-xs font-bold" style={{ color: cat.color }}>
-                          {days}j
-                        </span>
-                        <span className="text-[10px] text-muted-foreground ml-1">
-                          ({pct}%)
-                        </span>
-                      </div>
-                    </div>
-                    {/* Progress bar */}
-                    <div className="h-1.5 rounded-full bg-muted/50 overflow-hidden">
+                    <div className="flex items-center gap-2.5">
                       <div
-                        className="h-full rounded-full transition-all duration-700"
-                        style={{
-                          width: `${pct}%`,
-                          background: cat.color,
-                          opacity: 0.7,
-                        }}
+                        className="w-2.5 h-2.5 rounded-full shrink-0"
+                        style={{ background: cat.color, opacity: 0.8 }}
                       />
+                      <span
+                        className="text-sm"
+                        style={{ color: isDark ? 'rgba(255,255,255,0.7)' : '#555E68' }}
+                      >
+                        {cat.label}
+                      </span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <span
+                        className="text-sm font-medium"
+                        style={{ color: isDark ? '#e5e5e5' : '#32383E' }}
+                      >
+                        {days}j
+                      </span>
+                      <span
+                        className="text-xs"
+                        style={{ color: isDark ? 'rgba(255,255,255,0.35)' : '#999' }}
+                      >
+                        ({pct}%)
+                      </span>
                     </div>
                   </div>
                 )
               })}
             </div>
-          </CardContent>
-        </Card>
+          </div>
+        </div>
       </div>
 
-      {/* Historical Chart */}
+      {/* Historical Chart — Coinglass style bar chart */}
       {showChart && (
-      <Card className="glass-card border-border rounded-xl overflow-hidden">
-        <CardContent className="p-4 md:p-5">
-          <div className="flex items-center justify-between mb-4 flex-wrap gap-2">
-            <div className="flex items-center gap-2">
-              <h3 className="text-sm font-semibold text-foreground">Historique</h3>
-              <div className="flex items-center gap-1">
-                {periods.map(p => (
-                  <button
-                    key={p.key}
-                    onClick={() => setActivePeriod(p.key)}
-                    className={cn(
-                      'px-2.5 py-0.5 rounded-md text-[10px] font-medium transition-all',
-                      activePeriod === p.key
-                        ? 'bg-violet-500/15 text-violet-600 dark:text-violet-400 border border-violet-500/30'
-                        : 'bg-muted/50 text-muted-foreground border border-transparent hover:bg-muted'
-                    )}
-                  >
-                    {p.label}
-                  </button>
-                ))}
+        <div
+          className="rounded-xl border overflow-hidden"
+          style={{
+            background: isDark ? 'rgba(6,6,10,0.6)' : '#ffffff',
+            borderColor: isDark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.06)',
+          }}
+        >
+          <div className="p-4 md:p-5">
+            <div className="flex items-center justify-between mb-4 flex-wrap gap-2">
+              <div className="flex items-center gap-4">
+                <h3 className="text-sm font-semibold" style={{ color: isDark ? '#e5e5e5' : '#32383E' }}>Historique</h3>
+                <div className="flex items-center gap-1">
+                  {periods.map(p => (
+                    <button
+                      key={p.key}
+                      onClick={() => setActivePeriod(p.key)}
+                      className={cn(
+                        'px-2.5 py-1 rounded-md text-xs transition-all',
+                        activePeriod === p.key
+                          ? 'shadow-sm'
+                          : 'hover:bg-muted/50'
+                      )}
+                      style={activePeriod === p.key ? {
+                        background: isDark ? 'rgba(255,255,255,0.1)' : '#EFF2F5',
+                        color: isDark ? '#e5e5e5' : '#32383E',
+                        fontWeight: 500,
+                      } : {
+                        color: isDark ? 'rgba(255,255,255,0.4)' : '#555E68',
+                      }}
+                    >
+                      {p.label}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              {/* Legend */}
+              <div className="flex items-center gap-4 text-xs">
+                <div className="flex items-center gap-1.5">
+                  <div className="w-3 h-3 rounded-sm" style={{ background: '#58BA63' }} />
+                  <span style={{ color: isDark ? 'rgba(255,255,255,0.5)' : '#555E68' }}>Peur</span>
+                </div>
+                <div className="flex items-center gap-1.5">
+                  <div className="w-3 h-3 rounded-sm" style={{ background: '#FDDD60' }} />
+                  <span style={{ color: isDark ? 'rgba(255,255,255,0.5)' : '#555E68' }}>Neutre</span>
+                </div>
+                <div className="flex items-center gap-1.5">
+                  <div className="w-3 h-3 rounded-sm" style={{ background: '#FF6E76' }} />
+                  <span style={{ color: isDark ? 'rgba(255,255,255,0.5)' : '#555E68' }}>Avidité</span>
+                </div>
+                <div className="flex items-center gap-1.5">
+                  <div className="w-8 h-0.5 rounded-full" style={{ background: isDark ? 'rgba(255,255,255,0.25)' : 'rgba(0,0,0,0.2)' }} />
+                  <span style={{ color: isDark ? 'rgba(255,255,255,0.5)' : '#555E68' }}>Prix BTC</span>
+                </div>
               </div>
             </div>
 
-            {/* Legend */}
-            <div className="flex items-center gap-4">
-              <div className="flex items-center gap-1.5">
-                <div className="w-3 h-0.5 rounded-full" style={{ background: '#7c5cfc' }} />
-                <span className="text-[10px] text-muted-foreground">Indice F&C</span>
+            {chartData.length > 0 ? (
+              <div className="w-full" style={{ height: 340 }}>
+                <ResponsiveContainer width="100%" height="100%">
+                  <ComposedChart data={chartData} margin={{ top: 5, right: 10, left: 0, bottom: 0 }}>
+                    <CartesianGrid
+                      strokeDasharray="3 3"
+                      stroke={isDark ? 'rgba(255,255,255,0.04)' : '#EEEEEE'}
+                      vertical={false}
+                    />
+
+                    <XAxis
+                      dataKey="date"
+                      tickFormatter={formatDate}
+                      tick={{ fontSize: 11, fill: isDark ? 'rgba(255,255,255,0.3)' : '#999' }}
+                      axisLine={{ stroke: isDark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.06)' }}
+                      tickLine={false}
+                      interval="preserveStartEnd"
+                      minTickGap={50}
+                    />
+
+                    <YAxis
+                      yAxisId="fng"
+                      domain={[0, 100]}
+                      tick={{ fontSize: 11, fill: isDark ? 'rgba(255,255,255,0.3)' : '#999' }}
+                      axisLine={false}
+                      tickLine={false}
+                      width={30}
+                    />
+
+                    <YAxis
+                      yAxisId="btc"
+                      orientation="right"
+                      tickFormatter={(v: number) => `$${(v / 1000).toFixed(0)}k`}
+                      tick={{ fontSize: 11, fill: isDark ? 'rgba(255,255,255,0.3)' : '#999' }}
+                      axisLine={false}
+                      tickLine={false}
+                      width={50}
+                    />
+
+                    <Tooltip content={<CustomTooltip />} />
+
+                    {/* Neutral reference line at 50 */}
+                    <ReferenceLine
+                      y={50}
+                      yAxisId="fng"
+                      stroke={isDark ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.08)'}
+                      strokeDasharray="4 4"
+                    />
+
+                    {/* F&G colored bars — Coinglass style */}
+                    <Bar
+                      yAxisId="fng"
+                      dataKey="fngValue"
+                      radius={[2, 2, 0, 0]}
+                      maxBarSize={8}
+                      isAnimationActive={false}
+                    >
+                      {chartData.map((entry, index) => (
+                        <Cell key={index} fill={entry.fngColor} opacity={0.85} />
+                      ))}
+                    </Bar>
+
+                    {/* BTC Price Line overlay */}
+                    <Line
+                      yAxisId="btc"
+                      type="monotone"
+                      dataKey="btcPrice"
+                      stroke={isDark ? 'rgba(255,255,255,0.2)' : 'rgba(0,0,0,0.2)'}
+                      strokeWidth={1.5}
+                      dot={false}
+                      activeDot={false}
+                      connectNulls
+                      isAnimationActive={false}
+                    />
+                  </ComposedChart>
+                </ResponsiveContainer>
               </div>
-              <div className="flex items-center gap-1.5">
-                <div className="w-3 h-0.5 rounded-full" style={{ background: isDark ? 'rgba(255,255,255,0.3)' : 'rgba(0,0,0,0.3)' }} />
-                <span className="text-[10px] text-muted-foreground">Prix BTC</span>
+            ) : (
+              <div className="flex items-center justify-center h-64">
+                <p className="text-sm text-muted-foreground">Aucune donnée disponible</p>
               </div>
-            </div>
+            )}
           </div>
-
-          {chartData.length > 0 ? (
-            <div className="w-full" style={{ height: 320 }}>
-              <ResponsiveContainer width="100%" height="100%">
-                <AreaChart data={chartData} margin={{ top: 5, right: 10, left: 0, bottom: 0 }}>
-                  <defs>
-                    {/* Gradient for F&G area */}
-                    <linearGradient id="fngGradient" x1="0" y1="0" x2="0" y2="1">
-                      <stop offset="0%" stopColor="#7c5cfc" stopOpacity={0.3} />
-                      <stop offset="100%" stopColor="#7c5cfc" stopOpacity={0.02} />
-                    </linearGradient>
-                    {/* Gradient for BTC area */}
-                    <linearGradient id="btcGradient" x1="0" y1="0" x2="0" y2="1">
-                      <stop offset="0%" stopColor={isDark ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.08)'} stopOpacity={0.3} />
-                      <stop offset="100%" stopColor={isDark ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.08)'} stopOpacity={0.02} />
-                    </linearGradient>
-                  </defs>
-
-                  <CartesianGrid
-                    strokeDasharray="3 3"
-                    stroke={isDark ? 'rgba(255,255,255,0.04)' : 'rgba(0,0,0,0.06)'}
-                    vertical={false}
-                  />
-
-                  <XAxis
-                    dataKey="date"
-                    tickFormatter={formatDate}
-                    tick={{ fontSize: 10, fill: isDark ? 'rgba(255,255,255,0.35)' : 'rgba(0,0,0,0.4)' }}
-                    axisLine={{ stroke: isDark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.08)' }}
-                    tickLine={false}
-                    interval="preserveStartEnd"
-                    minTickGap={40}
-                  />
-
-                  <YAxis
-                    yAxisId="fng"
-                    domain={[0, 100]}
-                    tick={{ fontSize: 10, fill: isDark ? 'rgba(255,255,255,0.35)' : 'rgba(0,0,0,0.4)' }}
-                    axisLine={false}
-                    tickLine={false}
-                    width={30}
-                  />
-
-                  <YAxis
-                    yAxisId="btc"
-                    orientation="right"
-                    tickFormatter={(v: number) => `$${(v / 1000).toFixed(0)}k`}
-                    tick={{ fontSize: 10, fill: isDark ? 'rgba(255,255,255,0.35)' : 'rgba(0,0,0,0.4)' }}
-                    axisLine={false}
-                    tickLine={false}
-                    width={45}
-                  />
-
-                  <Tooltip content={<CustomTooltip />} />
-
-                  {/* BTC Price Area (rendered first so it's behind) */}
-                  <Area
-                    yAxisId="btc"
-                    type="monotone"
-                    dataKey="btcPrice"
-                    stroke={isDark ? 'rgba(255,255,255,0.25)' : 'rgba(0,0,0,0.25)'}
-                    strokeWidth={1.5}
-                    fill="url(#btcGradient)"
-                    dot={false}
-                    activeDot={false}
-                    connectNulls
-                    isAnimationActive={false}
-                  />
-
-                  {/* F&G Index Area */}
-                  <Area
-                    yAxisId="fng"
-                    type="monotone"
-                    dataKey="fngValue"
-                    stroke="#7c5cfc"
-                    strokeWidth={2}
-                    fill="url(#fngGradient)"
-                    dot={false}
-                    activeDot={{
-                      r: 4,
-                      stroke: '#7c5cfc',
-                      strokeWidth: 2,
-                      fill: isDark ? '#06060a' : '#ffffff',
-                    }}
-                    isAnimationActive={false}
-                  />
-                </AreaChart>
-              </ResponsiveContainer>
-            </div>
-          ) : (
-            <div className="flex items-center justify-center h-64">
-              <p className="text-sm text-muted-foreground">Aucune donnée disponible</p>
-            </div>
-          )}
-        </CardContent>
-      </Card>
+        </div>
       )}
     </div>
   )

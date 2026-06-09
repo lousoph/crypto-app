@@ -1,0 +1,28 @@
+{
+  "choices": [
+    {
+      "finish_reason": "stop",
+      "index": 0,
+      "message": {
+        "content": "I'll analyze this Coinglass Fear & Greed Index page in detail to help you recreate the design accurately:\n\n## 1. Semicircle Gauge Analysis\n\n**Arc Thickness & Structure:**\n- The gauge is a semi-circular arc with a medium thickness (approximately 15-20px)\n- The arc spans from left (Extreme Fear) to right (Extreme Greed) in a 180-degree arc\n- The arc has a white/very light gray background with a colored gradient overlay\n\n**Color Transitions (Exact Hex Colors):**\n- **Extreme Fear (Left):** Green (#4ade80 or similar bright green)\n- **Fear:** Light green transitioning to yellow (#facc15)\n- **Neutral:** Yellow (#facc15)\n- **Greed:** Yellow transitioning to orange (#fb923c)\n- **Extreme Greed (Right):** Red/orange (#f87171 or similar red)\n\n**Needle Shape & Color:**\n- The needle is triangular with a rounded tip\n- Color: Dark green (#16a34a)\n- Positioned at the \"Extreme Fear\" section (value of 9)\n- Needle has a slight shadow or 3D effect for depth\n\n**Number Positions:**\n- Numbers 0-100 are positioned along the inner edge of the arc\n- Small tick marks accompany each number\n- The current value \"9\" is prominently displayed in the center-bottom of the gauge\n\n**Label Positions:**\n- \"Extreme Fear\" at the far left\n- \"Fear\" in the left-middle\n- \"Neutral\" at the top-center\n- \"Greed\" in the right-middle\n- \"Extreme Greed\" at the far right\n\n## 2. Stats Section Layout\n\n**Layout:**\n- Positioned to the right of the gauge\n- Contains a table with 5 rows of data\n- Each row has a label on the left and a value on the right\n\n**Spacing & Alignment:**\n- Consistent vertical spacing between rows (approximately 24px)\n- Left-aligned labels, right-aligned values\n- Values have a secondary percentage in parentheses\n\n**Font Sizes:**\n- Labels: ~14px, regular weight\n- Values: ~16px, bold\n- Percentages: ~12px, regular weight, lighter color\n\n**Content:**\n- Extreme Fear: 395 days (13.04%)\n- Fear: 947 days (31.26%)\n- Neutral: 798\n- Greed: 740\n- Extreme Greed: 149 days (4.92%)\n\n## 3. Tab Buttons Design\n\n**Colors & Borders:**\n- Background: White (#ffffff)\n- Border: Light gray (#e5e7eb)\n- Text: Dark gray (#374151)\n\n**Selected State:**\n- Selected tab has a blue background (#3b82f6)\n- White text (#ffffff)\n- Slightly rounded corners\n\n**Tabs Available:**\n- \"All\" (selected)\n- \"1 week\"\n- \"1 month\" \n- \"1 Year\"\n\n## 4. Value Display\n\n- Current value \"9\" is prominently displayed in the center-bottom of the gauge\n- Large font size (approximately 48px)\n- Bold weight\n- Dark gray/black color (#1f2937)\n\n## 5. Overall Card/Container Styling\n\n**Container:**\n- White background (#ffffff)\n- Rounded corners (8-10px)\n- Subtle shadow (very light, almost imperceptible)\n- Padding: approximately 24px on all sides\n\n**Header:**\n- \"Crypto Fear & Greed Index\" title\n- Font size: ~20px\n- Font weight: bold\n- Margin-bottom: 24px\n\n## 6. Background Colors\n\n**Page Background:**\n- Very light gray (#f9fafb) - almost white\n\n**Card Background:**\n- Pure white (#ffffff)\n\n## Additional Details\n\n- The gauge has small tick marks along the arc at regular intervals\n- There's a legend button in the bottom right with a pink \"NEW\" badge\n- The page has a left sidebar with various metric options\n- Top navigation bar with Coinglass branding and menu items\n- Banner advertisement in the middle of the page\n- Dark mode toggle in the top right corner\n\nThis detailed breakdown should help you recreate the Fear & Greed Index gauge and surrounding elements with high fidelity to the original design.",
+        "role": "assistant"
+      }
+    }
+  ],
+  "created": 1780983960,
+  "id": "202606091345490ff29107eca1426a",
+  "model": "glm-4.6v",
+  "object": "chat.completion",
+  "request_id": "202606091345490ff29107eca1426a",
+  "usage": {
+    "completion_tokens": 920,
+    "completion_tokens_details": {
+      "reasoning_tokens": 0
+    },
+    "prompt_tokens": 1097,
+    "prompt_tokens_details": {
+      "cached_tokens": 7
+    },
+    "total_tokens": 2017
+  }
+}
