@@ -1573,9 +1573,6 @@ function HomeView({ tokens: allTokens }: { tokens: TokenData[] }) {
         </Card>
       </div>
 
-      {/* Liquidity Heatmap */}
-      <LiquidityHeatmap />
-
       {/* Section Separator */}
       <hr className="section-separator" />
 
