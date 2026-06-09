@@ -764,6 +764,29 @@ body {
   display: none;
 }
 
+/* Auto-scroll marquee for ticker */
+.ticker-marquee-container {
+  overflow: hidden;
+  mask-image: linear-gradient(to right, transparent 0%, black 4%, black 96%, transparent 100%);
+  -webkit-mask-image: linear-gradient(to right, transparent 0%, black 4%, black 96%, transparent 100%);
+}
+
+.ticker-marquee-track {
+  display: flex;
+  gap: 12px;
+  animation: tickerMarquee 40s linear infinite;
+  width: max-content;
+}
+
+.ticker-marquee-track:hover {
+  animation-play-state: paused;
+}
+
+@keyframes tickerMarquee {
+  0% { transform: translateX(0); }
+  100% { transform: translateX(-50%); }
+}
+
 /* ============================================================
    FAB BUTTON — GRADIENT WITH GLOW
    ============================================================ */

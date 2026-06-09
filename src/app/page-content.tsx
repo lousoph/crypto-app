@@ -563,7 +563,7 @@ function LiquidityHeatmap() {
           </div>
         </div>
 
-        {/* Current price indicator */
+        {/* Current price indicator */}
         <div className="flex items-center gap-2 mb-3 px-2 py-1.5 rounded-lg" style={{ background: 'rgba(124,92,252,0.06)' }}>
           <span className="text-[10px] text-muted-foreground">BTC/USD</span>
           <span className="text-xs font-bold text-violet-600 dark:text-violet-400">${currentPrice.toLocaleString('fr-FR')}</span>
@@ -616,7 +616,7 @@ function LiquidityHeatmap() {
           </div>
         </div>
 
-        {/* Color Legend */
+        {/* Color Legend */}
         <div className="flex items-center justify-between mt-3">
           <div className="flex items-center gap-2">
             <span className="text-[9px] text-emerald-500 font-medium">Achat</span>
@@ -664,17 +664,35 @@ function LivePriceTicker({ tokens }: { tokens: TokenData[] }) {
     fetchPrices(); const i = setInterval(fetchPrices, 60000); return () => clearInterval(i)
   }, [])
 
-  const tickers = tokens.filter(t => t.active && prices[t.ticker]).slice(0, 10)
+  // Sort: BTC first, then by market cap order, limit to 20 for scrolling
+  const tickers = tokens
+    .filter(t => t.active && prices[t.ticker])
+    .sort((a, b) => {
+      // BTC always first
+      if (a.ticker === 'BTC') return -1
+      if (b.ticker === 'BTC') return 1
+      // ETH second
+      if (a.ticker === 'ETH') return -1
+      if (b.ticker === 'ETH') return 1
+      // SOL third
+      if (a.ticker === 'SOL') return -1
+      if (b.ticker === 'SOL') return 1
+      return 0
+    })
+    .slice(0, 20)
 
   if (tickers.length === 0) return null
 
+  // Duplicate the list for seamless infinite scroll
+  const tickerItems = [...tickers, ...tickers]
+
   return (
-    <div className="w-full overflow-hidden">
-      <div className="flex gap-4 ticker-scroll overflow-x-auto pb-1">
-        {tickers.map(t => {
+    <div className="w-full ticker-marquee-container">
+      <div className="ticker-marquee-track">
+        {tickerItems.map((t, idx) => {
           const change = changes[t.ticker] || 0
           return (
-            <div key={t.ticker} className="flex items-center gap-2 shrink-0 px-3 py-1.5 rounded-lg bg-muted/50 border border-border/50">
+            <div key={`${t.ticker}-${idx}`} className="flex items-center gap-2 shrink-0 px-3 py-1.5 rounded-lg bg-muted/50 border border-border/50">
               <TokenLogo ticker={t.ticker} size={18} />
               <span className="text-xs font-semibold text-foreground">{t.ticker}</span>
               <span className="text-xs text-muted-foreground">${fmtPrice(prices[t.ticker])}</span>
@@ -2109,6 +2127,8 @@ function AdminUsersView() {
   const [editName, setEditName] = useState('')
   const [editEmail, setEditEmail] = useState('')
   const [editRole, setEditRole] = useState('')
+  const [editPassword, setEditPassword] = useState('')
+  const [showEditPassword, setShowEditPassword] = useState(false)
   const [editLoading, setEditLoading] = useState(false)
   const [deleteConfirm, setDeleteConfirm] = useState<string | null>(null)
   const [deleteLoading, setDeleteLoading] = useState(false)
@@ -2120,7 +2140,7 @@ function AdminUsersView() {
 
   useEffect(() => { fetchUsers() }, [fetchUsers])
 
-  const handleUpdate = async (id: string, updates: { role?: string; suspended?: boolean; name?: string; email?: string }) => {
+  const handleUpdate = async (id: string, updates: { role?: string; suspended?: boolean; name?: string; email?: string; newPassword?: string }) => {
     try {
       const res = await fetch('/api/admin/users', { method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ id, ...updates }) })
       const data = await res.json()
@@ -2134,13 +2154,27 @@ function AdminUsersView() {
     setEditName(u.name || '')
     setEditEmail(u.email)
     setEditRole(u.role)
+    setEditPassword('')
   }
 
   const handleSaveEdit = async () => {
     if (!editUser) return
     setEditLoading(true)
     try {
-      await handleUpdate(editUser.id, { name: editName, email: editEmail, role: editRole })
+      const updates: { name: string; email: string; role: string; newPassword?: string } = {
+        name: editName,
+        email: editEmail,
+        role: editRole,
+      }
+      if (editPassword.trim()) {
+        if (editPassword.length < 6) {
+          toast.error('Le mot de passe doit contenir au moins 6 caractères')
+          setEditLoading(false)
+          return
+        }
+        updates.newPassword = editPassword
+      }
+      await handleUpdate(editUser.id, updates)
       setEditUser(null)
     } finally { setEditLoading(false) }
   }
@@ -2278,6 +2312,29 @@ function AdminUsersView() {
                   <SelectItem value="admin">Admin</SelectItem>
                 </SelectContent>
               </Select>
+            </div>
+            <div className="space-y-2">
+              <Label className="text-xs font-medium text-muted-foreground flex items-center gap-1">
+                <Shield className="w-3 h-3" />Nouveau mot de passe
+              </Label>
+              <div className="relative">
+                <Input
+                  type={showEditPassword ? 'text' : 'password'}
+                  value={editPassword}
+                  onChange={(e) => setEditPassword(e.target.value)}
+                  placeholder="Laisser vide pour ne pas changer"
+                  className="h-10 rounded-xl bg-input border-border pr-10"
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowEditPassword(!showEditPassword)}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors p-0.5"
+                  tabIndex={-1}
+                >
+                  {showEditPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                </button>
+              </div>
+              <p className="text-[10px] text-muted-foreground/60">Minimum 6 caractères. Laisser vide pour conserver le mot de passe actuel.</p>
             </div>
           </div>
           <DialogFooter className="gap-2">

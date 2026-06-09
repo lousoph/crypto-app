@@ -224,3 +224,31 @@ Stage Summary:
 - 108 tokens actifs dans la DB (108 unique tickers)
 - 8 exchanges dans la DB
 - Fichier seed: /home/z/my-project/src/app/api/seed/route.ts
+
+---
+Task ID: 4
+Agent: Main Agent
+Task: Fix avatar display, auto-scroll ticker with BTC first, admin password modification
+
+Work Log:
+- Diagnosed avatar issue: next.config.ts has rewrite `/upload/:path*` → `/api/upload/:path*` but no handler existed
+- Created `/api/upload/[...path]/route.ts` to serve uploaded files from /home/z/my-project/upload/ with proper MIME types, caching, and security (path traversal prevention)
+- Updated LivePriceTicker component to:
+  - Sort tokens with BTC first, ETH second, SOL third
+  - Show up to 20 tokens instead of 10
+  - Duplicate items for seamless infinite scroll marquee
+  - Use CSS animation `tickerMarquee` for auto-scroll (40s loop, pauses on hover)
+- Added CSS for ticker marquee: `.ticker-marquee-container` with fade masks, `.ticker-marquee-track` with infinite translateX animation
+- Added admin password modification:
+  - Updated `/api/admin/users/route.ts` PUT handler to accept `newPassword`, hash with bcrypt, validate minimum 6 chars
+  - Added password state (`editPassword`, `showEditPassword`) to AdminUsersView
+  - Added password field with show/hide toggle to user edit dialog
+  - Updated handleSaveEdit to include password in update payload
+- Fixed pre-existing JSX comment syntax bugs (missing `}` in comments at lines 566 and 619)
+- Rebuilt and restarted server
+
+Stage Summary:
+- Avatar images now served correctly via /api/upload/[...path] handler
+- Live price ticker auto-scrolls infinitely starting with BTC on both homepage and dashboard
+- Admin can now change user passwords from the user edit dialog
+- Server running on port 3000, HTTP 200 confirmed

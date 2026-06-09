@@ -2,6 +2,7 @@ import { db } from "@/lib/db"
 import { NextRequest, NextResponse } from "next/server"
 import { getServerSession } from "next-auth"
 import { authOptions } from "@/lib/auth"
+import bcrypt from "bcryptjs"
 
 // GET /api/admin/users - List all users (admin only)
 export async function GET() {
@@ -38,10 +39,17 @@ export async function PUT(req: NextRequest) {
       return NextResponse.json({ error: "Accès refusé" }, { status: 403 })
     }
 
-    const { id, role, suspended, name, email } = await req.json()
+    const { id, role, suspended, name, email, newPassword } = await req.json()
 
     if (!id) {
       return NextResponse.json({ error: "ID requis" }, { status: 400 })
+    }
+
+    // Validate new password if provided
+    if (newPassword) {
+      if (newPassword.length < 6) {
+        return NextResponse.json({ error: "Le mot de passe doit contenir au moins 6 caractères" }, { status: 400 })
+      }
     }
 
     // Check if email is being changed and if it conflicts
@@ -59,6 +67,7 @@ export async function PUT(req: NextRequest) {
         ...(suspended !== undefined && { suspended }),
         ...(name !== undefined && { name }),
         ...(email !== undefined && { email }),
+        ...(newPassword && { passwordHash: await bcrypt.hash(newPassword, 12) }),
       },
     })
 
