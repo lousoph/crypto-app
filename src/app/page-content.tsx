@@ -1699,7 +1699,7 @@ function HomeView({ tokens: allTokens }: { tokens: TokenData[] }) {
             </div>
           ) : news.length > 1 ? (
             <div className="space-y-2">
-              {news.slice(0, 8).map((item: any, i: number) => (
+              {news.slice(0, 6).map((item: any, i: number) => (
                 <a
                   key={i}
                   href={item.link}
