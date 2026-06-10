@@ -119,7 +119,7 @@ export const authOptions: NextAuthOptions = {
         }
       }
 
-      // Refresh role and emailVerified from DB on each JWT refresh
+      // Refresh role, emailVerified and image from DB on each JWT refresh
       if (token.id) {
         const dbUser = await db.user.findUnique({
           where: { id: token.id as string },
@@ -127,6 +127,7 @@ export const authOptions: NextAuthOptions = {
         if (dbUser) {
           token.role = dbUser.role
           token.emailVerified = !!dbUser.emailVerified
+          token.picture = dbUser.image ?? undefined
         }
       } else if (token.email) {
         // Fallback: look up by email if id is missing
@@ -137,6 +138,7 @@ export const authOptions: NextAuthOptions = {
           token.role = dbUser.role
           token.id = dbUser.id
           token.emailVerified = !!dbUser.emailVerified
+          token.picture = dbUser.image ?? undefined
         }
       }
 
@@ -148,6 +150,9 @@ export const authOptions: NextAuthOptions = {
         (session.user as any).role = token.role
         ;(session.user as any).id = token.id
         ;(session.user as any).emailVerified = token.emailVerified ?? false
+        if (token.picture) {
+          session.user.image = token.picture as string
+        }
       }
       return session
     },
