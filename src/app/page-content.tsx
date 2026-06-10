@@ -8,7 +8,7 @@ import {
   Check, X, Menu, Search, Activity, Zap, Brain, Mail,
   Sun, Moon, Sparkles, ChevronDown, ChevronUp, Eye, EyeOff,
   Gauge, ArrowUpCircle, ArrowDownCircle, Minus, ExternalLink, Star, Pencil,
-  Home, Newspaper, Lightbulb, Clock, Globe, ArrowRight, Bell, Download, Flame, FlameKindling, ChevronsUpDown
+  Home, Newspaper, Lightbulb, Clock, Globe, ArrowRight, Bell, Download, Flame, FlameKindling, ChevronsUpDown, Tag
 } from 'lucide-react'
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
 import { Tooltip as TooltipUI, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip'
