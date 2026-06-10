@@ -39,7 +39,7 @@ import FearGreedIndex from '@/components/fear-greed-index'
 // ============================================================
 // TYPES
 // ============================================================
-type View = 'home' | 'dashboard' | 'transactions' | 'ai-analysis' | 'profile' | 'admin-users' | 'admin-tokens' | 'admin-exchanges' | 'admin-pricing'
+type View = 'home' | 'dashboard' | 'transactions' | 'ai-analysis' | 'profile' | 'admin-users' | 'admin-tokens' | 'admin-exchanges' | 'admin-pricing' | 'admin-coupons'
 
 interface TokenData {
   id: string; ticker: string; name: string; coingeckoId: string | null; cryptoCompareId: string | null; currentPrice: number | null; active: boolean
@@ -1830,6 +1830,69 @@ function HomeView({ tokens: allTokens }: { tokens: TokenData[] }) {
 }
 
 // ============================================================
+// PROMO CODE INPUT (user-facing)
+// ============================================================
+function PromoCodeInput() {
+  const [code, setCode] = useState('')
+  const [loading, setLoading] = useState(false)
+  const [result, setResult] = useState<{ success: boolean; message: string } | null>(null)
+
+  const handleRedeem = async () => {
+    if (!code.trim()) return
+    setLoading(true); setResult(null)
+    try {
+      const res = await fetch('/api/coupons/redeem', {
+        method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ code: code.trim() }),
+      })
+      const data = await res.json()
+      if (res.ok) {
+        setResult({ success: true, message: data.message })
+        toast.success(data.message)
+        setCode('')
+        const { update } = await import('next-auth/react')
+        await update({})
+      } else {
+        setResult({ success: false, message: data.error })
+        toast.error(data.error)
+      }
+    } catch {
+      setResult({ success: false, message: 'Erreur réseau' })
+      toast.error('Erreur réseau')
+    } finally { setLoading(false) }
+  }
+
+  return (
+    <div>
+      <div className="flex gap-2">
+        <Input
+          placeholder="Entrez votre code promo"
+          value={code}
+          onChange={(e) => { setCode(e.target.value.toUpperCase()); setResult(null) }}
+          className="h-10 rounded-xl bg-input border-border font-mono text-sm"
+          maxLength={30}
+          onKeyDown={(e) => { if (e.key === 'Enter') handleRedeem() }}
+        />
+        <Button
+          onClick={handleRedeem}
+          disabled={loading || !code.trim()}
+          className="rounded-xl h-10 px-4 text-xs font-medium shrink-0"
+          style={{ background: 'linear-gradient(135deg,#7c5cfc,#06b6d4)', color: 'white' }}
+        >
+          {loading ? <RefreshCw className="w-4 h-4 animate-spin" /> : <Check className="w-4 h-4" />}
+        </Button>
+      </div>
+      {result && (
+        <p className={`text-xs mt-2 ${result.success ? 'text-emerald-500' : 'text-red-500'}`}>
+          {result.success ? <Check className="w-3 h-3 inline mr-1" /> : <X className="w-3 h-3 inline mr-1" />}
+          {result.message}
+        </p>
+      )}
+    </div>
+  )
+}
+
+// ============================================================
 // PROFILE VIEW
 // ============================================================
 function ProfileView({ userRole }: { userRole: string }) {
@@ -1986,6 +2049,15 @@ function ProfileView({ userRole }: { userRole: string }) {
               </span>
               <input type="file" accept="image/jpeg,image/png,image/gif,image/webp" className="hidden" onChange={handleAvatarUpload} disabled={avatarUploading} />
             </label>
+          </div>
+
+          {/* Code promo */}
+          <div className="mt-4 pt-4 border-t border-border/50">
+            <div className="flex items-center gap-2 mb-3">
+              <Tag className="w-4 h-4 text-violet-500" />
+              <p className="text-sm font-semibold text-foreground">Code promotionnel</p>
+            </div>
+            <PromoCodeInput />
           </div>
         </CardContent>
       </Card>
@@ -2614,6 +2686,221 @@ function AdminPricingView() {
 }
 
 // ============================================================
+// ADMIN COUPONS VIEW
+// ============================================================
+interface CouponData {
+  id: string; code: string; type: string; value: number | null; maxUses: number | null;
+  usedCount: number; active: boolean; expiresAt: string | null; createdAt: string;
+  _count: { redemptions: number };
+}
+
+function AdminCouponsView() {
+  const [coupons, setCoupons] = useState<CouponData[]>([])
+  const [loading, setLoading] = useState(true)
+  const [dialogOpen, setDialogOpen] = useState(false)
+  const [editId, setEditId] = useState<string | null>(null)
+  const [formCode, setFormCode] = useState('')
+  const [formType, setFormType] = useState('premium_upgrade')
+  const [formValue, setFormValue] = useState('')
+  const [formMaxUses, setFormMaxUses] = useState('')
+  const [formExpiresAt, setFormExpiresAt] = useState('')
+  const [formActive, setFormActive] = useState(true)
+  const [saving, setSaving] = useState(false)
+  const [deleting, setDeleting] = useState<string | null>(null)
+
+  const fetchCoupons = async () => {
+    try {
+      const res = await fetch('/api/admin/coupons')
+      if (res.ok) { const data = await res.json(); setCoupons(data) }
+    } catch {}
+    setLoading(false)
+  }
+
+  useEffect(() => { fetchCoupons() }, [])
+
+  const resetForm = () => {
+    setEditId(null); setFormCode(''); setFormType('premium_upgrade'); setFormValue('')
+    setFormMaxUses(''); setFormExpiresAt(''); setFormActive(true)
+  }
+
+  const openCreate = () => { resetForm(); setDialogOpen(true) }
+
+  const openEdit = (c: CouponData) => {
+    setEditId(c.id); setFormCode(c.code); setFormType(c.type)
+    setFormValue(c.value !== null ? String(c.value) : '')
+    setFormMaxUses(c.maxUses !== null ? String(c.maxUses) : '')
+    setFormExpiresAt(c.expiresAt ? c.expiresAt.slice(0, 16) : '')
+    setFormActive(c.active); setDialogOpen(true)
+  }
+
+  const handleSave = async (e: React.FormEvent) => {
+    e.preventDefault(); setSaving(true)
+    try {
+      const body: any = {
+        code: formCode, type: formType,
+        value: formValue ? parseFloat(formValue) : null,
+        maxUses: formMaxUses ? parseInt(formMaxUses) : null,
+        expiresAt: formExpiresAt || null, active: formActive,
+      }
+      const url = editId
+        ? '/api/admin/coupons'
+        : '/api/admin/coupons'
+      const method = editId ? 'PUT' : 'POST'
+      if (editId) body.id = editId
+
+      const res = await fetch(url, { method, headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) })
+      if (res.ok) {
+        toast.success(editId ? 'Coupon modifié' : 'Coupon créé')
+        setDialogOpen(false); resetForm(); fetchCoupons()
+      } else {
+        const d = await res.json(); toast.error(d.error || 'Erreur')
+      }
+    } catch { toast.error('Erreur réseau') } finally { setSaving(false) }
+  }
+
+  const handleDelete = async (id: string) => {
+    setDeleting(id)
+    try {
+      const res = await fetch(`/api/admin/coupons?id=${id}`, { method: 'DELETE' })
+      if (res.ok) { toast.success('Coupon supprimé'); fetchCoupons() }
+      else toast.error('Erreur')
+    } catch { toast.error('Erreur réseau') } finally { setDeleting(null) }
+  }
+
+  const toggleActive = async (c: CouponData) => {
+    try {
+      const res = await fetch('/api/admin/coupons', {
+        method: 'PUT', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ id: c.id, active: !c.active }),
+      })
+      if (res.ok) { toast.success(c.active ? 'Coupon désactivé' : 'Coupon activé'); fetchCoupons() }
+    } catch { toast.error('Erreur') }
+  }
+
+  if (loading) return <div className="p-4"><div className="h-64 rounded-xl bg-muted/30 shimmer" /></div>
+
+  return (
+    <div className="space-y-4 p-4 md:p-6 page-transition">
+      <div className="flex items-center justify-between">
+        <h2 className="text-lg font-bold text-foreground flex items-center gap-2">
+          <Tag className="w-5 h-5 text-violet-500" />Codes promotionnels
+        </h2>
+        <Button onClick={openCreate} className="rounded-xl h-9 text-xs font-medium" style={{ background: 'linear-gradient(135deg,#7c5cfc,#06b6d4)', color: 'white' }}>
+          <Plus className="w-4 h-4 mr-1" />Créer un code
+        </Button>
+      </div>
+
+      {coupons.length === 0 ? (
+        <Card className="glass-card border-border rounded-xl">
+          <CardContent className="p-8 text-center">
+            <Tag className="w-10 h-10 text-muted-foreground/30 mx-auto mb-3" />
+            <p className="text-sm text-muted-foreground">Aucun code promo créé</p>
+            <p className="text-xs text-muted-foreground/60 mt-1">Créez votre premier code promotionnel</p>
+          </CardContent>
+        </Card>
+      ) : (
+        <div className="space-y-3">
+          {coupons.map(c => {
+            const isExpired = c.expiresAt && new Date(c.expiresAt) < new Date()
+            const isFull = c.maxUses !== null && c.usedCount >= c.maxUses
+            const statusColor = !c.active ? 'bg-gray-500/10 text-gray-500'
+              : isExpired ? 'bg-red-500/10 text-red-500'
+              : isFull ? 'bg-amber-500/10 text-amber-500'
+              : 'bg-emerald-500/10 text-emerald-500'
+            const statusLabel = !c.active ? 'Désactivé'
+              : isExpired ? 'Expiré'
+              : isFull ? 'Épuisé'
+              : 'Actif'
+
+            return (
+              <Card key={c.id} className="glass-card border-border rounded-xl">
+                <CardContent className="p-4">
+                  <div className="flex items-start justify-between gap-3">
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center gap-2 flex-wrap">
+                        <span className="font-mono font-bold text-sm text-foreground bg-muted/50 px-2.5 py-1 rounded-lg">{c.code}</span>
+                        <Badge variant="secondary" className={`text-[10px] font-bold ${statusColor}`}>{statusLabel}</Badge>
+                        <Badge variant="secondary" className="text-[10px]">
+                          {c.type === 'premium_upgrade' ? 'Upgrade Premium' : `Réduction ${c.value ?? 0}%`}
+                        </Badge>
+                      </div>
+                      <div className="flex items-center gap-4 mt-2 text-[11px] text-muted-foreground">
+                        <span>Utilisations : {c.usedCount}{c.maxUses ? ` / ${c.maxUses}` : ' (illimité)'}</span>
+                        {c.type === 'premium_upgrade' && c.value && <span>Durée : {Math.round(c.value)} jours</span>}
+                        {c.expiresAt && <span>Expire : {new Date(c.expiresAt).toLocaleDateString('fr-FR')}</span>}
+                      </div>
+                    </div>
+                    <div className="flex items-center gap-1 shrink-0">
+                      <Button variant="ghost" size="sm" className="h-8 w-8 p-0" onClick={() => toggleActive(c)} title={c.active ? 'Désactiver' : 'Activer'}>
+                        {c.active ? <Eye className="w-4 h-4" /> : <EyeOff className="w-4 h-4" />}
+                      </Button>
+                      <Button variant="ghost" size="sm" className="h-8 w-8 p-0" onClick={() => openEdit(c)} title="Modifier">
+                        <Pencil className="w-4 h-4" />
+                      </Button>
+                      <Button variant="ghost" size="sm" className="h-8 w-8 p-0 text-red-500 hover:text-red-400" onClick={() => handleDelete(c.id)} disabled={deleting === c.id} title="Supprimer">
+                        {deleting === c.id ? <RefreshCw className="w-4 h-4 animate-spin" /> : <Trash2 className="w-4 h-4" />}
+                      </Button>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            )
+          })}
+        </div>
+      )}
+
+      {/* Create/Edit Dialog */}
+      <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
+        <DialogContent className="glass-strong border-border rounded-2xl max-w-md">
+          <DialogHeader>
+            <DialogTitle className="text-foreground">{editId ? 'Modifier le code' : 'Nouveau code promo'}</DialogTitle>
+            <DialogDescription className="text-muted-foreground text-xs">{editId ? 'Modifiez les détails du coupon' : 'Créez un nouveau code promotionnel'}</DialogDescription>
+          </DialogHeader>
+          <form onSubmit={handleSave} className="space-y-4">
+            <div className="space-y-2">
+              <Label className="text-xs font-medium">Code</Label>
+              <Input placeholder="WELCOME50" value={formCode} onChange={(e) => setFormCode(e.target.value.toUpperCase())} className="h-10 rounded-xl bg-input border-border font-mono" required disabled={!!editId} />
+            </div>
+            <div className="space-y-2">
+              <Label className="text-xs font-medium">Type</Label>
+              <Select value={formType} onValueChange={setFormType}>
+                <SelectTrigger className="h-10 rounded-xl bg-input border-border"><SelectValue /></SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="premium_upgrade">Upgrade Premium</SelectItem>
+                  <SelectItem value="discount">Réduction (%)</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="space-y-2">
+              <Label className="text-xs font-medium">{formType === 'premium_upgrade' ? 'Durée premium (jours)' : 'Réduction (%)'}</Label>
+              <Input type="number" placeholder={formType === 'premium_upgrade' ? '30' : '50'} value={formValue} onChange={(e) => setFormValue(e.target.value)} className="h-10 rounded-xl bg-input border-border" />
+            </div>
+            <div className="space-y-2">
+              <Label className="text-xs font-medium">Utilisations max</Label>
+              <Input type="number" placeholder="Illimité si vide" value={formMaxUses} onChange={(e) => setFormMaxUses(e.target.value)} className="h-10 rounded-xl bg-input border-border" />
+            </div>
+            <div className="space-y-2">
+              <Label className="text-xs font-medium">Date d'expiration</Label>
+              <Input type="datetime-local" value={formExpiresAt} onChange={(e) => setFormExpiresAt(e.target.value)} className="h-10 rounded-xl bg-input border-border" />
+            </div>
+            <div className="flex items-center justify-between">
+              <Label className="text-xs font-medium">Actif</Label>
+              <Switch checked={formActive} onCheckedChange={setFormActive} />
+            </div>
+            <DialogFooter>
+              <Button type="button" variant="ghost" onClick={() => setDialogOpen(false)} className="rounded-xl">Annuler</Button>
+              <Button type="submit" className="rounded-xl h-10" style={{ background: 'linear-gradient(135deg,#7c5cfc,#06b6d4)', color: 'white' }} disabled={saving}>
+                {saving ? <RefreshCw className="w-4 h-4 animate-spin mr-2" /> : null}{editId ? 'Modifier' : 'Créer'}
+              </Button>
+            </DialogFooter>
+          </form>
+        </DialogContent>
+      </Dialog>
+    </div>
+  )
+}
+
+// ============================================================
 // NAVIGATION COMPONENTS
 // ============================================================
 const NAV_ITEMS: { id: View; label: string; icon: typeof LayoutDashboard; mobileOnly?: boolean }[] = [
@@ -2629,6 +2916,7 @@ const ADMIN_ITEMS: { id: View; label: string; icon: typeof Shield }[] = [
   { id: 'admin-tokens', label: 'Tokens', icon: Coins },
   { id: 'admin-exchanges', label: 'Exchanges', icon: Building2 },
   { id: 'admin-pricing', label: 'Tarifs', icon: Star },
+  { id: 'admin-coupons', label: 'Codes promo', icon: Tag },
 ]
 
 function BottomNav({ view, setView, isAdmin }: { view: View; setView: (v: View) => void; isAdmin: boolean }) {
@@ -2792,7 +3080,7 @@ export function CryptoApp() {
     // Restore view from URL hash on page load/refresh
     if (typeof window !== 'undefined') {
       const hash = window.location.hash.replace('#', '')
-      const validViews: View[] = ['home', 'dashboard', 'transactions', 'ai-analysis', 'profile', 'admin-users', 'admin-tokens', 'admin-exchanges', 'admin-pricing']
+      const validViews: View[] = ['home', 'dashboard', 'transactions', 'ai-analysis', 'profile', 'admin-users', 'admin-tokens', 'admin-exchanges', 'admin-pricing', 'admin-coupons']
       if (hash && validViews.includes(hash as View)) return hash as View
     }
     return 'home'
@@ -2851,6 +3139,7 @@ export function CryptoApp() {
       case 'admin-tokens': return isAdmin ? <AdminTokensView /> : <DashboardView tokens={tokens} userRole={userRole} />
       case 'admin-exchanges': return isAdmin ? <AdminExchangesView /> : <DashboardView tokens={tokens} userRole={userRole} />
       case 'admin-pricing': return isAdmin ? <AdminPricingView /> : <DashboardView tokens={tokens} userRole={userRole} />
+      case 'admin-coupons': return isAdmin ? <AdminCouponsView /> : <DashboardView tokens={tokens} userRole={userRole} />
       default: return <HomeView tokens={tokens} />
     }
   }
