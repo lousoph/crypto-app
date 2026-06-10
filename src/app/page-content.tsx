@@ -843,7 +843,7 @@ function DashboardView({ tokens: allTokens, userRole }: { tokens: TokenData[]; u
 
   if (loading) {
     return (
-      <div className="space-y-4 p-4 md:p-6">
+      <div className="space-y-4 p-4 md:px-0 md:py-3">
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
           {[...Array(4)].map((_, i) => <div key={i} className="h-28 rounded-xl bg-muted/30 shimmer" />)}
         </div>
@@ -1122,11 +1122,11 @@ function TransactionsView({ userRole }: { userRole: string }) {
   const uniqueTickers = [...new Set(transactions.map(t => t.tokenTicker))]
 
   if (loading) {
-    return <div className="space-y-4 p-4 md:p-6"><div className="h-20 rounded-xl bg-muted/30 shimmer" /><div className="h-64 rounded-xl bg-muted/30 shimmer" /></div>
+    return <div className="space-y-4 p-4 md:px-0 md:py-3"><div className="h-20 rounded-xl bg-muted/30 shimmer" /><div className="h-64 rounded-xl bg-muted/30 shimmer" /></div>
   }
 
   return (
-    <div className="space-y-4 p-4 md:p-6 page-transition">
+    <div className="space-y-4 p-4 md:px-0 md:py-3 page-transition">
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
         <div>
@@ -1360,7 +1360,7 @@ function AIAnalysisView({ tokens, userRole, setView }: { tokens: TokenData[]; us
   }
 
   return (
-    <div className="space-y-4 p-4 md:p-6 page-transition">
+    <div className="space-y-4 p-4 md:px-0 md:py-3 page-transition">
       <h2 className="text-lg font-bold text-foreground flex items-center gap-2">
         <Brain className="w-5 h-5 text-violet-500" />Prédict AI
       </h2>
@@ -1581,7 +1581,7 @@ function HomeView({ tokens: allTokens }: { tokens: TokenData[] }) {
   }
 
   return (
-    <div className="space-y-4 p-4 md:p-5 page-transition">
+    <div className="space-y-4 p-4 md:px-0 md:py-3 page-transition">
       {/* Header */}
       <div className="flex items-center gap-3">
         <div className="w-10 h-10 rounded-xl flex items-center justify-center" style={{ background: ts.iconBgViolet }}>
@@ -2011,7 +2011,7 @@ function ProfileView({ userRole }: { userRole: string }) {
   const displayAvatar = avatarUrl || user?.image
 
   return (
-    <div className="space-y-4 p-4 md:p-6 page-transition">
+    <div className="space-y-4 p-4 md:px-0 md:py-3 page-transition">
       <h2 className="text-lg font-bold text-foreground flex items-center gap-2">
         <User className="w-5 h-5 text-violet-500" />Profil
       </h2>
@@ -2318,7 +2318,7 @@ function AdminUsersView() {
   if (loading) return <div className="p-4"><div className="h-64 rounded-xl bg-muted/30 shimmer" /></div>
 
   return (
-    <div className="space-y-4 p-4 md:p-6 page-transition">
+    <div className="space-y-4 p-4 md:px-0 md:py-3 page-transition">
       <div className="flex items-center justify-between flex-wrap gap-2">
         <h2 className="text-lg font-bold text-foreground flex items-center gap-2"><Shield className="w-5 h-5 text-violet-500" />Gestion des utilisateurs</h2>
         <Badge variant="secondary" className="text-xs">{users.length} utilisateur{users.length !== 1 ? 's' : ''}</Badge>
@@ -2513,7 +2513,7 @@ function AdminTokensView() {
   }
 
   return (
-    <div className="space-y-4 p-4 md:p-6 page-transition">
+    <div className="space-y-4 p-4 md:px-0 md:py-3 page-transition">
       <div className="flex items-center justify-between">
         <h2 className="text-lg font-bold text-foreground flex items-center gap-2"><Coins className="w-5 h-5 text-violet-500" />Gestion des tokens</h2>
         <Button onClick={() => setShowForm(true)} className="rounded-xl h-9 text-xs gap-2" style={{ background: 'linear-gradient(135deg,#7c5cfc,#06b6d4)', color: 'white' }}>
@@ -2596,7 +2596,7 @@ function AdminExchangesView() {
   }
 
   return (
-    <div className="space-y-4 p-4 md:p-6 page-transition">
+    <div className="space-y-4 p-4 md:px-0 md:py-3 page-transition">
       <div className="flex items-center justify-between">
         <h2 className="text-lg font-bold text-foreground flex items-center gap-2"><Building2 className="w-5 h-5 text-violet-500" />Gestion des exchanges</h2>
         <Button onClick={() => setShowForm(true)} className="rounded-xl h-9 text-xs gap-2" style={{ background: 'linear-gradient(135deg,#7c5cfc,#06b6d4)', color: 'white' }}>
@@ -2654,7 +2654,7 @@ function AdminPricingView() {
   if (loading) return <div className="p-4"><div className="h-64 rounded-xl bg-muted/30 shimmer" /></div>
 
   return (
-    <div className="space-y-4 p-4 md:p-6 page-transition">
+    <div className="space-y-4 p-4 md:px-0 md:py-3 page-transition">
       <h2 className="text-lg font-bold text-foreground flex items-center gap-2"><Star className="w-5 h-5 text-violet-500" />Gestion des tarifs</h2>
       <Card className="glass-card border-border rounded-xl">
         <CardContent className="p-4 space-y-4">
@@ -2780,7 +2780,7 @@ function AdminCouponsView() {
   if (loading) return <div className="p-4"><div className="h-64 rounded-xl bg-muted/30 shimmer" /></div>
 
   return (
-    <div className="space-y-4 p-4 md:p-6 page-transition">
+    <div className="space-y-4 p-4 md:px-0 md:py-3 page-transition">
       <div className="flex items-center justify-between">
         <h2 className="text-lg font-bold text-foreground flex items-center gap-2">
           <Tag className="w-5 h-5 text-violet-500" />Codes promotionnels
@@ -2946,7 +2946,7 @@ function Sidebar({ view, setView, isAdmin, onLogout }: { view: View; setView: (v
   return (
     <aside className="glass-sidebar hidden md:flex flex-col w-52 h-screen fixed top-0 left-0 z-30 shrink-0">
       {/* Logo */}
-      <div className="p-4">
+      <div className="px-4 py-3">
         <div className="flex items-center gap-3">
           <div className="w-9 h-9 rounded-xl flex items-center justify-center" style={{ background: ts.logoBg, border: `1px solid ${ts.logoBorder}` }}>
             <Wallet className="w-5 h-5 text-violet-500 dark:text-violet-400" />
