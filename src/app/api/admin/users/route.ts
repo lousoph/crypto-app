@@ -45,14 +45,12 @@ export async function PUT(req: NextRequest) {
       return NextResponse.json({ error: "ID requis" }, { status: 400 })
     }
 
-    // Validate new password if provided
     if (newPassword) {
       if (newPassword.length < 6) {
         return NextResponse.json({ error: "Le mot de passe doit contenir au moins 6 caractères" }, { status: 400 })
       }
     }
 
-    // Check if email is being changed and if it conflicts
     if (email) {
       const existingUser = await db.user.findUnique({ where: { email } })
       if (existingUser && existingUser.id !== id) {
@@ -77,7 +75,7 @@ export async function PUT(req: NextRequest) {
   }
 }
 
-// DELETE /api/admin/users?id=xxx — Admin delete user and all related data
+// DELETE /api/admin/users?id=xxx — Admin delete user
 export async function DELETE(req: NextRequest) {
   try {
     const session = await getServerSession(authOptions)
@@ -94,11 +92,13 @@ export async function DELETE(req: NextRequest) {
       return NextResponse.json({ error: "Vous ne pouvez pas supprimer votre propre compte" }, { status: 400 })
     }
 
-    // Delete related records first (foreign key constraints)
-    await db.transaction.deleteMany({ where: { userId: id } })
-    await db.account.deleteMany({ where: { userId: id } })
-    await db.session.deleteMany({ where: { userId: id } })
-    await db.verificationToken.deleteMany({ where: { identifier: (await db.user.findUnique({ where: { id } }))?.email || "" } })
+    // Cascade deletes handle: transactions, accounts, sessions, couponRedemptions
+    // (all have onDelete: Cascade in the schema)
+    // VerificationTokens are linked by email, not userId, so clean them separately
+    const user = await db.user.findUnique({ where: { id }, select: { email: true } })
+    if (user?.email) {
+      await db.verificationToken.deleteMany({ where: { identifier: user.email } })
+    }
 
     await db.user.delete({ where: { id } })
     return NextResponse.json({ success: true })
