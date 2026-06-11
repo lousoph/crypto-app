@@ -1538,6 +1538,16 @@ function HomeView({ tokens: allTokens }: { tokens: TokenData[] }) {
     } catch {}
   }, [])
 
+  // Fetch news
+  const fetchNews = useCallback(async () => {
+    try {
+      const r = await fetch('/api/news')
+      const d = await r.json()
+      if (d.news) setNews(d.news)
+      setNewsLoading(false)
+    } catch { setNewsLoading(false) }
+  }, [])
+
   useEffect(() => {
     // Fetch AI tips
     fetch('/api/ai-tips')
@@ -1546,18 +1556,16 @@ function HomeView({ tokens: allTokens }: { tokens: TokenData[] }) {
       .catch(() => setTipsLoading(false))
 
     // Fetch news from @crypto_detente
-    fetch('/api/news')
-      .then(r => r.json())
-      .then(d => { setNews(d.news || []); setNewsLoading(false) })
-      .catch(() => setNewsLoading(false))
+    fetchNews()
 
     // Fetch global market data
     fetchGlobalData()
 
-    // Refresh global market data every 60 seconds
-    const interval = setInterval(fetchGlobalData, 60000)
-    return () => clearInterval(interval)
-  }, [fetchGlobalData])
+    // Refresh news every 5 minutes & market data every 60 seconds
+    const newsInterval = setInterval(fetchNews, 300000)
+    const marketInterval = setInterval(fetchGlobalData, 60000)
+    return () => { clearInterval(newsInterval); clearInterval(marketInterval) }
+  }, [fetchGlobalData, fetchNews])
 
   // Auto-rotate tips
   useEffect(() => {
