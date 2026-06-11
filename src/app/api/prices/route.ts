@@ -1,15 +1,11 @@
 import { db } from "@/lib/db"
 import { NextRequest, NextResponse } from "next/server"
 
-// CryptoCompare API key
-const CRYPTO_COMPARE_API_KEY = "4f527d4ae4beccf0fb013fc8a7c41fc19595a113d88edb97f83e12fae3ab8e76"
-
 // Price cache - shared across requests
 let priceCache: Record<string, { USD: number; CHANGEPCT24HOUR: number; HIGH24HOUR: number; LOW24HOUR: number }> = {}
 let lastFetchTime = 0
-const CACHE_DURATION = 60 * 1000 // 1 minute en ms
+const CACHE_DURATION = 60 * 1000 // 60 seconds
 
-// GET /api/prices - Get current prices for all tokens with 24h change
 export async function GET(request: NextRequest) {
   try {
     const { searchParams } = new URL(request.url)
@@ -19,53 +15,63 @@ export async function GET(request: NextRequest) {
     const needsRefresh = force || (now - lastFetchTime) > CACHE_DURATION
 
     if (needsRefresh) {
-      const tokens = await db.token.findMany({
-        where: { active: true },
-      })
+      const tokens = await db.token.findMany({ where: { active: true } })
 
-      const tickerSet = new Set(tokens.map((t) => t.cryptoCompareId || t.ticker).filter(Boolean))
-      const tickers = [...tickerSet].join(",")
+      // Build CoinGecko IDs list
+      const idMap = new Map<string, string>() // coingeckoId -> ticker
+      for (const t of tokens) {
+        if (t.coingeckoId) idMap.set(t.coingeckoId, t.ticker)
+      }
+      const ids = [...idMap.keys()].join(",")
 
-      try {
-        // Use pricemultifull to get prices + 24h change + highs/lows
-        const url = `https://min-api.cryptocompare.com/data/pricemultifull?fsyms=${tickers}&tsyms=USD&api_key=${CRYPTO_COMPARE_API_KEY}`
-        const response = await fetch(url, {
-          signal: AbortSignal.timeout(8000),
-          cache: "no-store",
-        })
+      if (ids.length > 0) {
+        try {
+          // CoinGecko: free, no API key needed, returns live prices
+          const url = `https://api.coingecko.com/api/v3/simple/price?ids=${ids}&vs_currencies=usd&include_24hr_change=true&include_high_24hr=true&include_low_24hr=true`
+          const response = await fetch(url, {
+            signal: AbortSignal.timeout(10000),
+            cache: "no-store",
+          })
 
-        if (response.ok) {
-          const data = await response.json()
+          if (response.ok) {
+            const data = await response.json()
 
-          const updatePromises = []
-          for (const token of tokens) {
-            const key = token.cryptoCompareId || token.ticker
-            const raw = data.RAW?.[key]?.USD
-            if (raw) {
-              priceCache[token.ticker] = {
-                USD: raw.PRICE,
-                CHANGEPCT24HOUR: raw.CHANGEPCT24HOUR || 0,
-                HIGH24HOUR: raw.HIGH24HOUR || 0,
-                LOW24HOUR: raw.LOW24HOUR || 0,
+            const updatePromises = []
+            for (const [coingeckoId, values] of Object.entries(data)) {
+              const ticker = idMap.get(coingeckoId)
+              if (!ticker) continue
+
+              const v = values as any
+              priceCache[ticker] = {
+                USD: v.usd || 0,
+                CHANGEPCT24HOUR: v.usd_24h_change || 0,
+                HIGH24HOUR: v.usd_24h_high || 0,
+                LOW24HOUR: v.usd_24h_low || 0,
               }
 
-              updatePromises.push(
-                db.token.update({
-                  where: { id: token.id },
-                  data: {
-                    currentPrice: raw.PRICE,
-                    priceUpdatedAt: new Date(),
-                  },
-                })
-              )
+              // Update DB
+              const token = tokens.find(t => t.ticker === ticker)
+              if (token && v.usd) {
+                updatePromises.push(
+                  db.token.update({
+                    where: { id: token.id },
+                    data: {
+                      currentPrice: v.usd,
+                      priceUpdatedAt: new Date(),
+                    },
+                  })
+                )
+              }
             }
-          }
 
-          await Promise.all(updatePromises)
-          lastFetchTime = now
+            if (updatePromises.length > 0) {
+              await Promise.all(updatePromises)
+            }
+            lastFetchTime = now
+          }
+        } catch (fetchError) {
+          console.error("Price fetch error:", fetchError)
         }
-      } catch (fetchError) {
-        console.error("Price fetch error:", fetchError)
       }
     }
 
