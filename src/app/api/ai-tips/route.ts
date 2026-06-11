@@ -7,7 +7,7 @@ export async function GET() {
     let btcDominance = 55
 
     try {
-      const fgRes = await fetch(`http://localhost:3000/api/fear-greed`, {
+      const fgRes = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL || ''}/api/fear-greed`, {
         signal: AbortSignal.timeout(5000),
       })
       if (fgRes.ok) {
@@ -17,7 +17,7 @@ export async function GET() {
     } catch {}
 
     try {
-      const gRes = await fetch(`http://localhost:3000/api/cmc/global`, {
+      const gRes = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL || ''}/api/cmc/global`, {
         signal: AbortSignal.timeout(5000),
       })
       if (gRes.ok) {
